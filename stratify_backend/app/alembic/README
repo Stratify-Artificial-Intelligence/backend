@@ -1,0 +1,19 @@
+# How to use alembic
+
+Alembic is a database migrations tool written by the author of SQLAlchemy.
+
+See: https://alembic.sqlalchemy.org/en/latest/tutorial.html
+
+```bash
+# Check current revision
+docker compose exec backend alembic history --indicate-current
+
+# Create a new revision
+docker compose exec backend alembic revision --autogenerate -m "<upgrade-message-here>"
+
+# Upgrade to the most recent version. You can use a specific hash too
+docker compose exec backend alembic upgrade heads
+
+# Downgrade to a specific version
+docker compose exec backend alembic downgrade <hash> 
+```

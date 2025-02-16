@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+
+  backend:
+    build:
+      context: .
+      dockerfile: stratify_backend/Dockerfile
+    command: uvicorn main:app --reload --workers 1 --host 0.0.0.0 --port 8000
+    volumes:
+      - ./stratify_backend:/stratify_backend
+      - /stratify_backend/.venv
+    ports:
+      - 80:8000
+    networks:
+      - stratify-backend
+    environment:
+      #- PYTHONPATH=/stratify_backend
+      - DATABASE_URL=postgresql+asyncpg://postgres:testtesttest@db_postgres:5432/stratify-db
+    depends_on:
+      - db_postgres
+
+  db_postgres:
+    image: postgres:15.3
+    expose:
+      - 5432
+    networks:
+      - stratify-backend
+    env_file:
+      - .env
+
+  pgadmin:
+    image: dpage/pgadmin4:6.4
+    container_name: pgadmin-dev
+    networks:
+      - stratify-backend
+    env_file:
+      - .env
+    ports:
+      - "5050:5050"
+    depends_on:
+      - db_postgres
+
+networks:
+  stratify-backend:
+    name: stratify-backend
