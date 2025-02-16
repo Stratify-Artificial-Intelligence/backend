@@ -12,7 +12,7 @@ settings = PostgresSettings()
 Base = declarative_base()
 
 engine = create_async_engine(
-    url=settings.DATABASE_URL,
+    url=settings.database_url,
     echo=True,
 )
 

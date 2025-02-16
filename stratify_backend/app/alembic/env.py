@@ -28,7 +28,7 @@ target_metadata = Base.metadata
 # my_important_option = config.get_main_option("my_important_option")
 # ... etc.
 settings = PostgresSettings()
-sync_database_url = settings.DATABASE_URL.replace("asyncpg", "psycopg2")
+sync_database_url = settings.database_url.replace("asyncpg", "psycopg2")
 config.set_main_option("sqlalchemy.url", sync_database_url)
 
 
@@ -76,7 +76,7 @@ def run_migrations_online() -> None:
 
     #     with context.begin_transaction():
     #         context.run_migrations()
-    sync_engine = create_engine(settings.DATABASE_URL.replace("asyncpg", "psycopg2"))
+    sync_engine = create_engine(settings.database_url.replace("asyncpg", "psycopg2"))
     with sync_engine.connect() as connection:
         context.configure(connection=connection, target_metadata=target_metadata)
         with context.begin_transaction():

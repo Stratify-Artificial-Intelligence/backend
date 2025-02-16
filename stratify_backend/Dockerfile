@@ -28,4 +28,6 @@ COPY --from=builder ${VIRTUAL_ENV} ${VIRTUAL_ENV}
 
 COPY . .
 
-# CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+COPY ./stratify_backend/prestart.sh /prestart.sh
+RUN chmod +x /prestart.sh
+ENTRYPOINT ["/bin/bash", "./prestart.sh"]
