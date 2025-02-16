@@ -5,7 +5,7 @@ import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from stratify_backend.routers import tests
+from app.routers import tests
 
 app = FastAPI(
     title='Stratify Backend API',
