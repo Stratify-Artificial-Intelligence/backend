@@ -2,10 +2,18 @@ from app.models import Test
 from app.domain import Test as TestDomain
 from app.repositories import BaseRepository
 
-from sqlalchemy import select
+from sqlalchemy import delete, select
 
 
 class TestRepository(BaseRepository):
+    async def get(self, test_id: int) -> TestDomain | None:
+        query = select(Test).where(Test.id == test_id)
+        result = await self._db.execute(query)
+        test = result.scalars().one_or_none()
+        if test is None:
+            return None
+        return TestDomain.model_validate(test)
+
     async def get_multi(self) -> list[TestDomain]:
         query = select(Test)
         result = await self._db.execute(query)
@@ -18,3 +26,8 @@ class TestRepository(BaseRepository):
         await self.commit()
         await self._db.refresh(new_test)
         return TestDomain.model_validate(new_test)
+
+    async def delete(self, test: Test) -> None:
+        query = delete(Test).where(Test.id == test.id)
+        await self._db.execute(query)
+        await self.commit()
