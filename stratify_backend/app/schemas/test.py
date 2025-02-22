@@ -1,15 +1,19 @@
-from typing import Optional
-
 from pydantic import BaseModel, Field
 
 
-class Test(BaseModel):
-    id: int
+class TestCreate(BaseModel):
     name: str
-    description: Optional[str] = Field(
+    description: str | None = Field(
         None,
         description='This is a description for a Test.',
     )
+
+    class Config:
+        extra = 'forbid'
+
+
+class Test(TestCreate):
+    id: int
 
     class Config:
         extra = 'forbid'

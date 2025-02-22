@@ -1,7 +1,10 @@
-from typing import Optional
+from pydantic import BaseModel
 
 
-class Test:
-    id: int
+class Test(BaseModel):
+    id: int | None = None
     name: str
-    description: Optional[str]
+    description: str | None = None
+
+    class Config:
+        from_attributes = True
