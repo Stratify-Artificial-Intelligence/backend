@@ -7,9 +7,7 @@ from sqlalchemy import delete, select
 
 class TestRepository(BaseRepository):
     async def get(self, test_id: int) -> TestDomain | None:
-        query = select(Test).where(Test.id == test_id)
-        result = await self._db.execute(query)
-        test = result.scalars().one_or_none()
+        test = await self._get(test_id=test_id)
         if test is None:
             return None
         return TestDomain.model_validate(test)
@@ -27,7 +25,23 @@ class TestRepository(BaseRepository):
         await self._db.refresh(new_test)
         return TestDomain.model_validate(new_test)
 
-    async def delete(self, test: Test) -> None:
-        query = delete(Test).where(Test.id == test.id)
+    async def update(self, test_id: int, test_update: TestDomain) -> TestDomain | None:
+        test = await self._get(test_id=test_id)
+        if test is None:
+            return None
+
+        self.update_model(model=test, update=test_update.model_dump(exclude_unset=True))
+
+        await self._db.commit()
+        await self._db.refresh(test)
+        return TestDomain.model_validate(test)
+
+    async def delete(self, test_id: int) -> None:
+        query = delete(Test).where(Test.id == test_id)
         await self._db.execute(query)
         await self.commit()
+
+    async def _get(self, test_id: int) -> Test | None:
+        query = select(Test).where(Test.id == test_id)
+        result = await self._db.execute(query)
+        return result.scalars().one_or_none()

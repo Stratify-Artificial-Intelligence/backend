@@ -5,4 +5,4 @@ from .errors import (
     HTTP404NotFound,
     HTTP405MethodNotAllowed,
 )
-from .test import Test, TestCreate
+from .test import Test, TestCreate, TestPartialUpdate

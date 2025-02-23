@@ -1,19 +1,22 @@
 from pydantic import BaseModel, Field
 
 
-class TestCreate(BaseModel):
-    name: str
+class TestBase(BaseModel):
     description: str | None = Field(
-        None,
-        description='This is a description for a Test.',
+        None, description="This is a description for a Test."
     )
 
     class Config:
-        extra = 'forbid'
+        extra = "forbid"
+
+
+class TestCreate(TestBase):
+    name: str
 
 
 class Test(TestCreate):
     id: int
 
-    class Config:
-        extra = 'forbid'
+
+class TestPartialUpdate(TestBase):
+    name: str | None = None
