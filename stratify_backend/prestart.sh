@@ -19,10 +19,10 @@ fi
 echo "Running uvicorn"
 if [ "$DOMAIN" = "localhost" ]; then
   # Local
-  uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+  uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 else
   # Production
-  uvicorn main:app --host 0.0.0.0 --port 8000
+  uvicorn app.main:app --host 0.0.0.0 --port 8000
 fi
 
 echo "Finished prestart.sh"

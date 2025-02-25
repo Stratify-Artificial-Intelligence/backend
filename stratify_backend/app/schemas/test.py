@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class TestBase(BaseModel):
@@ -6,8 +6,7 @@ class TestBase(BaseModel):
         None, description="This is a description for a Test."
     )
 
-    class Config:
-        extra = "forbid"
+    model_config = ConfigDict(extra='forbid')
 
 
 class TestCreate(TestBase):
