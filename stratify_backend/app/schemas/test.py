@@ -3,7 +3,8 @@ from pydantic import BaseModel, ConfigDict, Field
 
 class TestBase(BaseModel):
     description: str | None = Field(
-        None, description="This is a description for a Test."
+        None,
+        description='This is a description for a Test.',
     )
 
     model_config = ConfigDict(extra='forbid')
