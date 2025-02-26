@@ -72,7 +72,7 @@ async def test_create_test(mock_create, async_client: AsyncClient):
 
 async def test_create_test_bad_request(async_client: AsyncClient):
     expected_response = 'Field required'
-    test_data = {}
+    test_data = {'description': 'I am test B'}
     actual_response = await async_client.post('/tests/', json=test_data)
 
     assert status.HTTP_422_UNPROCESSABLE_ENTITY == actual_response.status_code
@@ -110,7 +110,7 @@ async def test_update_test_bad_request(mock_get, async_client: AsyncClient):
     mock_get.return_value = TestDomain(id=1, name='Test A', description='I am test A')
 
     expected_response = 'Field required'
-    test_data = {}
+    test_data = {'description': 'I am test AAAA'}
     actual_response = await async_client.put('/tests/1', json=test_data)
 
     assert status.HTTP_422_UNPROCESSABLE_ENTITY == actual_response.status_code
