@@ -28,7 +28,7 @@ class ChatMessage(Base):
     __tablename__ = 'chat_messages'
 
     id = Column(Integer, primary_key=True)
-    chat_id = Column(Integer, ForeignKey('chats.chat_id'), nullable=True, index=True)
+    chat_id = Column(Integer, ForeignKey('chats.id'), nullable=True, index=True)
     time = Column(DateTime(timezone=True), nullable=False)
     sender: Column[Enum] = Column(
         Enum(
@@ -39,4 +39,4 @@ class ChatMessage(Base):
     content = Column(String, nullable=False, unique=True)
 
     # Relationships
-    chat = relationship('Chat', back_populates='chat_messages')
+    chat = relationship('Chat', back_populates='messages')

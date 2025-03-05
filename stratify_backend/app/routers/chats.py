@@ -83,6 +83,7 @@ async def add_message(
     message_content: ChatMessageContent,
     chats_repo: ChatRepository = Depends(get_repository(ChatRepository)),
 ):
+    """Add message to a chat with user as sender."""
     message = ChatMessageDomain(
         chat_id=chat_id,
         time=datetime.now(),

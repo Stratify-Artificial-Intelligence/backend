@@ -20,7 +20,7 @@ class ChatMessage(ChatMessageContent):
 class ChatBase(BaseModel):
     id: int
     title: str
-    start_date: datetime
+    start_time: datetime
 
 
 class Chat(ChatBase):
