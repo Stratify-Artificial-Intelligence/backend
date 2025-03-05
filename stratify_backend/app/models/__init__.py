@@ -1,1 +1,2 @@
-from .test import Test  # noqa
+from .chat import Chat, ChatMessage
+from .test import Test

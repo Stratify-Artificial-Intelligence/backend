@@ -6,7 +6,7 @@ from app import schemas
 from app.deps import get_repository
 from app.domain import Test as TestDomain
 from app.repositories import TestRepository
-from app.schemas.test import Test, TestCreate, TestPartialUpdate
+from app.schemas import Test, TestCreate, TestPartialUpdate
 
 router = APIRouter(
     tags=['Test'],
