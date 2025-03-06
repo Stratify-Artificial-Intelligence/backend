@@ -1,3 +1,4 @@
+from .chat import Chat, ChatBase, ChatMessageContent
 from .errors import (
     HTTP400BadRequest,
     HTTP401Unauthorized,
