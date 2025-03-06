@@ -90,4 +90,10 @@ async def add_message(
         sender=ChatMessageSenderEnum.USER,
         content=message_content.content,
     )
-    return await chats_repo.add_message(message)
+    response_message = await chats_repo.add_message(message)
+    if response_message is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail='Chat not found',
+        )
+    return response_message
