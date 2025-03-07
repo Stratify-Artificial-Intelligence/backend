@@ -18,3 +18,12 @@ class PostgresSettings(BaseSettings):
         )
 
     model_config = SettingsConfigDict(env_file='.env')
+
+
+class OpenAISettings(BaseSettings):
+    """Load Open AI settings from environment or .env."""
+
+    API_KEY: str = ''
+    ASSISTANT_ID: str = ''
+
+    model_config = SettingsConfigDict(env_file='.env', env_prefix='OPEN_AI_')

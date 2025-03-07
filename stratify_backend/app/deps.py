@@ -1,10 +1,14 @@
+from datetime import datetime
 from typing import Callable, Type
 
 from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database.postgresql import get_session
-from app.repositories import BaseRepository
+from app.domain import ChatMessage as ChatMessageDomain
+from app.enums import ChatMessageSenderEnum
+from app.repositories import BaseRepository, ChatRepository
+from app.services.openai import add_message_to_chat_and_get_response, create_chat
 
 
 def get_repository(repo_type: Type[BaseRepository]) -> Callable:
@@ -12,3 +16,40 @@ def get_repository(repo_type: Type[BaseRepository]) -> Callable:
         return repo_type(db)
 
     return _get_repo
+
+
+# ToDo (pduran): Should this function be here?
+async def add_store_message_and_get_store_response(
+    message: ChatMessageDomain,
+    chats_repo: ChatRepository,
+) -> ChatMessageDomain:
+    """Register message and get the AI response."""
+    await chats_repo.add_message(message),
+    chat = await chats_repo.get(message.chat_id)
+    response_content = await add_message_to_chat_and_get_response(
+        chat_internal_id=chat.internal_id,
+        content=message.content,
+    ),
+    # ToDo (pduran): Parallelize these two operations
+    # _, response_content = await asyncio.gather(
+    #     chats_repo.add_message(message),
+    #     add_message_to_chat_and_get_response(
+    #         chat_internal_id=chat.internal_id,
+    #         content=message.content,
+    #     ),
+    # )
+    response_message = ChatMessageDomain(
+        chat_id=message.chat_id,
+        time=datetime.now(),
+        sender=ChatMessageSenderEnum.AI_MODEL,
+        content=response_content,
+    )
+    await chats_repo.add_message(response_message)
+    return response_message
+
+
+async def create_chat_in_service() -> str:
+    """Create a chat in the external service and return its internal ID."""
+    chat_internal_id = await create_chat()
+    return chat_internal_id
+
