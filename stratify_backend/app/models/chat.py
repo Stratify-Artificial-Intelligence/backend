@@ -36,7 +36,7 @@ class ChatMessage(Base):
             values_callable=(lambda enum_class: [sender.value for sender in enum_class]),
         ),
     )
-    content = Column(String, nullable=False, unique=True)
+    content = Column(String, nullable=False)
 
     # Relationships
     chat = relationship('Chat', back_populates='messages')
