@@ -40,7 +40,7 @@ def _add_message(chat_internal_id: str, content: str) -> str:
     )
     run = openai.beta.threads.runs.create(
         thread_id=chat_internal_id,
-        assistant_id=OpenAISettings.ASSISTANT_ID,
+        assistant_id=settings.ASSISTANT_ID,
     )
     return run.id
 
@@ -66,9 +66,9 @@ def _get_last_message_in_thread(chat_internal_id: str) -> str:
         order='desc',
         limit=1,
     )
-    if messages in None or len(messages) != 1:
+    if messages.data is None or len(messages.data) != 1:
         raise ValueError('Invalid retrieved last messages.')
-    last_message = messages[0]
+    last_message = messages.data[0]
     if len(last_message.content) != 1:
         raise NotImplementedError(
             'Message content with not exactly one block is not implemented yet.'

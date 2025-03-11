@@ -29,7 +29,7 @@ async def add_store_message_and_get_store_response(
     response_content = await add_message_to_chat_and_get_response(
         chat_internal_id=chat.internal_id,
         content=message.content,
-    ),
+    )
     # ToDo (pduran): Parallelize these two operations
     # _, response_content = await asyncio.gather(
     #     chats_repo.add_message(message),
@@ -44,8 +44,7 @@ async def add_store_message_and_get_store_response(
         sender=ChatMessageSenderEnum.AI_MODEL,
         content=response_content,
     )
-    await chats_repo.add_message(response_message)
-    return response_message
+    return await chats_repo.add_message(response_message)
 
 
 async def create_chat_in_service() -> str:
