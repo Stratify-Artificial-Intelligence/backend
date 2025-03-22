@@ -42,8 +42,20 @@ async def test_list_users(
     mock_get_multi.return_value = [test_user, test_user_2]
 
     expected_response = [
-        {'id': 1, 'username': 'User A', 'email': 'a@gmail.com', 'full_name': 'User A', 'is_active': True},
-        {'id': 2, 'username': 'User B', 'email': 'b@gmail.com', 'full_name': 'User B', 'is_active': True},
+        {
+            'id': 1,
+            'username': 'User A',
+            'email': 'a@gmail.com',
+            'full_name': 'User A',
+            'is_active': True,
+        },
+        {
+            'id': 2,
+            'username': 'User B',
+            'email': 'b@gmail.com',
+            'full_name': 'User B',
+            'is_active': True,
+        },
     ]
     actual_response = await async_client.get('/users')
 
