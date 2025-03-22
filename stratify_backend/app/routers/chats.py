@@ -5,7 +5,11 @@ from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, status
 
 from app import schemas
-from app.deps import get_repository
+from app.deps import (
+    add_store_message_and_get_store_response,
+    create_chat_in_service,
+    get_repository,
+)
 from app.domain import Chat as ChatDomain, ChatMessage as ChatMessageDomain
 from app.enums import ChatMessageSenderEnum
 from app.repositories import ChatRepository
@@ -64,7 +68,12 @@ async def get_chat_by_id(
 async def create_chat(
     chats_repo: ChatRepository = Depends(get_repository(ChatRepository)),
 ):
-    chat = ChatDomain(title='Chat title', start_time=datetime.now())
+    chat_internal_id = await create_chat_in_service()
+    chat = ChatDomain(
+        internal_id=chat_internal_id,
+        title='Chat title',
+        start_time=datetime.now(),
+    )
     return await chats_repo.create(chat)
 
 
@@ -90,7 +99,10 @@ async def add_message(
         sender=ChatMessageSenderEnum.USER,
         content=message_content.content,
     )
-    response_message = await chats_repo.add_message(message)
+    response_message = await add_store_message_and_get_store_response(
+        message=message,
+        chats_repo=chats_repo,
+    )
     if response_message is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,

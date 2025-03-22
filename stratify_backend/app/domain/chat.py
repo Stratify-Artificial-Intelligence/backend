@@ -17,7 +17,7 @@ class ChatMessage(BaseModel):
 
 class Chat(BaseModel):
     id: int | None = None
-    internal_id: str | None = None
+    internal_id: str
     title: str
     start_time: datetime
     messages: list[ChatMessage] | None = None

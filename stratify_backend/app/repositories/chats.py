@@ -21,7 +21,11 @@ class ChatRepository(BaseRepository):
         return [ChatDomain.model_validate(chat) for chat in chats]
 
     async def create(self, chat_in: ChatDomain) -> ChatDomain:
-        new_chat = Chat(title=chat_in.title, start_time=chat_in.start_time)
+        new_chat = Chat(
+            internal_id=chat_in.internal_id,
+            title=chat_in.title,
+            start_time=chat_in.start_time,
+        )
         self._db.add(new_chat)
         await self.commit()
         await self._db.refresh(new_chat)
