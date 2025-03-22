@@ -7,3 +7,4 @@ from .errors import (
     HTTP405MethodNotAllowed,
 )
 from .test import Test, TestCreate, TestPartialUpdate
+from .user import User, UserCreate

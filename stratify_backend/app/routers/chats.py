@@ -23,7 +23,7 @@ router = APIRouter(
 
 
 @router.get(
-    '/',
+    '',
     summary='List chats',
     response_model=list[ChatBase],
 )

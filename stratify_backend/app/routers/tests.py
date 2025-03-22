@@ -26,7 +26,7 @@ async def get_tests_dummy():
 
 
 @router.get(
-    '/',
+    '',
     summary='List tests',
     response_model=list[Test],
 )
