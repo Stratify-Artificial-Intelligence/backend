@@ -39,6 +39,7 @@ def test_message_response() -> ChatMessageDomain:
 def test_chat(test_message) -> ChatDomain:
     return ChatDomain(
         id=1,
+        internal_id='id_test',
         title='Chat A',
         start_time=datetime.fromisoformat('2020-05-08T13:00:00+00:00'),
         messages=[test_message],
@@ -49,6 +50,7 @@ def test_chat(test_message) -> ChatDomain:
 def test_chat_2() -> ChatDomain:
     return ChatDomain(
         id=2,
+        internal_id='id_test_2',
         title='Chat B',
         start_time=datetime.fromisoformat('2020-05-08T13:00:00+00:00'),
         messages=[],

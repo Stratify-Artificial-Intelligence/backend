@@ -22,10 +22,12 @@ def get_repository(repo_type: Type[BaseRepository]) -> Callable:
 async def add_store_message_and_get_store_response(
     message: ChatMessageDomain,
     chats_repo: ChatRepository,
-) -> ChatMessageDomain:
+) -> ChatMessageDomain | None:
     """Register message and get the AI response."""
     await chats_repo.add_message(message),
     chat = await chats_repo.get(message.chat_id)
+    if chat is None:
+        return None
     response_content = await add_message_to_chat_and_get_response(
         chat_internal_id=chat.internal_id,
         content=message.content,
