@@ -60,7 +60,7 @@ async def get_test_by_id(
 
 
 @router.post(
-    '/',
+    '',
     summary='Create test',
     response_model=Test,
     status_code=status.HTTP_201_CREATED,

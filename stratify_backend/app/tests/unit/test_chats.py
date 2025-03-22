@@ -70,7 +70,7 @@ async def test_list_chats(
         {'id': 1, 'title': 'Chat A', 'start_time': '2020-05-08T13:00:00Z'},
         {'id': 2, 'title': 'Chat B', 'start_time': '2020-05-08T13:00:00Z'},
     ]
-    actual_response = await async_client.get('/chats/')
+    actual_response = await async_client.get('/chats')
 
     assert status.HTTP_200_OK == actual_response.status_code
     assert expected_response == actual_response.json()
@@ -131,7 +131,7 @@ async def test_create_chat(
         'title': 'Chat B',
         'start_time': '2020-05-08T13:00:00Z',
     }
-    actual_response = await async_client.post('/chats/', json={})
+    actual_response = await async_client.post('/chat', json={})
 
     assert status.HTTP_201_CREATED == actual_response.status_code
     assert expected_response == actual_response.json()

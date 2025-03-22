@@ -30,7 +30,7 @@ async def test_list_tests(mock_get_multi, async_client: AsyncClient):
         {'id': 1, 'name': 'Test A', 'description': None},
         {'id': 2, 'name': 'Test B', 'description': 'I am test B'},
     ]
-    actual_response = await async_client.get('/tests/')
+    actual_response = await async_client.get('/tests')
 
     assert status.HTTP_200_OK == actual_response.status_code
     assert expected_response == actual_response.json()
@@ -64,7 +64,7 @@ async def test_create_test(mock_create, async_client: AsyncClient):
 
     expected_response = {'id': 1, 'name': 'Test A', 'description': None}
     test_data = {'name': 'Test A'}
-    actual_response = await async_client.post('/tests/', json=test_data)
+    actual_response = await async_client.post('/tests', json=test_data)
 
     assert status.HTTP_201_CREATED == actual_response.status_code
     assert expected_response == actual_response.json()
@@ -73,7 +73,7 @@ async def test_create_test(mock_create, async_client: AsyncClient):
 async def test_create_test_bad_request(async_client: AsyncClient):
     expected_response = 'Field required'
     test_data = {'description': 'I am test B'}
-    actual_response = await async_client.post('/tests/', json=test_data)
+    actual_response = await async_client.post('/tests', json=test_data)
 
     assert status.HTTP_422_UNPROCESSABLE_ENTITY == actual_response.status_code
     assert expected_response == actual_response.json()['detail'][0]['msg']

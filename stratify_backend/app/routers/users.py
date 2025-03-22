@@ -17,6 +17,7 @@ router = APIRouter(
 @router.get(
     '',
     summary='List users',
+    status_code=status.HTTP_200_OK,
     response_model=list[User],
 )
 async def list_users(
@@ -29,6 +30,7 @@ async def list_users(
 @router.post(
     '',
     summary='Create user',
+    status_code=status.HTTP_201_CREATED,
     response_model=User,
     responses={
         status.HTTP_400_BAD_REQUEST: {'model': schemas.HTTP400BadRequest},
