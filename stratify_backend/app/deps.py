@@ -51,4 +51,3 @@ async def create_chat_in_service() -> str:
     """Create a chat in the external service and return its internal ID."""
     chat_internal_id = await create_chat()
     return chat_internal_id
-

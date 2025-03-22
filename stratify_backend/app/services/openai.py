@@ -11,7 +11,10 @@ settings = OpenAISettings()
 openai.api_key = settings.API_KEY
 
 
-async def add_message_to_chat_and_get_response(chat_internal_id: str, content: str) -> str:
+async def add_message_to_chat_and_get_response(
+    chat_internal_id: str,
+    content: str,
+) -> str:
     """Add a message to a chat and return the response of the AI model."""
     message_creation_run_id = _add_message(
         chat_internal_id=chat_internal_id,
