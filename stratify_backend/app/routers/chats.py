@@ -23,7 +23,7 @@ router = APIRouter(
 
 
 @router.get(
-    '/',
+    '',
     summary='List chats',
     response_model=list[ChatBase],
 )
@@ -57,7 +57,7 @@ async def get_chat_by_id(
 
 
 @router.post(
-    '/',
+    '',
     summary='Create chat',
     response_model=ChatBase,
     status_code=status.HTTP_201_CREATED,
