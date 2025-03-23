@@ -85,7 +85,6 @@ async def test_create_user(
     del data['id']
     actual_response = await async_client.post('/users', json=data)
 
-    print(actual_response.json())
     assert status.HTTP_201_CREATED == actual_response.status_code
     assert expected_response == actual_response.json()
 

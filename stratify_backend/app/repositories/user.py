@@ -3,14 +3,26 @@ from sqlalchemy import select
 from app.domain import User as UserDomain
 from app.models import User
 from app.repositories import BaseRepository
-from app.security import get_password_hash
+from app.security import get_password_hash, verify_password
 
 
 class UserRepository(BaseRepository):
     async def get_by_username(self, username: str) -> UserDomain | None:
         query = select(User).where(User.username == username)
         result = await self._db.execute(query)
-        return result.scalars().one_or_none()
+        user = result.scalars().one_or_none()
+        if user is None:
+            return None
+        return UserDomain.model_validate(
+            {
+                'id': user.id,
+                'username': user.username,
+                'email': user.email,
+                'full_name': user.full_name,
+                'is_active': user.is_active,
+                'password': user.hashed_password,
+            }
+        )
 
     async def get_multi(self) -> list[UserDomain]:
         query = select(User)
@@ -52,3 +64,15 @@ class UserRepository(BaseRepository):
                 'password': new_user.hashed_password,
             }
         )
+
+    async def authenticate_user(
+        self,
+        username: str,
+        password: str,
+    ) -> UserDomain | None:
+        user = await self.get_by_username(username)
+        if not user:
+            return None
+        if not verify_password(plain_password=password, hashed_password=user.password):
+            return None
+        return user

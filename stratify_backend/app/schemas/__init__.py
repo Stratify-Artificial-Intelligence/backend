@@ -7,4 +7,5 @@ from .errors import (
     HTTP405MethodNotAllowed,
 )
 from .test import Test, TestCreate, TestPartialUpdate
+from .token import Token, TokenData
 from .user import User, UserCreate

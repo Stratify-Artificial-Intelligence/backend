@@ -1,13 +1,15 @@
 from datetime import datetime
 from typing import Callable, Type
 
-from fastapi import Depends
+from fastapi import Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database.postgresql import get_session
-from app.domain import ChatMessage as ChatMessageDomain
+from app.domain import ChatMessage as ChatMessageDomain, User as UserDomain
 from app.enums import ChatMessageSenderEnum
-from app.repositories import BaseRepository, ChatRepository
+from app.repositories import BaseRepository, ChatRepository, UserRepository
+from app.schemas import TokenData
+from app.security import check_auth_token
 from app.services.openai import add_message_to_chat_and_get_response, create_chat
 
 
@@ -16,6 +18,30 @@ def get_repository(repo_type: Type[BaseRepository]) -> Callable:
         return repo_type(db)
 
     return _get_repo
+
+
+async def get_current_user(
+    token_data: TokenData = Depends(check_auth_token),
+    users_repo: UserRepository = Depends(get_repository(UserRepository)),
+) -> UserDomain:
+    user = await users_repo.get_by_username(username=token_data.username)
+    if user is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail='Could not validate credentials',
+        )
+    return user
+
+
+async def get_current_active_user(
+    current_user: UserDomain = Depends(get_current_user)
+) -> UserDomain:
+    if not current_user.is_active:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail='Inactive user',
+        )
+    return current_user
 
 
 # ToDo (pduran): Should this function be here?

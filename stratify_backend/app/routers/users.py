@@ -3,7 +3,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 
 from app import schemas
-from app.deps import get_repository
+from app.deps import get_current_active_user, get_repository
 from app.domain import User as UserDomain
 from app.repositories import UserRepository
 from app.schemas import User, UserCreate
@@ -12,6 +12,19 @@ router = APIRouter(
     tags=['User'],
     prefix='/users',
 )
+
+
+@router.get(
+    '/me',
+    summary='Info about me',
+    status_code=status.HTTP_200_OK,
+    response_model=User,
+)
+async def read_users_me(
+    current_user: User = Depends(get_current_active_user),
+):
+    """Get information about the current user."""
+    return current_user
 
 
 @router.get(
