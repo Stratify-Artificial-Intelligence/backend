@@ -34,7 +34,7 @@ async def get_current_user(
 
 
 async def get_current_active_user(
-    current_user: UserDomain = Depends(get_current_user)
+    current_user: UserDomain = Depends(get_current_user),
 ) -> UserDomain:
     if not current_user.is_active:
         raise HTTPException(

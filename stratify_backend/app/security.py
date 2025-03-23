@@ -19,10 +19,14 @@ settings = SecuritySettings()
 
 pwd_context = CryptContext(schemes=['bcrypt'], deprecated='auto')
 
+auth_scheme: HTTPBearer | OAuth2PasswordBearer
 if settings.AUTH_METHOD == AuthMethodEnum.BEARER:
     auth_scheme = HTTPBearer(scheme_name='BearerAuth')
 elif settings.AUTH_METHOD == AuthMethodEnum.OAUTH2:
-    auth_scheme = OAuth2PasswordBearer(scheme_name='OAuth2', tokenUrl='token')
+    auth_scheme = OAuth2PasswordBearer(
+        scheme_name='OAuth2',
+        tokenUrl='token',
+    )
 else:
     raise ValueError(f'Unexpected Authorization method: {settings.AUTH_METHOD}')
 
@@ -52,11 +56,13 @@ def create_access_token(username: str, expiration_delta: timedelta | None = None
 
 
 def check_auth_token(
-    token: str | HTTPAuthorizationCredentials = Depends(auth_scheme)
+    token: str | HTTPAuthorizationCredentials = Depends(auth_scheme),
 ) -> TokenData:
     if settings.AUTH_METHOD == AuthMethodEnum.BEARER:
+        assert isinstance(token, HTTPAuthorizationCredentials)
         return _decode_token(token.credentials)
     elif settings.AUTH_METHOD == AuthMethodEnum.OAUTH2:
+        assert isinstance(token, str)
         return _decode_token(token)
     else:
         raise ValueError(f'Unexpected Authorization method: {settings.AUTH_METHOD}')
@@ -81,7 +87,7 @@ def _decode_token(token: str) -> TokenData:
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail='Token has expired',
         )
-    except (jwt.InvalidTokenError, ValidationError) as e:
+    except (jwt.InvalidTokenError, ValidationError):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail='Could not validate credentials',
