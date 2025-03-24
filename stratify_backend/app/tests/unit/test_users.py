@@ -32,6 +32,30 @@ def test_user_2() -> UserDomain:
     )
 
 
+@patch.object(UserRepository, 'get_by_username')
+async def test_read_users_me(
+    mock_get_by_username,
+    test_user,
+    superuser_token_headers,
+    async_client: AsyncClient,
+):
+    mock_get_by_username.return_value = test_user
+
+    expected_response = {
+        'id': 1,
+        'username': 'User A',
+        'email': 'a@gmail.com',
+        'full_name': 'User A',
+        'is_active': True,
+    }
+    actual_response = await async_client.get(
+        '/users/me',
+        headers=superuser_token_headers,
+    )
+    assert status.HTTP_200_OK == actual_response.status_code
+    assert expected_response == actual_response.json()
+
+
 @patch.object(UserRepository, 'get_multi')
 async def test_list_users(
     mock_get_multi,

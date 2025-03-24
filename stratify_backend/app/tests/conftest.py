@@ -1,3 +1,4 @@
+from datetime import timedelta
 from typing import AsyncGenerator
 
 import pytest
@@ -5,6 +6,11 @@ import pytest_asyncio
 from httpx import ASGITransport, AsyncClient
 
 from app.main import app
+from app.security import create_access_token
+from app.settings import SecuritySettings
+
+
+settings = SecuritySettings()
 
 
 # @pytest.fixture(scope='session')
@@ -63,3 +69,16 @@ def pytest_collection_modifyitems(items):
             item.add_marker(pytest.mark.integration)
         elif 'tests/unit/' in item_path:
             item.add_marker(pytest.mark.unit)
+
+
+@pytest_asyncio.fixture()
+async def superuser_token_headers() -> dict[str, str | None]:
+    return await _get_superuser_token_headers()
+
+
+async def _get_superuser_token_headers() -> dict[str, str | None]:
+    auth_token = create_access_token(
+        username=settings.FIRST_SUPERUSER_USERNAME,
+        expiration_delta=timedelta(minutes=10),
+    )
+    return {'Authorization': f'Bearer {auth_token}'}
