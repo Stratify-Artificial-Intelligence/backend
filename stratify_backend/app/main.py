@@ -5,7 +5,7 @@ import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.routers import chats_router, tests_router, users_router
+from app.routers import admin_router, chats_router, tests_router, users_router
 
 app = FastAPI(
     title='Stratify Backend API',
@@ -21,6 +21,7 @@ app.add_middleware(
     allow_headers=['*'],
 )
 
+app.include_router(admin_router)
 app.include_router(chats_router)
 app.include_router(tests_router)
 app.include_router(users_router)
