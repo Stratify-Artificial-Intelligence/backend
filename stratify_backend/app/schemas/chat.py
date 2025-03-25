@@ -21,6 +21,7 @@ class ChatBase(BaseModel):
     id: int
     title: str
     start_time: datetime
+    user_id: int
 
 
 class Chat(ChatBase):

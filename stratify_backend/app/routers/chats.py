@@ -8,9 +8,14 @@ from app import schemas
 from app.deps import (
     add_store_message_and_get_store_response,
     create_chat_in_service,
+    get_current_active_user,
     get_repository,
 )
-from app.domain import Chat as ChatDomain, ChatMessage as ChatMessageDomain
+from app.domain import (
+    Chat as ChatDomain,
+    ChatMessage as ChatMessageDomain,
+    User as UserDomain,
+)
 from app.enums import ChatMessageSenderEnum
 from app.repositories import ChatRepository
 from app.schemas import Chat, ChatBase, ChatMessageContent
@@ -29,9 +34,10 @@ router = APIRouter(
 )
 async def list_chats(
     chats_repo: ChatRepository = Depends(get_repository(ChatRepository)),
+    current_user: UserDomain = Depends(get_current_active_user),
 ):
-    """List of all chats present in the database."""
-    return await chats_repo.get_multi()
+    """List all chats accessible by the current user."""
+    return await chats_repo.get_multi(user_id=current_user.id)
 
 
 @router.get(
@@ -67,12 +73,14 @@ async def get_chat_by_id(
 )
 async def create_chat(
     chats_repo: ChatRepository = Depends(get_repository(ChatRepository)),
+    current_user: UserDomain = Depends(get_current_active_user),
 ):
     chat_internal_id = await create_chat_in_service()
     chat = ChatDomain(
         internal_id=chat_internal_id,
         title='Chat title',
         start_time=datetime.now(),
+        user_id=current_user.id,
     )
     return await chats_repo.create(chat)
 
