@@ -20,6 +20,7 @@ class Chat(BaseModel):
     internal_id: str
     title: str
     start_time: datetime
+    user_id: int
     messages: list[ChatMessage] | None = None
 
     model_config = ConfigDict(from_attributes=True)

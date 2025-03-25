@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 
 from app import schemas
 from app.deps import get_current_active_user, get_repository
-from app.domain import User as UserDomain
+from app.domain import UserBase as UserBaseDomain
 from app.repositories import UserRepository
 from app.schemas import User, UserCreate
 
@@ -60,7 +60,7 @@ async def create_user(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail='User already exists',
         )
-    user_to_create = UserDomain(
+    user_to_create = UserBaseDomain(
         username=user.username,
         email=user.email,
         full_name=user.full_name,
