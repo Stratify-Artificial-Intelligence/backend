@@ -1,6 +1,6 @@
 from sqlalchemy import select
 
-from app.domain import User as UserDomain
+from app.domain import User as UserDomain, UserBase as UserBaseDomain
 from app.models import User
 from app.repositories import BaseRepository
 from app.security import get_password_hash, verify_password
@@ -42,7 +42,7 @@ class UserRepository(BaseRepository):
             for user in users
         ]
 
-    async def create(self, user_in: UserDomain) -> UserDomain:
+    async def create(self, user_in: UserBaseDomain) -> UserDomain:
         hashed_password = get_password_hash(user_in.password)
         new_user = User(
             username=user_in.username,

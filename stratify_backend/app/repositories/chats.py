@@ -14,8 +14,10 @@ class ChatRepository(BaseRepository):
             return None
         return ChatDomain.model_validate(chat)
 
-    async def get_multi(self) -> list[ChatDomain]:
+    async def get_multi(self, user_id: int | None = None) -> list[ChatDomain]:
         query = select(Chat)
+        if user_id is not None:
+            query = query.where(Chat.user_id == user_id)
         result = await self._db.execute(query)
         chats = result.scalars().all()
         return [ChatDomain.model_validate(chat) for chat in chats]
@@ -25,6 +27,7 @@ class ChatRepository(BaseRepository):
             internal_id=chat_in.internal_id,
             title=chat_in.title,
             start_time=chat_in.start_time,
+            user_id=chat_in.user_id,
         )
         self._db.add(new_chat)
         await self.commit()

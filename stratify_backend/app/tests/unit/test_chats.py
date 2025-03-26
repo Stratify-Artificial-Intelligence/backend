@@ -42,6 +42,7 @@ def test_chat(test_message) -> ChatDomain:
         internal_id='id_test',
         title='Chat A',
         start_time=datetime.fromisoformat('2020-05-08T13:00:00+00:00'),
+        user_id=1,
         messages=[test_message],
     )
 
@@ -53,6 +54,7 @@ def test_chat_2() -> ChatDomain:
         internal_id='id_test_2',
         title='Chat B',
         start_time=datetime.fromisoformat('2020-05-08T13:00:00+00:00'),
+        user_id=1,
         messages=[],
     )
 
@@ -62,15 +64,19 @@ async def test_list_chats(
     mock_get_multi,
     test_chat,
     test_chat_2,
+    superuser_token_headers,
     async_client: AsyncClient,
 ):
     mock_get_multi.return_value = [test_chat, test_chat_2]
 
     expected_response = [
-        {'id': 1, 'title': 'Chat A', 'start_time': '2020-05-08T13:00:00Z'},
-        {'id': 2, 'title': 'Chat B', 'start_time': '2020-05-08T13:00:00Z'},
+        {'id': 1, 'title': 'Chat A', 'start_time': '2020-05-08T13:00:00Z', 'user_id': 1},
+        {'id': 2, 'title': 'Chat B', 'start_time': '2020-05-08T13:00:00Z', 'user_id': 1},
     ]
-    actual_response = await async_client.get('/chats')
+    actual_response = await async_client.get(
+        '/chats',
+        headers=superuser_token_headers,
+    )
 
     assert status.HTTP_200_OK == actual_response.status_code
     assert expected_response == actual_response.json()
@@ -85,6 +91,7 @@ async def test_get_chat_by_id(mock_get, test_chat, async_client: AsyncClient):
         'id': 1,
         'title': 'Chat A',
         'start_time': '2020-05-08T13:00:00Z',
+        'user_id': 1,
         'messages': [
             {
                 'id': 1,
@@ -130,6 +137,7 @@ async def test_create_chat(
         'id': 2,
         'title': 'Chat B',
         'start_time': '2020-05-08T13:00:00Z',
+        'user_id': 1,
     }
     actual_response = await async_client.post('/chat', json={})
 
