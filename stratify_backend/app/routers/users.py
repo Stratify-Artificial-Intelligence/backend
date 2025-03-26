@@ -66,5 +66,6 @@ async def create_user(
         full_name=user.full_name,
         is_active=user.is_active,
         password=user.password.get_secret_value(),
+        role=user.role,
     )
     return await users_repo.create(user_to_create)
