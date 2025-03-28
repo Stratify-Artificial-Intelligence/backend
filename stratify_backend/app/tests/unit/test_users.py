@@ -5,6 +5,7 @@ from fastapi import status
 from httpx import AsyncClient
 
 from app.domain import User as UserDomain
+from app.enums import UserRoleEnum
 from app.repositories import UserRepository
 
 
@@ -17,6 +18,7 @@ def test_user() -> UserDomain:
         full_name='User A',
         is_active=True,
         password='test_password',
+        role=UserRoleEnum.ADMIN,
     )
 
 
@@ -29,6 +31,7 @@ def test_user_2() -> UserDomain:
         full_name='User B',
         is_active=True,
         password='test_password_2',
+        role=UserRoleEnum.ADMIN,
     )
 
 
@@ -47,6 +50,7 @@ async def test_read_users_me(
         'email': 'a@gmail.com',
         'full_name': 'User A',
         'is_active': True,
+        'role': UserRoleEnum.ADMIN.value,
     }
     actual_response = await async_client.get(
         '/users/me',
@@ -72,6 +76,7 @@ async def test_list_users(
             'email': 'a@gmail.com',
             'full_name': 'User A',
             'is_active': True,
+            'role': UserRoleEnum.ADMIN.value,
         },
         {
             'id': 2,
@@ -79,6 +84,7 @@ async def test_list_users(
             'email': 'b@gmail.com',
             'full_name': 'User B',
             'is_active': True,
+            'role': UserRoleEnum.ADMIN.value,
         },
     ]
     actual_response = await async_client.get('/users')
@@ -104,6 +110,7 @@ async def test_create_user(
         'email': 'a@gmail.com',
         'full_name': 'User A',
         'is_active': True,
+        'role': UserRoleEnum.ADMIN.value,
     }
     data = test_user.model_dump()
     del data['id']

@@ -21,6 +21,7 @@ class UserRepository(BaseRepository):
                 'full_name': user.full_name,
                 'is_active': user.is_active,
                 'password': user.hashed_password,
+                'role': user.role,
             }
         )
 
@@ -37,6 +38,7 @@ class UserRepository(BaseRepository):
                     'full_name': user.full_name,
                     'is_active': user.is_active,
                     'password': user.hashed_password,
+                    'role': user.role,
                 }
             )
             for user in users
@@ -50,6 +52,7 @@ class UserRepository(BaseRepository):
             email=user_in.email,
             full_name=user_in.full_name,
             is_active=user_in.is_active,
+            role=user_in.role,
         )
         self._db.add(new_user)
         await self.commit()
@@ -62,6 +65,7 @@ class UserRepository(BaseRepository):
                 'full_name': new_user.full_name,
                 'is_active': new_user.is_active,
                 'password': new_user.hashed_password,
+                'role': new_user.role,
             }
         )
 
