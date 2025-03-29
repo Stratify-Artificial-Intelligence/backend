@@ -13,6 +13,7 @@ class SecuritySettings(BaseSettings):
     TOKEN_ENCRYPTION_ALGORITHM: str = 'HS256'
     AUTH_METHOD: str = AuthMethodEnum.OAUTH2
     FIRST_SUPERUSER_USERNAME: str = 'admin'
+    FIRST_BASIC_USER_USERNAME: str = 'user'
 
     model_config = SettingsConfigDict(env_file='.env')
 
