@@ -8,4 +8,4 @@ from .errors import (
 )
 from .test import Test, TestCreate, TestPartialUpdate
 from .token import Token, TokenData
-from .user import User, UserBase, UserCreate
+from .user import User, UserBase, UserBasePartialUpdate, UserCreate

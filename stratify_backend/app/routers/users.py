@@ -8,7 +8,7 @@ from app.deps import get_current_active_user, get_repository
 from app.domain import UserBase as UserBaseDomain, UserWithSecret as UserWithSecretDomain
 from app.enums import UserRoleEnum
 from app.repositories import UserRepository
-from app.schemas import User, UserBase, UserCreate
+from app.schemas import User, UserBase, UserBasePartialUpdate, UserCreate
 
 router = APIRouter(
     tags=['User'],
@@ -124,7 +124,7 @@ async def create_user(
 )
 async def update_user(
     user_id: int,
-    user_data: UserBase,
+    user_data: UserBasePartialUpdate,
     users_repo: UserRepository = Depends(get_repository(UserRepository)),
 ):
     """Update user information."""
@@ -134,11 +134,8 @@ async def update_user(
             status_code=status.HTTP_404_NOT_FOUND,
             detail='User not found',
         )
-    user_to_update = UserBaseDomain(
-        username=user_data.username,
-        email=user_data.email,
-        full_name=user_data.full_name,
-        is_active=user_data.is_active,
-        role=user_data.role,
-    )
-    return await users_repo.update(user_id, user_to_update)
+    # ToDo (pduran): Check username uniqueness
+    update_data = user_data.model_dump(exclude_unset=True)
+    for key, value in update_data.items():
+        setattr(user, key, value)
+    return await users_repo.update(user_id, user)
