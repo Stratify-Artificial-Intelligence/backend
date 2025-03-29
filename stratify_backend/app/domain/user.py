@@ -8,13 +8,16 @@ class UserBase(BaseModel):
     email: str
     full_name: str
     is_active: bool
-    password: str
     role: UserRoleEnum
 
     model_config = ConfigDict(from_attributes=True)
 
 
-class User(UserBase):
+class UserWithSecret(UserBase):
+    password: str
+
+
+class User(UserWithSecret):
     id: int
 
     model_config = ConfigDict(from_attributes=True)
