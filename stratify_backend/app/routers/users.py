@@ -3,8 +3,10 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 
 from app import schemas
+from app.authorization_server import RoleChecker
 from app.deps import get_current_active_user, get_repository
 from app.domain import UserBase as UserBaseDomain
+from app.enums import UserRoleEnum
 from app.repositories import UserRepository
 from app.schemas import User, UserCreate
 
@@ -19,6 +21,9 @@ router = APIRouter(
     summary='Info about me',
     status_code=status.HTTP_200_OK,
     response_model=User,
+    responses={
+        status.HTTP_401_UNAUTHORIZED: {'model': schemas.HTTP401Unauthorized},
+    },
 )
 async def read_users_me(
     current_user: User = Depends(get_current_active_user),
@@ -32,6 +37,11 @@ async def read_users_me(
     summary='List users',
     status_code=status.HTTP_200_OK,
     response_model=list[User],
+    responses={
+        status.HTTP_401_UNAUTHORIZED: {'model': schemas.HTTP401Unauthorized},
+        status.HTTP_403_FORBIDDEN: {'model': schemas.HTTP403Forbidden},
+    },
+    dependencies=[Depends(RoleChecker(allowed_roles=[UserRoleEnum.ADMIN]))],
 )
 async def list_users(
     users_repo: UserRepository = Depends(get_repository(UserRepository)),
@@ -47,7 +57,10 @@ async def list_users(
     response_model=User,
     responses={
         status.HTTP_400_BAD_REQUEST: {'model': schemas.HTTP400BadRequest},
+        status.HTTP_401_UNAUTHORIZED: {'model': schemas.HTTP401Unauthorized},
+        status.HTTP_403_FORBIDDEN: {'model': schemas.HTTP403Forbidden},
     },
+    dependencies=[Depends(RoleChecker(allowed_roles=[UserRoleEnum.ADMIN]))],
 )
 async def create_user(
     user: UserCreate,

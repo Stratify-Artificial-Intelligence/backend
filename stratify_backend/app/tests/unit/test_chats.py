@@ -8,7 +8,7 @@ from httpx import AsyncClient
 
 from app.domain import Chat as ChatDomain, ChatMessage as ChatMessageDomain
 from app.enums import ChatMessageSenderEnum
-from app.repositories import ChatRepository
+from app.repositories import ChatRepository, UserRepository
 from app.services import openai
 from app import deps
 
@@ -83,8 +83,17 @@ async def test_list_chats(
 
 
 @patch.object(ChatRepository, 'get')
-async def test_get_chat_by_id(mock_get, test_chat, async_client: AsyncClient):
+@patch.object(UserRepository, 'get_by_username')
+async def test_get_chat_by_id(
+    mock_get_user,
+    mock_get,
+    test_user,
+    test_chat,
+    superuser_token_headers,
+    async_client: AsyncClient,
+):
     # ToDo (pduran): Add messages to the Chat.
+    mock_get_user.return_value = test_user
     mock_get.return_value = test_chat
 
     expected_response = {
@@ -101,18 +110,32 @@ async def test_get_chat_by_id(mock_get, test_chat, async_client: AsyncClient):
             }
         ],
     }
-    actual_response = await async_client.get('/chats/1')
+    actual_response = await async_client.get(
+        '/chats/1',
+        headers=superuser_token_headers,
+    )
 
     assert status.HTTP_200_OK == actual_response.status_code
     assert expected_response == actual_response.json()
 
 
 @patch.object(ChatRepository, 'get')
-async def test_get_chat_by_id_not_found(mock_get, async_client: AsyncClient):
+@patch.object(UserRepository, 'get_by_username')
+async def test_get_chat_by_id_not_found(
+    mock_get_user,
+    mock_get,
+    test_user,
+    superuser_token_headers,
+    async_client: AsyncClient,
+):
+    mock_get_user.return_value = test_user
     mock_get.return_value = None
 
     expected_response = {'detail': 'Chat not found'}
-    actual_response = await async_client.get('/chats/99')
+    actual_response = await async_client.get(
+        '/chats/99',
+        headers=superuser_token_headers,
+    )
 
     assert status.HTTP_404_NOT_FOUND == actual_response.status_code
     assert expected_response == actual_response.json()
@@ -124,12 +147,17 @@ async def test_get_chat_by_id_not_found(mock_get, async_client: AsyncClient):
 )
 @patch.object(deps, 'create_chat_in_service')
 @patch.object(ChatRepository, 'create')
+@patch.object(UserRepository, 'get_by_username')
 async def test_create_chat(
+    mock_get_user,
     mock_create,
     mock_create_chat_openai,
+    test_user,
     test_chat_2,
+    superuser_token_headers,
     async_client: AsyncClient,
 ):
+    mock_get_user.return_value = test_user
     mock_create.return_value = test_chat_2
     mock_create_chat_openai.return_value = 'id_test'
 
@@ -139,7 +167,11 @@ async def test_create_chat(
         'start_time': '2020-05-08T13:00:00Z',
         'user_id': 1,
     }
-    actual_response = await async_client.post('/chat', json={})
+    actual_response = await async_client.post(
+        '/chat',
+        json={},
+        headers=superuser_token_headers,
+    )
 
     assert status.HTTP_201_CREATED == actual_response.status_code
     assert expected_response == actual_response.json()
@@ -183,23 +215,41 @@ async def test_create_message(
     'Test not working as expected, since mocks are not working as expected.'
 )
 @patch.object(ChatRepository, 'add_message')
+@patch.object(UserRepository, 'get_by_username')
 async def test_create_message_chat_not_found(
+    mock_get_user,
     mock_add_message,
+    test_user,
+    superuser_token_headers,
     async_client: AsyncClient,
 ):
+    mock_get_user.return_value = test_user
     mock_add_message.return_value = None
 
     expected_response = {'detail': 'Chat not found'}
     message_data = {'content': 'This is a test message.'}
-    actual_response = await async_client.post('/chats/9/messages', json=message_data)
+    actual_response = await async_client.post(
+        '/chats/9/messages',
+        json=message_data,
+        headers=superuser_token_headers,
+    )
 
     assert status.HTTP_404_NOT_FOUND == actual_response.status_code
     assert expected_response == actual_response.json()
 
 
-async def test_create_message_bad_request(async_client: AsyncClient):
+@patch.object(UserRepository, 'get_by_username')
+async def test_create_message_bad_request(
+    mock_get_user,
+    test_user,
+    superuser_token_headers,
+    async_client: AsyncClient,
+):
+    mock_get_user.return_value = test_user
     expected_response = 'Field required'
-    actual_response = await async_client.post('/chats/1/messages', json={})
+    actual_response = await async_client.post(
+        '/chats/1/messages', json={}, headers=superuser_token_headers
+    )
 
     assert status.HTTP_422_UNPROCESSABLE_ENTITY == actual_response.status_code
     assert expected_response == actual_response.json()['detail'][0]['msg']

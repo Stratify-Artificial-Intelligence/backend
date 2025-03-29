@@ -10,19 +10,6 @@ from app.repositories import UserRepository
 
 
 @pytest.fixture
-def test_user() -> UserDomain:
-    return UserDomain(
-        id=1,
-        username='User A',
-        email='a@gmail.com',
-        full_name='User A',
-        is_active=True,
-        password='test_password',
-        role=UserRoleEnum.ADMIN,
-    )
-
-
-@pytest.fixture
 def test_user_2() -> UserDomain:
     return UserDomain(
         id=2,
@@ -61,12 +48,16 @@ async def test_read_users_me(
 
 
 @patch.object(UserRepository, 'get_multi')
+@patch.object(UserRepository, 'get_by_username')
 async def test_list_users(
+    mock_get_by_username,
     mock_get_multi,
     test_user,
     test_user_2,
+    superuser_token_headers,
     async_client: AsyncClient,
 ):
+    mock_get_by_username.return_value = test_user
     mock_get_multi.return_value = [test_user, test_user_2]
 
     expected_response = [
@@ -87,7 +78,10 @@ async def test_list_users(
             'role': UserRoleEnum.ADMIN.value,
         },
     ]
-    actual_response = await async_client.get('/users')
+    actual_response = await async_client.get(
+        '/users',
+        headers=superuser_token_headers,
+    )
 
     assert status.HTTP_200_OK == actual_response.status_code
     assert expected_response == actual_response.json()
@@ -99,9 +93,10 @@ async def test_create_user(
     mock_get_by_username,
     mock_create,
     test_user,
+    superuser_token_headers,
     async_client: AsyncClient,
 ):
-    mock_get_by_username.return_value = None
+    mock_get_by_username.side_effect = [test_user, None]
     mock_create.return_value = test_user
 
     expected_response = {
@@ -114,7 +109,11 @@ async def test_create_user(
     }
     data = test_user.model_dump()
     del data['id']
-    actual_response = await async_client.post('/users', json=data)
+    actual_response = await async_client.post(
+        '/users',
+        json=data,
+        headers=superuser_token_headers,
+    )
 
     assert status.HTTP_201_CREATED == actual_response.status_code
     assert expected_response == actual_response.json()
@@ -124,6 +123,7 @@ async def test_create_user(
 async def test_create_user_already_exists(
     mock_get_by_username,
     test_user,
+    superuser_token_headers,
     async_client: AsyncClient,
 ):
     mock_get_by_username.return_value = test_user
@@ -131,16 +131,32 @@ async def test_create_user_already_exists(
     expected_response = 'User already exists'
     data = test_user.model_dump()
     del data['id']
-    response = await async_client.post('/users', json=data)
+    response = await async_client.post(
+        '/users',
+        json=data,
+        headers=superuser_token_headers,
+    )
 
     assert status.HTTP_400_BAD_REQUEST == response.status_code
     assert expected_response == response.json()['detail']
 
 
-async def test_create_user_bad_request(async_client: AsyncClient):
+@patch.object(UserRepository, 'get_by_username')
+async def test_create_user_bad_request(
+    mock_get_by_username,
+    test_user,
+    superuser_token_headers,
+    async_client: AsyncClient,
+):
+    mock_get_by_username.return_value = test_user
+
     expected_response = 'Field required'
     test_data = {'full_name': 'I am test B'}
-    actual_response = await async_client.post('/users', json=test_data)
+    actual_response = await async_client.post(
+        '/users',
+        json=test_data,
+        headers=superuser_token_headers,
+    )
 
     assert status.HTTP_422_UNPROCESSABLE_ENTITY == actual_response.status_code
     assert expected_response == actual_response.json()['detail'][0]['msg']

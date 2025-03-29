@@ -5,6 +5,7 @@ from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, status
 
 from app import schemas
+from app.authorization_server import user_can_read_chat
 from app.deps import (
     add_store_message_and_get_store_response,
     create_chat_in_service,
@@ -31,6 +32,9 @@ router = APIRouter(
     '',
     summary='List chats',
     response_model=list[ChatBase],
+    responses={
+        status.HTTP_401_UNAUTHORIZED: {'model': schemas.HTTP401Unauthorized},
+    },
 )
 async def list_chats(
     chats_repo: ChatRepository = Depends(get_repository(ChatRepository)),
@@ -46,18 +50,26 @@ async def list_chats(
     response_model=Chat,
     status_code=status.HTTP_200_OK,
     responses={
+        status.HTTP_401_UNAUTHORIZED: {'model': schemas.HTTP401Unauthorized},
+        status.HTTP_403_FORBIDDEN: {'model': schemas.HTTP403Forbidden},
         status.HTTP_404_NOT_FOUND: {'model': schemas.HTTP404NotFound},
     },
 )
 async def get_chat_by_id(
     chat_id: int,
     chats_repo: ChatRepository = Depends(get_repository(ChatRepository)),
+    current_user: UserDomain = Depends(get_current_active_user),
 ):
     chat = await chats_repo.get(chat_id)
     if chat is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail='Chat not found',
+        )
+    if not user_can_read_chat(chat, current_user):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail='User does not have enough privileges.',
         )
     return chat
 
@@ -68,6 +80,7 @@ async def get_chat_by_id(
     response_model=ChatBase,
     status_code=status.HTTP_201_CREATED,
     responses={
+        status.HTTP_401_UNAUTHORIZED: {'model': schemas.HTTP401Unauthorized},
         status.HTTP_400_BAD_REQUEST: {'model': schemas.HTTP400BadRequest},
     },
 )
@@ -92,6 +105,8 @@ async def create_chat(
     status_code=status.HTTP_201_CREATED,
     responses={
         status.HTTP_400_BAD_REQUEST: {'model': schemas.HTTP400BadRequest},
+        status.HTTP_401_UNAUTHORIZED: {'model': schemas.HTTP401Unauthorized},
+        status.HTTP_403_FORBIDDEN: {'model': schemas.HTTP403Forbidden},
         status.HTTP_404_NOT_FOUND: {'model': schemas.HTTP404NotFound},
     },
 )
@@ -99,6 +114,7 @@ async def add_message(
     chat_id: int,
     message_content: ChatMessageContent,
     chats_repo: ChatRepository = Depends(get_repository(ChatRepository)),
+    current_user: UserDomain = Depends(get_current_active_user),
 ):
     """Add message to a chat with user as sender."""
     message = ChatMessageDomain(
@@ -107,7 +123,19 @@ async def add_message(
         sender=ChatMessageSenderEnum.USER,
         content=message_content.content,
     )
+    chat = await chats_repo.get(chat_id)
+    if chat is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail='Chat not found',
+        )
+    if not user_can_read_chat(chat, current_user):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail='User does not have enough privileges.',
+        )
     response_message = await add_store_message_and_get_store_response(
+        chat=chat,
         message=message,
         chats_repo=chats_repo,
     )

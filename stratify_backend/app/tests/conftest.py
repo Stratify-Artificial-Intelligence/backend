@@ -5,6 +5,8 @@ import pytest
 import pytest_asyncio
 from httpx import ASGITransport, AsyncClient
 
+from app.domain import User as UserDomain
+from app.enums import UserRoleEnum
 from app.main import app
 from app.security import create_access_token
 from app.settings import SecuritySettings
@@ -69,6 +71,19 @@ def pytest_collection_modifyitems(items):
             item.add_marker(pytest.mark.integration)
         elif 'tests/unit/' in item_path:
             item.add_marker(pytest.mark.unit)
+
+
+@pytest.fixture
+def test_user() -> UserDomain:
+    return UserDomain(
+        id=1,
+        username='User A',
+        email='a@gmail.com',
+        full_name='User A',
+        is_active=True,
+        password='test_password',
+        role=UserRoleEnum.ADMIN,
+    )
 
 
 @pytest_asyncio.fixture()

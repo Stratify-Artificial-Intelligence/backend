@@ -5,7 +5,11 @@ from fastapi import Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database.postgresql import get_session
-from app.domain import ChatMessage as ChatMessageDomain, User as UserDomain
+from app.domain import (
+    Chat as ChatDomain,
+    ChatMessage as ChatMessageDomain,
+    User as UserDomain,
+)
 from app.enums import ChatMessageSenderEnum
 from app.repositories import BaseRepository, ChatRepository, UserRepository
 from app.schemas import TokenData
@@ -46,14 +50,12 @@ async def get_current_active_user(
 
 # ToDo (pduran): Should this function be here?
 async def add_store_message_and_get_store_response(
+    chat: ChatDomain,
     message: ChatMessageDomain,
     chats_repo: ChatRepository,
 ) -> ChatMessageDomain | None:
     """Register message and get the AI response."""
     await chats_repo.add_message(message),
-    chat = await chats_repo.get(message.chat_id)
-    if chat is None:
-        return None
     response_content = await add_message_to_chat_and_get_response(
         chat_internal_id=chat.internal_id,
         content=message.content,
