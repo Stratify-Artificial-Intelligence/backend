@@ -212,3 +212,94 @@ async def test_create_user_bad_request(
 
     assert status.HTTP_422_UNPROCESSABLE_ENTITY == actual_response.status_code
     assert expected_response == actual_response.json()['detail'][0]['msg']
+
+
+@patch.object(UserRepository, 'update')
+@patch.object(UserRepository, 'get')
+@patch.object(UserRepository, 'get_by_username')
+async def test_update_user(
+    mock_get_by_username,
+    mock_get,
+    mock_update,
+    test_user,
+    test_user_2,
+    superuser_token_headers,
+    async_client: AsyncClient,
+):
+    mock_get_by_username.return_value = test_user
+    mock_get.return_value = test_user_2
+    updated_user = test_user_2.model_copy()
+    updated_user.full_name = 'User B with new name'
+    mock_update.return_value = updated_user
+
+    expected_response = {
+        'id': 2,
+        'username': 'User B',
+        'email': 'b@gmail.com',
+        'full_name': 'User B with new name',
+        'is_active': True,
+        'role': UserRoleEnum.ADMIN.value,
+    }
+    data = {
+        'full_name': 'User B with nem name',
+    }
+    actual_response = await async_client.patch(
+        '/users/2',
+        json=data,
+        headers=superuser_token_headers,
+    )
+
+    assert status.HTTP_200_OK == actual_response.status_code
+    assert expected_response == actual_response.json()
+
+
+@patch.object(UserRepository, 'update')
+@patch.object(UserRepository, 'get')
+@patch.object(UserRepository, 'get_by_username')
+async def test_update_user_already_exists(
+    mock_get_by_username,
+    mock_get,
+    mock_update,
+    test_user,
+    test_user_2,
+    superuser_token_headers,
+    async_client: AsyncClient,
+):
+    mock_get_by_username.return_value = test_user
+    mock_get.return_value = test_user_2
+    mock_update.side_effect = ValueError('Username already exists')
+
+    expected_response = {'detail': 'Username already exists'}
+    data = {
+        'username': 'User A',
+    }
+    response = await async_client.patch(
+        '/users/2',
+        json=data,
+        headers=superuser_token_headers,
+    )
+
+    assert status.HTTP_400_BAD_REQUEST == response.status_code
+    assert expected_response == response.json()
+
+
+@patch.object(UserRepository, 'get_by_username')
+async def test_update_user_bad_request(
+    mock_get_by_username,
+    test_user,
+    test_user_2,
+    superuser_token_headers,
+    async_client: AsyncClient,
+):
+    mock_get_by_username.return_value = test_user
+
+    expected_response = 'Extra inputs are not permitted'
+    test_data = test_user_2.model_dump()
+    actual_response = await async_client.patch(
+        '/users/2',
+        json=test_data,
+        headers=superuser_token_headers,
+    )
+
+    assert status.HTTP_422_UNPROCESSABLE_ENTITY == actual_response.status_code
+    assert expected_response == actual_response.json()['detail'][0]['msg']

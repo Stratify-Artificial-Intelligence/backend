@@ -5,10 +5,10 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from app import schemas
 from app.authorization_server import RoleChecker
 from app.deps import get_current_active_user, get_repository
-from app.domain import UserBase as UserBaseDomain, UserWithSecret as UserWithSecretDomain
+from app.domain import UserWithSecret as UserWithSecretDomain
 from app.enums import UserRoleEnum
 from app.repositories import UserRepository
-from app.schemas import User, UserBase, UserBasePartialUpdate, UserCreate
+from app.schemas import User, UserBasePartialUpdate, UserCreate
 
 router = APIRouter(
     tags=['User'],
