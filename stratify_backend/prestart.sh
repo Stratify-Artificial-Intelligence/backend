@@ -9,11 +9,10 @@ if [ "$DOMAIN" = "localhost" ]; then
 fi
 
 # Create initial data in DB
-# ToDo (pduran): Add initial data to the DB
-# if [ "$DOMAIN" = "localhost" ]; then
-#   echo "Running initial_data.py"
-#   python /app/prestart/initial_data.py
-# fi
+if [ "$DOMAIN" = "localhost" ]; then
+  echo "Running initial_data.py"
+  python /stratify_backend/app/database/init_db.py
+fi
 
 # Run webserver
 echo "Running uvicorn"

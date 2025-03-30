@@ -1,1 +1,1 @@
-from .postgresql import Base
+from .postgresql import Base, async_session
