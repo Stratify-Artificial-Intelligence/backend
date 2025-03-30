@@ -160,12 +160,6 @@ async def create_user(
     users_repo: UserRepository = Depends(get_repository(UserRepository)),
 ):
     """Create a new user."""
-    existing_user = await users_repo.get_by_username(user.username)
-    if existing_user:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail='User already exists',
-        )
     user_to_create = UserWithSecretDomain(
         username=user.username,
         email=user.email,
@@ -174,7 +168,14 @@ async def create_user(
         password=user.password.get_secret_value(),
         role=user.role,
     )
-    return await users_repo.create(user_to_create)
+    try:
+        user_created = await users_repo.create(user_to_create)
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e),
+        )
+    return user_created
 
 
 @router.patch(

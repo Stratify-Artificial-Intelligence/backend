@@ -309,7 +309,7 @@ async def test_create_user(
     superuser_token_headers,
     async_client: AsyncClient,
 ):
-    mock_get_by_username.side_effect = [test_user, None]
+    mock_get_by_username.return_value = test_user
     mock_create.return_value = test_user
 
     expected_response = {
@@ -332,16 +332,19 @@ async def test_create_user(
     assert expected_response == actual_response.json()
 
 
+@patch.object(UserRepository, 'create')
 @patch.object(UserRepository, 'get_by_username')
 async def test_create_user_already_exists(
     mock_get_by_username,
+    mock_create,
     test_user,
     superuser_token_headers,
     async_client: AsyncClient,
 ):
     mock_get_by_username.return_value = test_user
+    mock_create.side_effect = ValueError('Username already exists')
 
-    expected_response = 'User already exists'
+    expected_response = 'Username already exists'
     data = test_user.model_dump()
     del data['id']
     response = await async_client.post(
