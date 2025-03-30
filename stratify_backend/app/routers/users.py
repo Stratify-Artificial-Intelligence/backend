@@ -138,4 +138,11 @@ async def update_user(
     update_data = user_data.model_dump(exclude_unset=True)
     for key, value in update_data.items():
         setattr(user, key, value)
-    return await users_repo.update(user_id, user)
+    try:
+        user_updated = await users_repo.update(user_id, user)
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e),
+        )
+    return user_updated

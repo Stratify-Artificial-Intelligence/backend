@@ -87,6 +87,58 @@ async def test_list_users(
     assert expected_response == actual_response.json()
 
 
+@patch.object(UserRepository, 'get')
+@patch.object(UserRepository, 'get_by_username')
+async def test_read_user_by_id(
+    mock_get_by_username,
+    mock_get,
+    test_user,
+    test_user_2,
+    superuser_token_headers,
+    async_client: AsyncClient,
+):
+    mock_get_by_username.return_value = test_user
+    mock_get.return_value = test_user_2
+
+    expected_response = {
+        'id': 2,
+        'username': 'User B',
+        'email': 'b@gmail.com',
+        'full_name': 'User B',
+        'is_active': True,
+        'role': UserRoleEnum.ADMIN.value,
+    }
+    actual_response = await async_client.get(
+        '/users/2',
+        headers=superuser_token_headers,
+    )
+
+    assert status.HTTP_200_OK == actual_response.status_code
+    assert expected_response == actual_response.json()
+
+
+@patch.object(UserRepository, 'get')
+@patch.object(UserRepository, 'get_by_username')
+async def test_read_user_by_id_not_found(
+    mock_get_by_username,
+    mock_get,
+    test_user,
+    superuser_token_headers,
+    async_client: AsyncClient,
+):
+    mock_get_by_username.return_value = test_user
+    mock_get.return_value = None
+
+    expected_response = {'detail': 'User not found'}
+    actual_response = await async_client.get(
+        '/users/99',
+        headers=superuser_token_headers,
+    )
+
+    assert status.HTTP_404_NOT_FOUND == actual_response.status_code
+    assert expected_response == actual_response.json()
+
+
 @patch.object(UserRepository, 'create')
 @patch.object(UserRepository, 'get_by_username')
 async def test_create_user(

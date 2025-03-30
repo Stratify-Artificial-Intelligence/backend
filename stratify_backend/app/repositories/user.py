@@ -63,6 +63,14 @@ class UserRepository(BaseRepository):
         except KeyError:
             pass
 
+        try:
+            username = user_dict['username']
+            existing_user = await self.get_by_username(username)
+            if existing_user and existing_user.id != user_id:
+                raise ValueError('Username already exists')
+        except KeyError:
+            pass
+
         self.update_model(model=user, update=user_dict)
 
         await self.commit()
