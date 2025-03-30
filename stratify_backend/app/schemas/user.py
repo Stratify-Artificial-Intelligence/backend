@@ -23,6 +23,14 @@ class UserBasePartialUpdate(BaseModel):
     model_config = ConfigDict(extra='forbid')
 
 
+class UserMePartialUpdate(BaseModel):
+    username: str | None = None
+    email: str | None = None
+    full_name: str | None = None
+
+    model_config = ConfigDict(extra='forbid')
+
+
 class User(UserBase):
     id: int
 

@@ -5,10 +5,10 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from app import schemas
 from app.authorization_server import RoleChecker
 from app.deps import get_current_active_user, get_repository
-from app.domain import UserWithSecret as UserWithSecretDomain
+from app.domain import User as UserDomain, UserWithSecret as UserWithSecretDomain
 from app.enums import UserRoleEnum
 from app.repositories import UserRepository
-from app.schemas import User, UserBasePartialUpdate, UserCreate
+from app.schemas import User, UserBasePartialUpdate, UserCreate, UserMePartialUpdate
 
 router = APIRouter(
     tags=['User'],
@@ -26,10 +26,39 @@ router = APIRouter(
     },
 )
 async def read_users_me(
-    current_user: User = Depends(get_current_active_user),
+    current_user: UserDomain = Depends(get_current_active_user),
 ):
     """Get information about the current user."""
     return current_user
+
+
+@router.patch(
+    '/me',
+    summary='Partial update me',
+    status_code=status.HTTP_200_OK,
+    response_model=User,
+    responses={
+        status.HTTP_400_BAD_REQUEST: {'model': schemas.HTTP400BadRequest},
+        status.HTTP_401_UNAUTHORIZED: {'model': schemas.HTTP401Unauthorized},
+    },
+)
+async def update_users_me(
+    user_data: UserMePartialUpdate,
+    current_user: UserDomain = Depends(get_current_active_user),
+    users_repo: UserRepository = Depends(get_repository(UserRepository)),
+):
+    """Update user information."""
+    update_data = user_data.model_dump(exclude_unset=True)
+    for key, value in update_data.items():
+        setattr(current_user, key, value)
+    try:
+        user_updated = await users_repo.update(current_user.id, current_user)
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e),
+        )
+    return user_updated
 
 
 @router.get(
@@ -134,7 +163,6 @@ async def update_user(
             status_code=status.HTTP_404_NOT_FOUND,
             detail='User not found',
         )
-    # ToDo (pduran): Check username uniqueness
     update_data = user_data.model_dump(exclude_unset=True)
     for key, value in update_data.items():
         setattr(user, key, value)
