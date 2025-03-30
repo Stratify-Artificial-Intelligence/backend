@@ -22,6 +22,85 @@ def test_user_2() -> UserDomain:
     )
 
 
+@pytest.fixture
+def test_user_3() -> UserDomain:
+    return UserDomain(
+        id=3,
+        username='User C',
+        email='c@gmail.com',
+        full_name='User C',
+        is_active=True,
+        role=UserRoleEnum.BASIC,
+        password='test_password_3',
+    )
+
+
+@patch.object(UserRepository, 'create')
+async def test_signup_user(
+    mock_create,
+    test_user_3,
+    async_client: AsyncClient,
+):
+    mock_create.return_value = test_user_3
+
+    expected_response = {
+        'id': 3,
+        'username': 'User C',
+        'email': 'c@gmail.com',
+        'full_name': 'User C',
+        'is_active': True,
+        'role': UserRoleEnum.BASIC.value,
+    }
+    data = test_user_3.model_dump()
+    del data['id']
+    del data['role']
+    del data['is_active']
+    actual_response = await async_client.post(
+        '/users/signup',
+        json=data,
+    )
+
+    assert status.HTTP_201_CREATED == actual_response.status_code
+    assert expected_response == actual_response.json()
+
+
+@patch.object(UserRepository, 'create')
+async def test_signup_user_already_exists(
+    mock_create,
+    test_user_3,
+    async_client: AsyncClient,
+):
+    mock_create.side_effect = ValueError('Username already exists')
+
+    expected_response = {'detail': 'Username already exists'}
+    data = test_user_3.model_dump()
+    del data['id']
+    del data['role']
+    del data['is_active']
+    response = await async_client.post(
+        '/users/signup',
+        json=data,
+    )
+
+    assert status.HTTP_400_BAD_REQUEST == response.status_code
+    assert expected_response == response.json()
+
+
+async def test_signup_user_bad_request(
+    test_user,
+    async_client: AsyncClient,
+):
+    expected_response = 'Field required'
+    test_data = {'full_name': 'I am test B'}
+    actual_response = await async_client.post(
+        '/users/signup',
+        json=test_data,
+    )
+
+    assert status.HTTP_422_UNPROCESSABLE_ENTITY == actual_response.status_code
+    assert expected_response == actual_response.json()['detail'][0]['msg']
+
+
 @patch.object(UserRepository, 'get_by_username')
 async def test_read_users_me(
     mock_get_by_username,

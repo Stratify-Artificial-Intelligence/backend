@@ -7,20 +7,30 @@ class UserBase(BaseModel):
     username: str
     email: str
     full_name: str
+
+    model_config = ConfigDict(extra='forbid')
+
+
+class UserBaseExtended(UserBase):
     is_active: bool
     role: UserRoleEnum
 
-    model_config = ConfigDict(extra='forbid')
+
+class User(UserBaseExtended):
+    id: int
 
 
-class UserBasePartialUpdate(BaseModel):
-    username: str | None = None
-    email: str | None = None
-    full_name: str | None = None
-    is_active: bool | None = None
-    role: UserRoleEnum | None = None
+class Password(SecretStr):
+    min_length = 6
+    max_length = 50
 
-    model_config = ConfigDict(extra='forbid')
+
+class UserCreate(UserBaseExtended):
+    password: Password
+
+
+class UserBaseCreate(UserBase):
+    password: Password
 
 
 class UserMePartialUpdate(BaseModel):
@@ -31,14 +41,6 @@ class UserMePartialUpdate(BaseModel):
     model_config = ConfigDict(extra='forbid')
 
 
-class User(UserBase):
-    id: int
-
-
-class Password(SecretStr):
-    min_length = 6
-    max_length = 50
-
-
-class UserCreate(UserBase):
-    password: Password
+class UserPartialUpdate(UserMePartialUpdate):
+    is_active: bool | None = None
+    role: UserRoleEnum | None = None

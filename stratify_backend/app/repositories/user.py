@@ -34,6 +34,9 @@ class UserRepository(BaseRepository):
         return [await self._user_model_to_domain(user) for user in users]
 
     async def create(self, user_in: UserWithSecretDomain) -> UserDomain:
+        existing_user = await self.get_by_username(username=user_in.username)
+        if existing_user is not None:
+            raise ValueError('Username already exists')
         hashed_password = get_password_hash(user_in.password)
         new_user = User(
             username=user_in.username,
