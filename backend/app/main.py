@@ -1,4 +1,4 @@
-"""Implementations of entrypoint methods of Stratify Backend."""
+"""Implementations of entrypoint methods of Backend."""
 
 import os
 
@@ -8,8 +8,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.routers import admin_router, chats_router, tests_router, users_router
 
 app = FastAPI(
-    title='Stratify Backend API',
-    description='Backend module of Stratify Artificial Intelligence.',
+    title='Veyra Backend API',
+    description='Backend module of Veyra Artificial Intelligence.',
     root_path=os.getenv('ROOT_PATH', ''),
 )
 
