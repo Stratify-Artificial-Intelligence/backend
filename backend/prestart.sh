@@ -11,7 +11,7 @@ fi
 # Create initial data in DB
 if [ "$DOMAIN" = "localhost" ]; then
   echo "Running initial_data.py"
-  python /stratify_backend/app/database/init_db.py
+  python /backend/app/database/init_db.py
 fi
 
 # Run webserver

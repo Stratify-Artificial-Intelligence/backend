@@ -1,2 +1,2 @@
-# stratify-backend
-Backend module of Stratify
+# Backend
+Backend module of Veyra
