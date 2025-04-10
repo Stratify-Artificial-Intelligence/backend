@@ -26,24 +26,18 @@ class Business(Base):
     user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
 
     __mapper_args__ = {
-        'polymorphic_identity': 'chat',
-        'polymorphic_on': 'stage',
+        'polymorphic_identity': 'business',
+        'polymorphic_on': stage,
     }
 
     # Relationships
-    messages = relationship(
-        'ChatMessage',
-        back_populates='chat',
-        lazy='selectin',
-        cascade='all, delete-orphan',
-    )
-    user = relationship('User', back_populates='chats', lazy='selectin')
+    user = relationship('User', back_populates='businesses', lazy='selectin')
 
 
 class BusinessIdea(Business):
     __tablename__ = 'business_ideas'
 
-    id = Column(Integer, ForeignKey('business.id'), primary_key=True)
+    id = Column(Integer, ForeignKey('businesses.id'), primary_key=True)
     competitor_existence = Column(Boolean, nullable=True)
     competitor_differentiation = Column(String, nullable=True)
     investment = Column(Float, nullable=True)
@@ -64,7 +58,7 @@ class BusinessIdea(Business):
 class EstablishedBusiness(Business):
     __tablename__ = 'established_businesses'
 
-    id = Column(Integer, ForeignKey('business.id'), primary_key=True)
+    id = Column(Integer, ForeignKey('businesses.id'), primary_key=True)
     billing = Column(Float, nullable=True)
     billing_currency: Column[Enum] = Column(
         Enum(
