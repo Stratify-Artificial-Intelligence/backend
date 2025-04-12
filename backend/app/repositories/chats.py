@@ -8,9 +8,9 @@ from sqlalchemy import select
 
 
 class ChatRepository(BaseRepository):
-    async def get(self, chat_id: int) -> ChatDomain | None:
+    async def get(self, business_id: int, chat_id: int) -> ChatDomain | None:
         chat = await self._get(chat_id=chat_id, include_messages=True)
-        if chat is None:
+        if chat is None or chat.business_id != business_id:
             return None
         return ChatDomain.model_validate(chat)
 

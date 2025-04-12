@@ -2,17 +2,18 @@
 
 from datetime import datetime
 
-from fastapi import APIRouter, Depends, HTTPException, status, Query
+from fastapi import APIRouter, Depends, HTTPException, status
 
 from app import schemas
 from app.authorization_server import (
+    user_can_create_chat,
     user_can_publish_message,
     user_can_read_chat,
-    user_can_read_business,
 )
 from app.deps import (
     add_store_message_and_get_store_response,
     create_chat_in_service,
+    get_business,
     get_current_active_user,
     get_repository,
 )
@@ -46,17 +47,12 @@ async def list_chats(
     current_user: UserDomain = Depends(get_current_active_user),
 ):
     """List all chats of a business."""
-    business = await business_repo.get(business_id=business_id)
-    if business is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail='Business not found',
-        )
-    if not user_can_read_business(business, current_user):
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail='User does not have enough privileges.',
-        )
+    await get_business(
+        business_id=business_id,
+        user=current_user,
+        business_repo=business_repo,
+        permission_func=user_can_read_chat,
+    )
     return await chats_repo.get_multi(business_id=business_id)
 
 
@@ -72,20 +68,23 @@ async def list_chats(
     },
 )
 async def get_chat_by_id(
+    business_id: int,
     chat_id: int,
+    business_repo: BusinessRepository = Depends(get_repository(BusinessRepository)),
     chats_repo: ChatRepository = Depends(get_repository(ChatRepository)),
     current_user: UserDomain = Depends(get_current_active_user),
 ):
-    chat = await chats_repo.get(chat_id)
+    await get_business(
+        business_id=business_id,
+        user=current_user,
+        business_repo=business_repo,
+        permission_func=user_can_read_chat,
+    )
+    chat = await chats_repo.get(business_id=business_id, chat_id=chat_id)
     if chat is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail='Chat not found',
-        )
-    if not user_can_read_chat(chat, current_user):
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail='User does not have enough privileges.',
         )
     return chat
 
@@ -101,15 +100,23 @@ async def get_chat_by_id(
     },
 )
 async def create_chat(
+    business_id: int,
+    business_repo: BusinessRepository = Depends(get_repository(BusinessRepository)),
     chats_repo: ChatRepository = Depends(get_repository(ChatRepository)),
     current_user: UserDomain = Depends(get_current_active_user),
 ):
+    await get_business(
+        business_id=business_id,
+        user=current_user,
+        business_repo=business_repo,
+        permission_func=user_can_create_chat,
+    )
     chat_internal_id = await create_chat_in_service()
     chat = ChatDomain(
         internal_id=chat_internal_id,
         title='Chat title',
         start_time=datetime.now(),
-        user_id=current_user.id,
+        business_id=business_id,
     )
     return await chats_repo.create(chat)
 
@@ -127,28 +134,31 @@ async def create_chat(
     },
 )
 async def add_message(
+    business_id: int,
     chat_id: int,
     message_content: ChatMessageContent,
+    business_repo: BusinessRepository = Depends(get_repository(BusinessRepository)),
     chats_repo: ChatRepository = Depends(get_repository(ChatRepository)),
     current_user: UserDomain = Depends(get_current_active_user),
 ):
     """Add message to a chat with user as sender."""
+    await get_business(
+        business_id=business_id,
+        user=current_user,
+        business_repo=business_repo,
+        permission_func=user_can_publish_message,
+    )
     message = ChatMessageDomain(
         chat_id=chat_id,
         time=datetime.now(),
         sender=ChatMessageSenderEnum.USER,
         content=message_content.content,
     )
-    chat = await chats_repo.get(chat_id)
+    chat = await chats_repo.get(business_id=business_id, chat_id=chat_id)
     if chat is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail='Chat not found',
-        )
-    if not user_can_publish_message(chat, current_user):
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail='User does not have enough privileges.',
         )
     response_message = await add_store_message_and_get_store_response(
         chat=chat,
