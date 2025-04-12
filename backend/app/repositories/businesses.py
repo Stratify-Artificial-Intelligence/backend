@@ -16,6 +16,14 @@ class BusinessRepository(BaseRepository):
             return None
         return BusinessDomain.model_validate(business)
 
+    async def get_multi(self, user_id: int | None = None) -> list[BusinessDomain]:
+        query = select(Business)
+        if user_id is not None:
+            query = query.where(Business.user_id == user_id)
+        result = await self._db.execute(query)
+        businesses = result.scalars().all()
+        return [BusinessDomain.model_validate(business) for business in businesses]
+
     async def create_idea(self, business_in: BusinessIdeaDomain) -> BusinessIdeaDomain:
         new_business_idea = BusinessIdea(
             name=business_in.name,

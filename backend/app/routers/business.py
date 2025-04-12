@@ -25,20 +25,20 @@ router = APIRouter(
 )
 
 
-# @router.get(
-#     '',
-#     summary='List businesses',
-#     response_model=list[ChatBase],
-#     responses={
-#         status.HTTP_401_UNAUTHORIZED: {'model': schemas.HTTP401Unauthorized},
-#     },
-# )
-# async def list_businesses(
-#     chats_repo: ChatRepository = Depends(get_repository(ChatRepository)),
-#     current_user: UserDomain = Depends(get_current_active_user),
-# ):
-#     """List all businesses accessible by the current user."""
-#     return await chats_repo.get_multi(user_id=current_user.id)
+@router.get(
+    '',
+    summary='List businesses',
+    response_model=list[BusinessIdea | EstablishedBusiness],
+    responses={
+        status.HTTP_401_UNAUTHORIZED: {'model': schemas.HTTP401Unauthorized},
+    },
+)
+async def list_businesses(
+    business_repo: BusinessRepository = Depends(get_repository(BusinessRepository)),
+    current_user: UserDomain = Depends(get_current_active_user),
+):
+    """List all businesses accessible by the current user."""
+    return await business_repo.get_multi(user_id=current_user.id)
 
 
 @router.get(
