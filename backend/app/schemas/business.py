@@ -1,9 +1,11 @@
+from typing import Any
+
 from app.enums import BusinessStageEnum, CurrencyUnitEnum
 
 from pydantic import BaseModel, ConfigDict
 
 
-BUSINESS_BASE_EXAMPLE = {
+BUSINESS_BASE_EXAMPLE: dict[str, Any] = {
     'name': 'Veyra',
     'location': 'Spain',
     'description': 'Veyra is super cool!',
@@ -12,14 +14,14 @@ BUSINESS_BASE_EXAMPLE = {
     'team_description': 'Super nice guys.',
 }
 
-BUSINESS_EXAMPLE = {
+BUSINESS_EXAMPLE: dict[str, Any] = {
     'id': 4,
     'user_id': 1,
     'stage': BusinessStageEnum.IDEA,
     **BUSINESS_BASE_EXAMPLE,
 }
 
-BUSINESS_IDEA_BASE_EXAMPLE = {
+BUSINESS_IDEA_BASE_EXAMPLE: dict[str, Any] = {
     **BUSINESS_BASE_EXAMPLE,
     'competitor_existence': True,
     'competitor_differentiation': 'Well, we are the best.',
@@ -27,14 +29,14 @@ BUSINESS_IDEA_BASE_EXAMPLE = {
     'investment_currency': CurrencyUnitEnum.EURO,
 }
 
-BUSINESS_IDEA_EXAMPLE = {
+BUSINESS_IDEA_EXAMPLE: dict[str, Any] = {
     'id': 5,
     'user_id': 1,
     'stage': BusinessStageEnum.IDEA,
     **BUSINESS_IDEA_BASE_EXAMPLE,
 }
 
-ESTABLISHED_BUSINESS_BASE_EXAMPLE = {
+ESTABLISHED_BUSINESS_BASE_EXAMPLE: dict[str, Any] = {
     **BUSINESS_BASE_EXAMPLE,
     'billing': 1000,
     'billing_currency': CurrencyUnitEnum.EURO,
@@ -43,7 +45,7 @@ ESTABLISHED_BUSINESS_BASE_EXAMPLE = {
     'profit_margin': 5,
 }
 
-ESTABLISHED_BUSINESS_EXAMPLE = {
+ESTABLISHED_BUSINESS_EXAMPLE: dict[str, Any] = {
     'id': 6,
     'user_id': 1,
     'stage': BusinessStageEnum.ESTABLISHED,

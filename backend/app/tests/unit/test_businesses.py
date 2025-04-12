@@ -52,7 +52,6 @@ def test_established_business() -> EstablishedBusinessDomain:
     )
 
 
-
 @patch.object(BusinessRepository, 'get_multi')
 @patch.object(UserRepository, 'get_by_username')
 async def test_list_businesses(
