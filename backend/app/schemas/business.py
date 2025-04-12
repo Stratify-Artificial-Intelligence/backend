@@ -21,7 +21,7 @@ BUSINESS_EXAMPLE = {
 
 BUSINESS_IDEA_BASE_EXAMPLE = {
     **BUSINESS_BASE_EXAMPLE,
-    'competitor_existance': True,
+    'competitor_existence': True,
     'competitor_differentiation': 'Well, we are the best.',
     'investment': 0,
     'investment_currency': CurrencyUnitEnum.EURO,
