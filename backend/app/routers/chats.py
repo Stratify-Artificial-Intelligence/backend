@@ -5,7 +5,7 @@ from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, status
 
 from app import schemas
-from app.authorization_server import user_can_read_chat
+from app.authorization_server import user_can_publish_message, user_can_read_chat
 from app.deps import (
     add_store_message_and_get_store_response,
     create_chat_in_service,
@@ -128,7 +128,7 @@ async def add_message(
             status_code=status.HTTP_404_NOT_FOUND,
             detail='Chat not found',
         )
-    if not user_can_read_chat(chat, current_user):
+    if not user_can_publish_message(chat, current_user):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail='User does not have enough privileges.',

@@ -59,7 +59,7 @@ async def get_business_by_id(
 ):
     """Get a specific business by ID."""
     business = await business_repo.get(business_id=business_id)
-    if not business:
+    if business is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail='Business not found',

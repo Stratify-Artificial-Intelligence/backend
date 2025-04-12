@@ -1,8 +1,6 @@
-from app.enums import ChatMessageSenderEnum, BusinessStageEnum, CurrencyUnitEnum
+from app.enums import BusinessStageEnum, CurrencyUnitEnum
 
 from pydantic import BaseModel, ConfigDict
-
-from datetime import datetime
 
 
 BUSINESS_BASE_EXAMPLE = {
