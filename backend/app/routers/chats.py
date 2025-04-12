@@ -19,8 +19,7 @@ from app.domain import (
 )
 from app.enums import ChatMessageSenderEnum
 from app.repositories import ChatRepository
-from app.schemas import Chat, ChatBase, ChatMessageContent
-from app.schemas.chat import ChatMessage
+from app.schemas import Chat, ChatBase, ChatMessage, ChatMessageContent
 
 router = APIRouter(
     tags=['Chat'],
@@ -80,8 +79,8 @@ async def get_chat_by_id(
     response_model=ChatBase,
     status_code=status.HTTP_201_CREATED,
     responses={
-        status.HTTP_401_UNAUTHORIZED: {'model': schemas.HTTP401Unauthorized},
         status.HTTP_400_BAD_REQUEST: {'model': schemas.HTTP400BadRequest},
+        status.HTTP_401_UNAUTHORIZED: {'model': schemas.HTTP401Unauthorized},
     },
 )
 async def create_chat(

@@ -1,7 +1,7 @@
 from fastapi import Depends, HTTPException, status
 
 from app.deps import get_current_active_user
-from app.domain import Chat as ChatDomain, User as UserDomain
+from app.domain import Business as BusinessDomain, Chat as ChatDomain, User as UserDomain
 
 
 class RoleChecker:
@@ -26,3 +26,7 @@ def user_can_read_chat(chat: ChatDomain, user: UserDomain) -> bool:
 
 def user_can_publish_message(chat: ChatDomain, user: UserDomain) -> bool:
     return chat.user_id == user.id
+
+
+def user_can_read_business(business: BusinessDomain, user: UserDomain) -> bool:
+    return business.user_id == user.id

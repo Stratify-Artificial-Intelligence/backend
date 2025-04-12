@@ -5,7 +5,13 @@ import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.routers import admin_router, chats_router, tests_router, users_router
+from app.routers import (
+    admin_router,
+    business_router,
+    chats_router,
+    tests_router,
+    users_router,
+)
 
 app = FastAPI(
     title='Veyra Backend API',
@@ -22,6 +28,7 @@ app.add_middleware(
 )
 
 app.include_router(admin_router)
+app.include_router(business_router)
 app.include_router(chats_router)
 app.include_router(tests_router)
 app.include_router(users_router)

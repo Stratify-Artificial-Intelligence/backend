@@ -1,34 +1,44 @@
+from app.enums import ChatMessageSenderEnum, BusinessStageEnum, CurrencyUnitEnum
+
 from pydantic import BaseModel, ConfigDict
 
-from app.enums import BusinessStageEnum, CurrencyUnitEnum
+from datetime import datetime
 
 
-class Business(BaseModel):
-    id: int | None = None
+class BusinessBase(BaseModel):
     name: str
     location: str
     description: str | None = None
-    goal: str | None = None
     stage: BusinessStageEnum
+
+
+class Business(BusinessBase):
+    goal: str | None = None
     team_size: int | None = None
     team_description: str | None = None
     user_id: int
 
-    model_config = ConfigDict(from_attributes=True)
+    model_config = ConfigDict(extra='forbid')
 
 
-class BusinessIdea(Business):
-    id: int | None = None
+class BusinessIdeaBase(Business):
     competitor_existence: bool | None = None
     competitor_differentiation: str | None = None
     investment: float | None = None
     investment_currency: CurrencyUnitEnum | None = None
 
 
-class EstablishedBusiness(Business):
-    id: int | None = None
+class BusinessIdea(BusinessIdeaBase):
+    id: int
+
+
+class EstablishedBusinessBase(Business):
     billing: float | None = None
     billing_currency: CurrencyUnitEnum | None = None
     ebitda: float | None = None
     ebitda_currency: CurrencyUnitEnum | None = None
     profit_margin: float | None = None
+
+
+class EstablishedBusiness(EstablishedBusinessBase):
+    id: int
