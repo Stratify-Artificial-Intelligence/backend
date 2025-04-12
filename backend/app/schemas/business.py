@@ -9,19 +9,20 @@ class BusinessBase(BaseModel):
     name: str
     location: str
     description: str | None = None
-    stage: BusinessStageEnum
-
-
-class Business(BusinessBase):
     goal: str | None = None
     team_size: int | None = None
     team_description: str | None = None
-    user_id: int
 
     model_config = ConfigDict(extra='forbid')
 
 
-class BusinessIdeaBase(Business):
+class Business(BusinessBase):
+    id: int
+    user_id: int
+    stage: BusinessStageEnum
+
+
+class BusinessIdeaBase(BusinessBase):
     competitor_existence: bool | None = None
     competitor_differentiation: str | None = None
     investment: float | None = None
@@ -30,9 +31,11 @@ class BusinessIdeaBase(Business):
 
 class BusinessIdea(BusinessIdeaBase):
     id: int
+    user_id: int
+    stage: BusinessStageEnum
 
 
-class EstablishedBusinessBase(Business):
+class EstablishedBusinessBase(BusinessBase):
     billing: float | None = None
     billing_currency: CurrencyUnitEnum | None = None
     ebitda: float | None = None
@@ -42,3 +45,5 @@ class EstablishedBusinessBase(Business):
 
 class EstablishedBusiness(EstablishedBusinessBase):
     id: int
+    user_id: int
+    stage: BusinessStageEnum

@@ -1,4 +1,3 @@
-from app.enums import BusinessStageEnum
 from app.models import Business, BusinessIdea, EstablishedBusiness
 from app.domain import (
     Business as BusinessDomain,
@@ -51,7 +50,7 @@ class BusinessRepository(BaseRepository):
             team_description=business_in.team_description,
             user_id=business_in.user_id,
             billing=business_in.billing,
-            billling_currency=business_in.billing_currency,
+            billing_currency=business_in.billing_currency,
             ebitda=business_in.ebitda,
             ebitda_currency=business_in.ebitda_currency,
             profit_margin=business_in.profit_margin,

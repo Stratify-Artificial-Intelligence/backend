@@ -1,26 +1,18 @@
 """API endpoints for business management."""
 
-from datetime import datetime
-
 from fastapi import APIRouter, Depends, HTTPException, status
 
 from app import schemas
 from app.authorization_server import user_can_read_business
-from app.deps import (
-    add_store_message_and_get_store_response,
-    create_chat_in_service,
-    get_current_active_user,
-    get_repository,
-)
+from app.deps import get_current_active_user, get_repository
 from app.domain import (
     BusinessIdea as BusinessIdeaDomain,
-    ChatMessage as ChatMessageDomain,
+    EstablishedBusiness as EstablishedBusinessDomain,
     User as UserDomain,
 )
-from app.enums import ChatMessageSenderEnum
+from app.enums import BusinessStageEnum
 from app.repositories import BusinessRepository
 from app.schemas import (
-    BusinessBase,
     BusinessIdea,
     BusinessIdeaBase,
     EstablishedBusiness,
@@ -81,7 +73,7 @@ async def get_business_by_id(
 
 
 @router.post(
-    '',
+    '/ideas',
     summary='Create business idea',
     response_model=BusinessIdea,
     status_code=status.HTTP_201_CREATED,
@@ -96,8 +88,37 @@ async def create_business_idea(
     current_user: UserDomain = Depends(get_current_active_user),
 ):
     """Create a new business idea."""
-    # ToDo (pduran): Handle user id
     business_idea = BusinessIdeaDomain(
-        **business_in.model_dump(),
+        **{
+            **business_in.model_dump(),
+            'user_id': current_user.id,
+            'stage': BusinessStageEnum.IDEA,
+        }
     )
     return await business_repo.create_idea(business_idea)
+
+
+@router.post(
+    '/established',
+    summary='Create established business',
+    response_model=EstablishedBusiness,
+    status_code=status.HTTP_201_CREATED,
+    responses={
+        status.HTTP_400_BAD_REQUEST: {'model': schemas.HTTP400BadRequest},
+        status.HTTP_401_UNAUTHORIZED: {'model': schemas.HTTP401Unauthorized},
+    },
+)
+async def create_established_business(
+    business_in: EstablishedBusinessBase,
+    business_repo: BusinessRepository = Depends(get_repository(BusinessRepository)),
+    current_user: UserDomain = Depends(get_current_active_user),
+):
+    """Create a new established business."""
+    established_business = EstablishedBusinessDomain(
+        **{
+            **business_in.model_dump(),
+            'user_id': current_user.id,
+            'stage': BusinessStageEnum.ESTABLISHED,
+        }
+    )
+    return await business_repo.create_established(established_business)
