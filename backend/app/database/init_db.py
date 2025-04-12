@@ -96,7 +96,7 @@ chats_data = [
         'title': 'chat2',
         'internal_id': 'internal_id2',
         'start_time': datetime.now(tz=tz.gettz('UTC')),
-        'user_id': 2,
+        'business_id': 2,
     },
 ]
 

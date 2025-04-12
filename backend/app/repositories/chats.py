@@ -27,7 +27,7 @@ class ChatRepository(BaseRepository):
             internal_id=chat_in.internal_id,
             title=chat_in.title,
             start_time=chat_in.start_time,
-            user_id=chat_in.user_id,
+            business_id=chat_in.business_id,
         )
         self._db.add(new_chat)
         await self.commit()
