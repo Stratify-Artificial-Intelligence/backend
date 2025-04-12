@@ -60,13 +60,17 @@ def test_chat_2() -> ChatDomain:
 
 
 @patch.object(ChatRepository, 'get_multi')
+@patch.object(UserRepository, 'get_by_username')
 async def test_list_chats(
+    mock_get_user,
     mock_get_multi,
+    test_user,
     test_chat,
     test_chat_2,
     superuser_token_headers,
     async_client: AsyncClient,
 ):
+    mock_get_user.return_value = test_user
     mock_get_multi.return_value = [test_chat, test_chat_2]
 
     expected_response = [

@@ -29,3 +29,9 @@ class User(Base):
         lazy='selectin',
         cascade='all, delete-orphan',
     )
+    businesses = relationship(
+        'Business',
+        back_populates='user',
+        lazy='selectin',
+        cascade='all, delete-orphan',
+    )
