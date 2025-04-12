@@ -31,6 +31,12 @@ class Business(Base):
     }
 
     # Relationships
+    chats = relationship(
+        'Chat',
+        back_populates='business',
+        lazy='selectin',
+        cascade='all, delete-orphan',
+    )
     user = relationship('User', back_populates='businesses', lazy='selectin')
 
 

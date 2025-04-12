@@ -14,10 +14,10 @@ class ChatRepository(BaseRepository):
             return None
         return ChatDomain.model_validate(chat)
 
-    async def get_multi(self, user_id: int | None = None) -> list[ChatDomain]:
+    async def get_multi(self, business_id: int | None = None) -> list[ChatDomain]:
         query = select(Chat)
-        if user_id is not None:
-            query = query.where(Chat.user_id == user_id)
+        if business_id is not None:
+            query = query.where(Chat.business_id == business_id)
         result = await self._db.execute(query)
         chats = result.scalars().all()
         return [ChatDomain.model_validate(chat) for chat in chats]

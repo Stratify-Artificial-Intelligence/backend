@@ -2,10 +2,14 @@
 
 from datetime import datetime
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Query
 
 from app import schemas
-from app.authorization_server import user_can_publish_message, user_can_read_chat
+from app.authorization_server import (
+    user_can_publish_message,
+    user_can_read_chat,
+    user_can_read_business,
+)
 from app.deps import (
     add_store_message_and_get_store_response,
     create_chat_in_service,
@@ -18,12 +22,12 @@ from app.domain import (
     User as UserDomain,
 )
 from app.enums import ChatMessageSenderEnum
-from app.repositories import ChatRepository
+from app.repositories import ChatRepository, BusinessRepository
 from app.schemas import Chat, ChatBase, ChatMessage, ChatMessageContent
 
 router = APIRouter(
     tags=['Chat'],
-    prefix='/chats',
+    prefix='/businesses/{business_id}/chats',
 )
 
 
@@ -36,11 +40,24 @@ router = APIRouter(
     },
 )
 async def list_chats(
+    business_id: int,
     chats_repo: ChatRepository = Depends(get_repository(ChatRepository)),
+    business_repo: BusinessRepository = Depends(get_repository(BusinessRepository)),
     current_user: UserDomain = Depends(get_current_active_user),
 ):
-    """List all chats accessible by the current user."""
-    return await chats_repo.get_multi(user_id=current_user.id)
+    """List all chats of a business."""
+    business = await business_repo.get(business_id=business_id)
+    if business is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail='Business not found',
+        )
+    if not user_can_read_business(business, current_user):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail='User does not have enough privileges.',
+        )
+    return await chats_repo.get_multi(business_id=business_id)
 
 
 @router.get(
