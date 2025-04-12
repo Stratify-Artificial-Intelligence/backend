@@ -1,7 +1,7 @@
 from fastapi import Depends, HTTPException, status
 
 from app.deps import get_current_active_user
-from app.domain import Business as BusinessDomain, Chat as ChatDomain, User as UserDomain
+from app.domain import Business as BusinessDomain, User as UserDomain
 
 
 class RoleChecker:

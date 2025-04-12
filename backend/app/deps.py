@@ -12,8 +12,12 @@ from app.domain import (
     User as UserDomain,
 )
 from app.enums import ChatMessageSenderEnum
-from app.repositories import BaseRepository, ChatRepository, UserRepository, \
-    BusinessRepository
+from app.repositories import (
+    BaseRepository,
+    BusinessRepository,
+    ChatRepository,
+    UserRepository,
+)
 from app.schemas import TokenData
 from app.security import check_auth_token
 from app.services.openai import add_message_to_chat_and_get_response, create_chat
@@ -68,7 +72,6 @@ async def get_business(
             detail='User does not have enough privileges.',
         )
     return business
-
 
 
 # ToDo (pduran): Should this function be here?
