@@ -6,12 +6,18 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database.postgresql import get_session
 from app.domain import (
+    Business as BusinessDomain,
     Chat as ChatDomain,
     ChatMessage as ChatMessageDomain,
     User as UserDomain,
 )
 from app.enums import ChatMessageSenderEnum
-from app.repositories import BaseRepository, ChatRepository, UserRepository
+from app.repositories import (
+    BaseRepository,
+    BusinessRepository,
+    ChatRepository,
+    UserRepository,
+)
 from app.schemas import TokenData
 from app.security import check_auth_token
 from app.services.openai import add_message_to_chat_and_get_response, create_chat
@@ -46,6 +52,26 @@ async def get_current_active_user(
             detail='Inactive user',
         )
     return current_user
+
+
+async def get_business(
+    business_id: int,
+    user: UserDomain,
+    business_repo: BusinessRepository,
+    permission_func: Callable[[BusinessDomain, UserDomain], bool],
+) -> BusinessDomain:
+    business = await business_repo.get(business_id=business_id)
+    if business is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail='Business not found',
+        )
+    if not permission_func(business, user):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail='User does not have enough privileges.',
+        )
+    return business
 
 
 # ToDo (pduran): Should this function be here?

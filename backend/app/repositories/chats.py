@@ -8,16 +8,16 @@ from sqlalchemy import select
 
 
 class ChatRepository(BaseRepository):
-    async def get(self, chat_id: int) -> ChatDomain | None:
+    async def get(self, business_id: int, chat_id: int) -> ChatDomain | None:
         chat = await self._get(chat_id=chat_id, include_messages=True)
-        if chat is None:
+        if chat is None or chat.business_id != business_id:
             return None
         return ChatDomain.model_validate(chat)
 
-    async def get_multi(self, user_id: int | None = None) -> list[ChatDomain]:
+    async def get_multi(self, business_id: int | None = None) -> list[ChatDomain]:
         query = select(Chat)
-        if user_id is not None:
-            query = query.where(Chat.user_id == user_id)
+        if business_id is not None:
+            query = query.where(Chat.business_id == business_id)
         result = await self._db.execute(query)
         chats = result.scalars().all()
         return [ChatDomain.model_validate(chat) for chat in chats]
@@ -27,7 +27,7 @@ class ChatRepository(BaseRepository):
             internal_id=chat_in.internal_id,
             title=chat_in.title,
             start_time=chat_in.start_time,
-            user_id=chat_in.user_id,
+            business_id=chat_in.business_id,
         )
         self._db.add(new_chat)
         await self.commit()

@@ -14,7 +14,7 @@ class Chat(Base):
     internal_id = Column(String, nullable=True, unique=True)
     title = Column(String, nullable=False)
     start_time = Column(DateTime(timezone=True), nullable=False)
-    user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
+    business_id = Column(Integer, ForeignKey('businesses.id'), nullable=False)
 
     # Relationships
     messages = relationship(
@@ -23,7 +23,7 @@ class Chat(Base):
         lazy='selectin',
         cascade='all, delete-orphan',
     )
-    user = relationship('User', back_populates='chats', lazy='selectin')
+    business = relationship('Business', back_populates='chats', lazy='selectin')
 
 
 class ChatMessage(Base):

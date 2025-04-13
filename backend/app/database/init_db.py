@@ -5,13 +5,19 @@ from dateutil import tz
 
 from app.database import async_session
 from app.domain import (
+    BusinessIdea as BusinessIdeaDomain,
     Chat as ChatDomain,
     ChatMessage as ChatMessageDomain,
+    EstablishedBusiness as EstablishedBusinessDomain,
     UserWithSecret as UserWithSecretDomain,
 )
-from app.enums import ChatMessageSenderEnum, UserRoleEnum
-from app.repositories import ChatRepository, UserRepository
-
+from app.enums import (
+    BusinessStageEnum,
+    ChatMessageSenderEnum,
+    CurrencyUnitEnum,
+    UserRoleEnum,
+)
+from app.repositories import BusinessRepository, ChatRepository, UserRepository
 
 users_data = [
     {
@@ -32,12 +38,47 @@ users_data = [
     },
 ]
 
+businesses_idea_data = [
+    {
+        'user_id': 1,
+        'stage': BusinessStageEnum.IDEA,
+        'name': 'Veyra',
+        'location': 'Spain',
+        'description': 'Veyra is super cool!',
+        'goal': 'Help entrepreneurs',
+        'team_size': 3,
+        'team_description': 'Super nice guys.',
+        'competitor_existence': True,
+        'competitor_differentiation': 'Well, we are the best.',
+        'investment': 0,
+        'investment_currency': CurrencyUnitEnum.EURO,
+    }
+]
+
+established_businesses_data = [
+    {
+        'user_id': 1,
+        'stage': BusinessStageEnum.ESTABLISHED,
+        'name': 'Veyra',
+        'location': 'Spain',
+        'description': 'Veyra is super cool!',
+        'goal': 'Help entrepreneurs',
+        'team_size': 3,
+        'team_description': 'Super nice guys.',
+        'billing': 1000,
+        'billing_currency': CurrencyUnitEnum.EURO,
+        'ebitda': 50,
+        'ebitda_currency': CurrencyUnitEnum.EURO,
+        'profit_margin': 5,
+    }
+]
+
 chats_data = [
     {
         'title': 'chat1',
         'internal_id': 'internal_id1',
         'start_time': datetime.now(tz=tz.gettz('UTC')),
-        'user_id': 1,
+        'business_id': 1,
         'messages': [
             {
                 'time': datetime.now(tz=tz.gettz('UTC')),
@@ -55,7 +96,7 @@ chats_data = [
         'title': 'chat2',
         'internal_id': 'internal_id2',
         'start_time': datetime.now(tz=tz.gettz('UTC')),
-        'user_id': 2,
+        'business_id': 2,
     },
 ]
 
@@ -67,6 +108,19 @@ async def main() -> None:
             user = UserWithSecretDomain.model_validate(user_data)
             await users_repo.create(user)
         print('Initial users data done')
+
+        businesses_repo = BusinessRepository(session)
+        for business_idea_data in businesses_idea_data:
+            business_idea = BusinessIdeaDomain.model_validate(business_idea_data)
+            await businesses_repo.create_idea(business_idea)
+        print('Businesses idea data done')
+
+        for established_business_data in established_businesses_data:
+            established_business = EstablishedBusinessDomain.model_validate(
+                established_business_data,
+            )
+            await businesses_repo.create_established(established_business)
+        print('Established businesses data done')
 
         chats_repo = ChatRepository(session)
         for chat_data in chats_data:
