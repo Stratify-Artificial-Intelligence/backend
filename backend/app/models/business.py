@@ -24,6 +24,7 @@ class Business(Base):
     team_size = Column(Integer, nullable=True)
     team_description = Column(String, nullable=True)
     user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
+    user_position = Column(String, nullable=True)
 
     __mapper_args__ = {
         'polymorphic_identity': 'business',
@@ -65,6 +66,7 @@ class EstablishedBusiness(Business):
     __tablename__ = 'established_businesses'
 
     id = Column(Integer, ForeignKey('businesses.id'), primary_key=True)
+    mission_and_vision = Column(String, nullable=True)
     billing = Column(Float, nullable=True)
     billing_currency: Column[Enum] = Column(
         Enum(

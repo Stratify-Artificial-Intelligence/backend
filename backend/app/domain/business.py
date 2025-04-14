@@ -1,9 +1,11 @@
+from abc import ABC
+
 from pydantic import BaseModel, ConfigDict
 
 from app.enums import BusinessStageEnum, CurrencyUnitEnum
 
 
-class Business(BaseModel):
+class Business(BaseModel, ABC):
     id: int | None = None
     name: str
     location: str
@@ -13,12 +15,12 @@ class Business(BaseModel):
     team_size: int | None = None
     team_description: str | None = None
     user_id: int
+    user_position: str | None = None
 
     model_config = ConfigDict(from_attributes=True)
 
 
 class BusinessIdea(Business):
-    id: int | None = None
     competitor_existence: bool | None = None
     competitor_differentiation: str | None = None
     investment: float | None = None
@@ -26,7 +28,7 @@ class BusinessIdea(Business):
 
 
 class EstablishedBusiness(Business):
-    id: int | None = None
+    mission_and_vision: str | None = None
     billing: float | None = None
     billing_currency: CurrencyUnitEnum | None = None
     ebitda: float | None = None
