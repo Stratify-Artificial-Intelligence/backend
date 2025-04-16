@@ -1,4 +1,5 @@
 from .business import (
+    Business,
     BusinessBase,
     BusinessIdea,
     BusinessIdeaBase,
