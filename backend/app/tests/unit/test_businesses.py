@@ -6,11 +6,27 @@ from fastapi import status
 from httpx import AsyncClient
 
 from app.domain import (
+    Business as BusinessDomain,
     BusinessIdea as BusinessIdeaDomain,
     EstablishedBusiness as EstablishedBusinessDomain,
 )
 from app.enums import BusinessStageEnum, CurrencyUnitEnum
 from app.repositories import BusinessRepository, UserRepository
+
+
+@pytest.fixture
+def test_business() -> BusinessDomain:
+    return BusinessDomain(
+        id=5,
+        user_id=1,
+        stage=BusinessStageEnum.IDEA,
+        name='Veyra',
+        location='Spain',
+        description='Veyra is super cool!',
+        goal='Help entrepreneurs',
+        team_size=3,
+        team_description='Super nice guys.',
+    )
 
 
 @pytest.fixture
@@ -58,6 +74,7 @@ async def test_list_businesses(
     mock_get_user,
     mock_get_multi,
     test_user,
+    test_business,
     test_business_idea,
     test_established_business,
     superuser_token_headers,
@@ -67,8 +84,28 @@ async def test_list_businesses(
     mock_get_multi.return_value = [test_business_idea, test_established_business]
 
     expected_response = [
-        test_business_idea.model_dump(),
-        test_established_business.model_dump(),
+        {
+            'id': test_business_idea.id,
+            'user_id': test_business_idea.user_id,
+            'stage': test_business_idea.stage,
+            'name': test_business_idea.name,
+            'location': test_business_idea.location,
+            'description': test_business_idea.description,
+            'goal': test_business_idea.goal,
+            'team_size': test_business_idea.team_size,
+            'team_description': test_business_idea.team_description,
+        },
+        {
+            'id': test_established_business.id,
+            'user_id': test_established_business.user_id,
+            'stage': test_established_business.stage,
+            'name': test_established_business.name,
+            'location': test_established_business.location,
+            'description': test_established_business.description,
+            'goal': test_established_business.goal,
+            'team_size': test_established_business.team_size,
+            'team_description': test_established_business.team_description,
+        },
     ]
     actual_response = await async_client.get(
         '/businesses',
