@@ -7,7 +7,7 @@ from fastapi import status
 from httpx import AsyncClient
 
 from app.domain import (
-    Business as BusinessDomain,
+    BusinessIdea as BusinessIdeaDomain,
     Chat as ChatDomain,
     ChatMessage as ChatMessageDomain,
 )
@@ -18,8 +18,8 @@ from app import deps
 
 
 @pytest.fixture
-def test_business() -> BusinessDomain:
-    return BusinessDomain(
+def test_business() -> BusinessIdeaDomain:
+    return BusinessIdeaDomain(
         id=1,
         user_id=1,
         stage=BusinessStageEnum.IDEA,

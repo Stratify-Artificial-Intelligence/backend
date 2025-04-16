@@ -12,6 +12,7 @@ BUSINESS_BASE_EXAMPLE: dict[str, Any] = {
     'goal': 'Help entrepreneurs',
     'team_size': 3,
     'team_description': 'Super nice guys.',
+    'user_position': 'CEO',
 }
 
 BUSINESS_EXAMPLE: dict[str, Any] = {
@@ -38,6 +39,7 @@ BUSINESS_IDEA_EXAMPLE: dict[str, Any] = {
 
 ESTABLISHED_BUSINESS_BASE_EXAMPLE: dict[str, Any] = {
     **BUSINESS_BASE_EXAMPLE,
+    'mission_and_vision': 'We are the best.',
     'billing': 1000,
     'billing_currency': CurrencyUnitEnum.EURO,
     'ebitda': 50,
@@ -60,6 +62,7 @@ class BusinessBase(BaseModel):
     goal: str | None = None
     team_size: int | None = None
     team_description: str | None = None
+    user_position: str | None = None
 
     model_config = ConfigDict(
         extra='forbid',
@@ -102,6 +105,7 @@ class BusinessIdea(BusinessIdeaBase):
 
 
 class EstablishedBusinessBase(BusinessBase):
+    mission_and_vision: str | None = None
     billing: float | None = None
     billing_currency: CurrencyUnitEnum | None = None
     ebitda: float | None = None
