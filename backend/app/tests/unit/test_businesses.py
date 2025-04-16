@@ -116,9 +116,9 @@ async def test_list_businesses(
     assert expected_response == actual_response.json()
 
 
-@patch.object(BusinessRepository, 'get')
+@patch.object(BusinessRepository, 'get_idea')
 @patch.object(UserRepository, 'get_by_username')
-async def test_get_business_by_id(
+async def test_get_business_idea_by_id(
     mock_get_user,
     mock_get,
     test_user,
@@ -131,7 +131,7 @@ async def test_get_business_by_id(
 
     expected_response = test_business_idea.model_dump()
     actual_response = await async_client.get(
-        'businesses/5',
+        'businesses/ideas/5',
         headers=superuser_token_headers,
     )
 
@@ -139,9 +139,9 @@ async def test_get_business_by_id(
     assert expected_response == actual_response.json()
 
 
-@patch.object(BusinessRepository, 'get')
+@patch.object(BusinessRepository, 'get_idea')
 @patch.object(UserRepository, 'get_by_username')
-async def test_get_business_by_id_not_found(
+async def test_get_business_idea_by_id_not_found(
     mock_get_user,
     mock_get,
     test_user,
@@ -151,9 +151,9 @@ async def test_get_business_by_id_not_found(
     mock_get_user.return_value = test_user
     mock_get.return_value = None
 
-    expected_response = {'detail': 'Business not found'}
+    expected_response = {'detail': 'Business idea not found'}
     actual_response = await async_client.get(
-        '/businesses/99',
+        '/businesses/ideas/99',
         headers=superuser_token_headers,
     )
 
@@ -208,6 +208,51 @@ async def test_create_business_idea_bad_request(
 
     assert status.HTTP_422_UNPROCESSABLE_ENTITY == actual_response.status_code
     assert expected_response == actual_response.json()['detail'][0]['msg']
+
+
+@patch.object(BusinessRepository, 'get_established')
+@patch.object(UserRepository, 'get_by_username')
+async def test_get_established_business_by_id(
+    mock_get_user,
+    mock_get,
+    test_user,
+    test_established_business,
+    superuser_token_headers,
+    async_client: AsyncClient,
+):
+    mock_get_user.return_value = test_user
+    mock_get.return_value = test_established_business
+
+    expected_response = test_established_business.model_dump()
+    actual_response = await async_client.get(
+        'businesses/established/5',
+        headers=superuser_token_headers,
+    )
+
+    assert status.HTTP_200_OK == actual_response.status_code
+    assert expected_response == actual_response.json()
+
+
+@patch.object(BusinessRepository, 'get_established')
+@patch.object(UserRepository, 'get_by_username')
+async def test_get_established_business_by_id_not_found(
+    mock_get_user,
+    mock_get,
+    test_user,
+    superuser_token_headers,
+    async_client: AsyncClient,
+):
+    mock_get_user.return_value = test_user
+    mock_get.return_value = None
+
+    expected_response = {'detail': 'Established business not found'}
+    actual_response = await async_client.get(
+        '/businesses/established/99',
+        headers=superuser_token_headers,
+    )
+
+    assert status.HTTP_404_NOT_FOUND == actual_response.status_code
+    assert expected_response == actual_response.json()
 
 
 @patch.object(BusinessRepository, 'create_established')
