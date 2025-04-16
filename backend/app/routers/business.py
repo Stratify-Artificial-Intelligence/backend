@@ -13,6 +13,7 @@ from app.domain import (
 from app.enums import BusinessStageEnum
 from app.repositories import BusinessRepository
 from app.schemas import (
+    Business,
     BusinessIdea,
     BusinessIdeaBase,
     EstablishedBusiness,
@@ -28,7 +29,7 @@ router = APIRouter(
 @router.get(
     '',
     summary='List businesses',
-    response_model=list[BusinessIdea | EstablishedBusiness],
+    response_model=list[Business],
     responses={
         status.HTTP_401_UNAUTHORIZED: {'model': schemas.HTTP401Unauthorized},
     },
@@ -42,9 +43,9 @@ async def list_businesses(
 
 
 @router.get(
-    '/{business_id}',
-    summary='Get business by ID',
-    response_model=BusinessIdea | EstablishedBusiness,
+    '/ideas/{business_id}',
+    summary='Get business idea by ID',
+    response_model=BusinessIdea,
     status_code=status.HTTP_200_OK,
     responses={
         status.HTTP_401_UNAUTHORIZED: {'model': schemas.HTTP401Unauthorized},
@@ -52,24 +53,24 @@ async def list_businesses(
         status.HTTP_404_NOT_FOUND: {'model': schemas.HTTP404NotFound},
     },
 )
-async def get_business_by_id(
+async def get_business_idea_by_id(
     business_id: int,
     business_repo: BusinessRepository = Depends(get_repository(BusinessRepository)),
     current_user: UserDomain = Depends(get_current_active_user),
 ):
     """Get a specific business by ID."""
-    business = await business_repo.get(business_id=business_id)
-    if business is None:
+    business_idea = await business_repo.get_idea(business_id=business_id)
+    if business_idea is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail='Business not found',
+            detail='Business idea not found',
         )
-    if not user_can_read_business(business, current_user):
+    if not user_can_read_business(business_idea, current_user):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail='User does not have enough privileges.',
         )
-    return business
+    return business_idea
 
 
 @router.post(
@@ -96,6 +97,37 @@ async def create_business_idea(
         }
     )
     return await business_repo.create_idea(business_idea)
+
+
+@router.get(
+    '/established/{business_id}',
+    summary='Get established business by ID',
+    response_model=EstablishedBusiness,
+    status_code=status.HTTP_200_OK,
+    responses={
+        status.HTTP_401_UNAUTHORIZED: {'model': schemas.HTTP401Unauthorized},
+        status.HTTP_403_FORBIDDEN: {'model': schemas.HTTP403Forbidden},
+        status.HTTP_404_NOT_FOUND: {'model': schemas.HTTP404NotFound},
+    },
+)
+async def get_established_business_by_id(
+    business_id: int,
+    business_repo: BusinessRepository = Depends(get_repository(BusinessRepository)),
+    current_user: UserDomain = Depends(get_current_active_user),
+):
+    """Get a specific business by ID."""
+    established_business = await business_repo.get_established(business_id=business_id)
+    if established_business is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail='Established business not found',
+        )
+    if not user_can_read_business(established_business, current_user):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail='User does not have enough privileges.',
+        )
+    return established_business
 
 
 @router.post(

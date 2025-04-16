@@ -1,3 +1,5 @@
+from sqlalchemy.orm import with_polymorphic
+
 from app.models import Business, BusinessIdea, EstablishedBusiness
 from app.domain import (
     Business as BusinessDomain,
@@ -23,6 +25,21 @@ class BusinessRepository(BaseRepository):
         result = await self._db.execute(query)
         businesses = result.scalars().all()
         return [BusinessDomain.model_validate(business) for business in businesses]
+
+    async def get_idea(self, business_id: int) -> BusinessIdeaDomain | None:
+        business = await self._get(business_id=business_id, load_hierarchy=True)
+        if business is None or not isinstance(business, BusinessIdea):
+            return None
+        return BusinessIdeaDomain.model_validate(business)
+
+    async def get_established(
+        self,
+        business_id: int,
+    ) -> EstablishedBusinessDomain | None:
+        business = await self._get(business_id=business_id, load_hierarchy=True)
+        if business is None or not isinstance(business, EstablishedBusiness):
+            return None
+        return EstablishedBusinessDomain.model_validate(business)
 
     async def create_idea(self, business_in: BusinessIdeaDomain) -> BusinessIdeaDomain:
         new_business_idea = BusinessIdea(
@@ -68,7 +85,14 @@ class BusinessRepository(BaseRepository):
         await self._db.refresh(new_established_business)
         return EstablishedBusinessDomain.model_validate(new_established_business)
 
-    async def _get(self, business_id: int) -> Business | None:
-        query = select(Business).where(Business.id == business_id)
+    async def _get(
+        self,
+        business_id: int,
+        load_hierarchy: bool = False,
+    ) -> Business | BusinessIdea | EstablishedBusiness | None:
+        business_to_select = (
+            with_polymorphic(Business, '*') if load_hierarchy else Business
+        )
+        query = select(business_to_select).where(Business.id == business_id)
         result = await self._db.execute(query)
         return result.scalars().one_or_none()
