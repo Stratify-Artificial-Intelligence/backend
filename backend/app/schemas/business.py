@@ -12,7 +12,7 @@ BUSINESS_BASE_EXAMPLE: dict[str, Any] = {
     'goal': 'Help entrepreneurs',
     'team_size': 3,
     'team_description': 'Super nice guys.',
-    'user_position': 'CEO',
+    'user_position': 'CTO and backend developer',
 }
 
 BUSINESS_EXAMPLE: dict[str, Any] = {
@@ -39,7 +39,7 @@ BUSINESS_IDEA_EXAMPLE: dict[str, Any] = {
 
 ESTABLISHED_BUSINESS_BASE_EXAMPLE: dict[str, Any] = {
     **BUSINESS_BASE_EXAMPLE,
-    'mission_and_vision': 'We are the best.',
+    'mission_and_vision': 'We try to be the best in class.',
     'billing': 1000,
     'billing_currency': CurrencyUnitEnum.EURO,
     'ebitda': 50,
