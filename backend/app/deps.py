@@ -20,7 +20,11 @@ from app.repositories import (
 )
 from app.schemas import TokenData
 from app.security import check_auth_token
-from app.services.openai import add_message_to_chat_and_get_response, create_chat
+from app.services.openai import (
+    add_message_to_chat,
+    add_message_to_chat_and_get_response,
+    create_chat,
+)
 
 
 def get_repository(repo_type: Type[BaseRepository]) -> Callable:
@@ -101,6 +105,17 @@ async def add_store_message_and_get_store_response(
         content=response_content,
     )
     return await chats_repo.add_message(response_message)
+
+
+async def add_message_to_external_chat(
+    chat: ChatDomain,
+    message_content: str,
+) -> None:
+    """Add a message to an external chat."""
+    add_message_to_chat(
+        chat_internal_id=chat.internal_id,
+        content=message_content,
+    )
 
 
 async def create_chat_in_service() -> str:

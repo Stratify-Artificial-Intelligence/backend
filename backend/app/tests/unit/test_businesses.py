@@ -6,7 +6,6 @@ from fastapi import status
 from httpx import AsyncClient
 
 from app.domain import (
-    Business as BusinessDomain,
     BusinessIdea as BusinessIdeaDomain,
     EstablishedBusiness as EstablishedBusinessDomain,
 )

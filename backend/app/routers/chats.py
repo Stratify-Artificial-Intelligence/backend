@@ -11,6 +11,7 @@ from app.authorization_server import (
     user_can_read_chat,
 )
 from app.deps import (
+    add_message_to_external_chat,
     add_store_message_and_get_store_response,
     create_chat_in_service,
     get_business,
@@ -105,7 +106,7 @@ async def create_chat(
     chats_repo: ChatRepository = Depends(get_repository(ChatRepository)),
     current_user: UserDomain = Depends(get_current_active_user),
 ):
-    await get_business(
+    business = await get_business(
         business_id=business_id,
         user=current_user,
         business_repo=business_repo,
@@ -117,6 +118,11 @@ async def create_chat(
         title='Chat title',
         start_time=datetime.now(),
         business_id=business_id,
+    )
+    # Initialize chat with context
+    await add_message_to_external_chat(
+        chat=chat,
+        message_content=business.get_information(),
     )
     return await chats_repo.create(chat)
 
