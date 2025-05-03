@@ -10,6 +10,7 @@ class Business(BaseModel):
     of it. This is useful for endpoints were only the parent information is returned, to
     avoid having unnecessary joins in the database query.
     """
+
     id: int | None = None
     name: str
     location: str
