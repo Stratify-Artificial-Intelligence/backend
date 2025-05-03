@@ -1,11 +1,15 @@
-from abc import ABC, abstractmethod
-
 from pydantic import BaseModel, ConfigDict
 
 from app.enums import BusinessStageEnum, CurrencyUnitEnum
 
 
-class Business(BaseModel, ABC):
+class Business(BaseModel):
+    """Business domain model.
+
+    Although this class may be abstract, it is not marked as such to allow instantiations
+    of it. This is useful for endpoints were only the parent information is returned, to
+    avoid having unnecessary joins in the database query.
+    """
     id: int | None = None
     name: str
     location: str
@@ -57,13 +61,11 @@ class Business(BaseModel, ABC):
         return description
 
     @staticmethod
-    @abstractmethod
     def _get_team_str(team_size: int, team_description: str | None) -> str:
-        pass
+        raise NotImplementedError
 
-    @abstractmethod
     def _get_additional_info_str(self) -> str:
-        pass
+        raise NotImplementedError
 
     @staticmethod
     def _get_goal_str(goal: str) -> str:
