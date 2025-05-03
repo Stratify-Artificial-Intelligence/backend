@@ -6,6 +6,7 @@ from .business import (
     EstablishedBusiness,
     EstablishedBusinessBase,
 )
+from .business_research import BusinessResearch, BusinessResearchParams
 from .chat import Chat, ChatBase, ChatMessage, ChatMessageContent
 from .errors import (
     HTTP400BadRequest,
