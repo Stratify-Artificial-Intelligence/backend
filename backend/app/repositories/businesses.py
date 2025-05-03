@@ -92,7 +92,7 @@ class BusinessRepository(BaseRepository):
         self,
         business_id: int,
         load_hierarchy: bool = False,
-    ) -> Business | BusinessIdea | EstablishedBusiness | None:
+    ) -> BusinessIdea | EstablishedBusiness | None:
         business_to_select = (
             with_polymorphic(Business, '*') if load_hierarchy else Business
         )

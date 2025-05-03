@@ -16,7 +16,7 @@ async def add_message_to_chat_and_get_response(
     content: str,
 ) -> str:
     """Add a message to a chat and return the response of the AI model."""
-    message_creation_run_id = _add_message(
+    message_creation_run_id = add_message_to_chat(
         chat_internal_id=chat_internal_id,
         content=content,
     )
@@ -34,7 +34,7 @@ async def create_chat() -> str:
     return thread.id
 
 
-def _add_message(chat_internal_id: str, content: str) -> str:
+def add_message_to_chat(chat_internal_id: str, content: str) -> str:
     """Add a message to a thread and return run id."""
     openai.beta.threads.messages.create(
         thread_id=chat_internal_id,

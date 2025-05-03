@@ -6,27 +6,11 @@ from fastapi import status
 from httpx import AsyncClient
 
 from app.domain import (
-    Business as BusinessDomain,
     BusinessIdea as BusinessIdeaDomain,
     EstablishedBusiness as EstablishedBusinessDomain,
 )
 from app.enums import BusinessStageEnum, CurrencyUnitEnum
 from app.repositories import BusinessRepository, UserRepository
-
-
-@pytest.fixture
-def test_business() -> BusinessDomain:
-    return BusinessDomain(
-        id=5,
-        user_id=1,
-        stage=BusinessStageEnum.IDEA,
-        name='Veyra',
-        location='Spain',
-        description='Veyra is super cool!',
-        goal='Help entrepreneurs',
-        team_size=3,
-        team_description='Super nice guys.',
-    )
 
 
 @pytest.fixture
@@ -77,7 +61,6 @@ async def test_list_businesses(
     mock_get_user,
     mock_get_multi,
     test_user,
-    test_business,
     test_business_idea,
     test_established_business,
     superuser_token_headers,
@@ -97,6 +80,7 @@ async def test_list_businesses(
             'goal': test_business_idea.goal,
             'team_size': test_business_idea.team_size,
             'team_description': test_business_idea.team_description,
+            'user_position': test_business_idea.user_position,
         },
         {
             'id': test_established_business.id,
@@ -108,6 +92,7 @@ async def test_list_businesses(
             'goal': test_established_business.goal,
             'team_size': test_established_business.team_size,
             'team_description': test_established_business.team_description,
+            'user_position': test_established_business.user_position,
         },
     ]
     actual_response = await async_client.get(
