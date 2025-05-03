@@ -44,5 +44,4 @@ async def create_business_research(
             status_code=status.HTTP_403_FORBIDDEN,
             detail='User does not have enough privileges.',
         )
-    research = deep_research_for_business(business=business, params=research_params)
-    return BusinessResearch(research=research)
+    return deep_research_for_business(business=business, params=research_params)

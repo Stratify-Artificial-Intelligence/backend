@@ -20,7 +20,7 @@ from app.repositories import (
     ChatRepository,
     UserRepository,
 )
-from app.schemas import BusinessResearchParams, TokenData
+from app.schemas import BusinessResearch, BusinessResearchParams, TokenData
 from app.security import check_auth_token
 from app.services.openai import (
     add_message_to_chat,
@@ -130,7 +130,7 @@ async def create_chat_in_service() -> str:
 def deep_research_for_business(
     business: BusinessIdeaDomain | EstablishedBusinessDomain,
     params: BusinessResearchParams,
-) -> str:
+) -> BusinessResearch:
     """Perform deep research for a business."""
     research_context = business.get_information()
     research_instructions = _get_deep_search_instructions()

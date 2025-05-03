@@ -6,4 +6,11 @@ class BusinessResearchParams(BaseModel):
 
 
 class BusinessResearch(BaseModel):
+    id: str
+    prompt_tokens: int
+    completion_tokens: int
+    total_tokens: int
+    citation_tokens: int
+    num_search_queries: int
+    reasoning_tokens: int
     research: str
