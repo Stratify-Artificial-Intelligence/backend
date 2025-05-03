@@ -8,6 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.routers import (
     admin_router,
     business_router,
+    business_research_router,
     chats_router,
     tests_router,
     users_router,
@@ -29,6 +30,7 @@ app.add_middleware(
 
 app.include_router(admin_router)
 app.include_router(business_router)
+app.include_router(business_research_router)
 app.include_router(chats_router)
 app.include_router(tests_router)
 app.include_router(users_router)

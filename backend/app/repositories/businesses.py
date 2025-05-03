@@ -18,6 +18,17 @@ class BusinessRepository(BaseRepository):
             return None
         return BusinessDomain.model_validate(business)
 
+    # ToDo (pduran): Improve this method.
+    async def get_child(
+        self,
+        business_id: int,
+    ) -> BusinessIdeaDomain | EstablishedBusinessDomain | None:
+        business_idea = await self.get_idea(business_id=business_id)
+        if business_idea is not None:
+            return business_idea
+        established_business = await self.get_established(business_id=business_id)
+        return established_business
+
     async def get_multi(self, user_id: int | None = None) -> list[BusinessDomain]:
         query = select(Business)
         if user_id is not None:

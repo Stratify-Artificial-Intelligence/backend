@@ -44,3 +44,12 @@ class OpenAISettings(BaseSettings):
     ASSISTANT_ID: str = ''
 
     model_config = SettingsConfigDict(env_file='.env', env_prefix='OPEN_AI_')
+
+
+class PerplexitySettings(BaseSettings):
+    """Load Perplexity settings from environment or .env."""
+
+    API_URL: str = ''
+    API_KEY: str = ''
+
+    model_config = SettingsConfigDict(env_file='.env', env_prefix='PERPLEXITY_')
