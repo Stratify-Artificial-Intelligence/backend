@@ -111,6 +111,7 @@ async def create_chat(
         user=current_user,
         business_repo=business_repo,
         permission_func=user_can_create_chat,
+        load_hierarchy=True,
     )
     chat_internal_id = await create_chat_in_service()
     chat = ChatDomain(

@@ -66,8 +66,14 @@ async def get_business(
     user: UserDomain,
     business_repo: BusinessRepository,
     permission_func: Callable[[BusinessDomain, UserDomain], bool],
-) -> BusinessDomain:
-    business = await business_repo.get(business_id=business_id)
+    load_hierarchy: bool = False,
+) -> BusinessDomain | BusinessIdeaDomain | EstablishedBusinessDomain:
+    business = (
+        await business_repo.get_child(business_id=business_id)
+        if load_hierarchy
+        else await business_repo.get(business_id=business_id)
+    )
+
     if business is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
