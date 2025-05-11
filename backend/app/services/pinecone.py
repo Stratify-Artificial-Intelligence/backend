@@ -19,8 +19,8 @@ if rag_settings.INDEX_NAME not in pc.list_indexes().names():
         metric=rag_settings.INDEX_METRIC,
         spec=ServerlessSpec(
             cloud=pinecone_settings.CLOUD,
-            region='us-east-1', # pinecone_settings.REGION,
-        )
+            region=pinecone_settings.REGION,
+        ),
     )
 index = pc.Index(rag_settings.INDEX_NAME)
 
@@ -30,4 +30,3 @@ def upload_vectors(
     vectors: list[tuple[str, list[float], dict[str, str]]],
 ) -> None:
     index.upsert(vectors=vectors, namespace=namespace)
-

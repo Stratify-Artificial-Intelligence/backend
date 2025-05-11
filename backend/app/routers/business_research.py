@@ -53,7 +53,10 @@ async def create_business_research(
             status_code=status.HTTP_403_FORBIDDEN,
             detail='User does not have enough privileges.',
         )
-    # business_research = deep_research_for_business(business=business, params=research_params)
+    # business_research = deep_research_for_business(
+    #     business=business,
+    #     params=research_params,
+    # )
 
     if research_params.store_result:
         # research = business_research.research
@@ -72,8 +75,6 @@ async def create_business_research(
             vector = embed_text(text=chunk)
             metadata = {'text': chunk}
             vectors_to_upsert.append((vector_id, vector, metadata))
-            print(type(vector))
-            print(vector)
         upload_vectors_for_business(business_id=business_id, vectors=vectors_to_upsert)
 
     return business_research

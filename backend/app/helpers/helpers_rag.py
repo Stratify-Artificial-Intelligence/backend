@@ -1,5 +1,3 @@
-from typing import Any
-
 from app.domain import (
     BusinessIdea as BusinessIdeaDomain,
     EstablishedBusiness as EstablishedBusinessDomain,
@@ -40,7 +38,7 @@ def chunk_text(text: str, max_tokens: int, overlap: int) -> list[str]:
     else:
         step = max_tokens - overlap
         for i in range(0, len(tokens), step):
-            segment = tokens[i: i + max_tokens]
+            segment = tokens[i : i + max_tokens]
             if not segment:
                 break
             chunked_text = tokenizer.decode(segment)
