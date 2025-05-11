@@ -11,13 +11,10 @@ from app.services.pinecone import upload_vectors
 
 from tiktoken import encoding_for_model
 
-from app.settings import OpenAIEmbeddingSettings
+from app.settings import OpenAIEmbeddingSettings, RAGSettings
 
 open_ai_embedding_settings = OpenAIEmbeddingSettings()
-
-
-
-tokenizer = encoding_for_model(model_name=open_ai_embedding_settings.MODEL_NAME)
+rag_settings = RAGSettings()
 
 
 def deep_research_for_business(
@@ -35,6 +32,7 @@ def deep_research_for_business(
 
 def chunk_text(text: str, max_tokens: int, overlap: int) -> list[str]:
     """Chunk text into smaller fragments of max_tokens size with overlap."""
+    tokenizer = encoding_for_model(model_name=open_ai_embedding_settings.MODEL_NAME)
     tokens = tokenizer.encode(text)
     chunks = []
     if len(tokens) <= max_tokens:
@@ -62,7 +60,10 @@ def upload_vectors_for_business(
     vectors: list[tuple[str, list[float], dict[str, str]]],
 ) -> None:
     """Upload vectors to Pinecone."""
-    upload_vectors()
+    upload_vectors(
+        namespace=rag_settings.NAMESPACE_ID.format(business_id=business_id),
+        vectors=vectors,
+    )
 
 
 def _get_deep_search_instructions() -> str:

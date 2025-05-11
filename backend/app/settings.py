@@ -52,7 +52,7 @@ class OpenAIEmbeddingSettings(BaseSettings):
     API_KEY: str = ''
     MODEL_NAME: str = ''
 
-    model_config = SettingsConfigDict(env_file='.env', env_prefix='OPEN_AI_EMBEDDING')
+    model_config = SettingsConfigDict(env_file='.env', env_prefix='OPEN_AI_EMBEDDING_')
 
 
 class PerplexitySettings(BaseSettings):
@@ -68,7 +68,8 @@ class PineconeSettings(BaseSettings):
     """Load Pinecone settings from environment or .env."""
 
     API_KEY: str = ''
-    ENVIRONMENT: str = ''
+    REGION: str = ''
+    CLOUD: str = ''
 
     model_config = SettingsConfigDict(env_file='.env', env_prefix='PINECONE_')
 
@@ -79,6 +80,7 @@ class RAGSettings(BaseSettings):
     MAX_TOKENS: int = 600
     OVERLAP: int = 170
     VECTOR_ID: str = 'doc{doc_index}_chunk{chunk_index}'
+    NAMESPACE_ID: str = 'business_{business_id}'
     INDEX_NAME: str = 'veyra-index'
     INDEX_DIMENSION: int = 1536
     INDEX_METRIC: str = 'cosine'

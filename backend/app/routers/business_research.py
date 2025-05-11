@@ -6,7 +6,12 @@ from app import schemas
 from app.authorization_server import user_can_read_business
 from app.deps import get_current_active_user, get_repository
 from app.domain import User as UserDomain
-from app.helpers import chunk_text, deep_research_for_business, embed_text
+from app.helpers import (
+    chunk_text,
+    deep_research_for_business,
+    embed_text,
+    upload_vectors_for_business,
+)
 from app.repositories import BusinessRepository
 from app.schemas import BusinessResearch, BusinessResearchParams
 from app.settings import RAGSettings
@@ -53,7 +58,6 @@ async def create_business_research(
     if research_params.store_result:
         # research = business_research.research
         research = 'Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata'
-        # ToDo (pduran): Extract this to settings
         chunks = chunk_text(
             text=research,
             max_tokens=rag_settings.MAX_TOKENS,
@@ -70,6 +74,6 @@ async def create_business_research(
             vectors_to_upsert.append((vector_id, vector, metadata))
             print(type(vector))
             print(vector)
-        upload_vectors(business_id=business_id, vectors=vectors_to_upsert)
+        upload_vectors_for_business(business_id=business_id, vectors=vectors_to_upsert)
 
     return business_research
