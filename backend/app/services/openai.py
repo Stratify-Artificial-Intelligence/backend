@@ -55,7 +55,7 @@ def _wait_message_response(chat_internal_id: str, run_id: str) -> str:
             thread_id=chat_internal_id,
             run_id=run_id,
         )
-        # ToDo (pduran): Can be somehow use RunStatus literal instead of a string?
+        # ToDo (pduran): Can we somehow use RunStatus literal instead of a string?
         #  See: openai/types/beta/threads/run_status.py
         if run.status in ['completed', 'failed']:
             return run.status

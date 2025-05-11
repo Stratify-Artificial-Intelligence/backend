@@ -3,6 +3,7 @@ from pydantic import BaseModel
 
 class BusinessResearchParams(BaseModel):
     max_tokens: int
+    store_result: bool = True
 
 
 class BusinessResearch(BaseModel):
