@@ -53,14 +53,13 @@ async def create_business_research(
             status_code=status.HTTP_403_FORBIDDEN,
             detail='User does not have enough privileges.',
         )
-    # business_research = deep_research_for_business(
-    #     business=business,
-    #     params=research_params,
-    # )
+    business_research = deep_research_for_business(
+        business=business,
+        params=research_params,
+    )
 
     if research_params.store_result:
-        # research = business_research.research
-        research = 'Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata'
+        research = business_research.research
         chunks = chunk_text(
             text=research,
             max_tokens=rag_settings.MAX_TOKENS,
