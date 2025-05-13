@@ -5,7 +5,7 @@ from app.domain import (
 from app.schemas import BusinessResearch, BusinessResearchParams
 from app.services.openai_embedding import get_embedding
 from app.services.perplexity import deep_research
-from app.services.pinecone import upload_vectors
+from app.services.pinecone import search_vectors, upload_vectors
 
 from tiktoken import encoding_for_model
 
@@ -61,6 +61,19 @@ def upload_vectors_for_business(
     upload_vectors(
         namespace=rag_settings.NAMESPACE_ID.format(business_id=business_id),
         vectors=vectors,
+    )
+
+
+def search_vectors_for_business(
+    business_id: int,
+    query: str,
+) -> list[str]:
+    """Search vectors in Pinecone."""
+    query_vector = embed_text(query)
+    return search_vectors(
+        namespace=rag_settings.NAMESPACE_ID.format(business_id=business_id),
+        query_vector=query_vector,
+        top_k=rag_settings.TOP_K,
     )
 
 

@@ -14,15 +14,22 @@ openai.api_key = settings.API_KEY
 async def add_message_to_chat_and_get_response(
     chat_internal_id: str,
     content: str,
+    context_vectors: list[str],
 ) -> str:
     """Add a message to a chat and return the response of the AI model."""
     message_creation_run_id = add_message_to_chat(
         chat_internal_id=chat_internal_id,
         content=content,
     )
-    _wait_message_response(
+    _add_context_to_message(
         chat_internal_id=chat_internal_id,
         run_id=message_creation_run_id,
+        context_vectors=context_vectors,
+    )
+    _wait_message_for_status(
+        chat_internal_id=chat_internal_id,
+        run_id=message_creation_run_id,
+        status_list=['completed', 'failed'],
     )
     message_response = _get_last_message_in_thread(chat_internal_id=chat_internal_id)
     return message_response
@@ -48,7 +55,42 @@ def add_message_to_chat(chat_internal_id: str, content: str) -> str:
     return run.id
 
 
-def _wait_message_response(chat_internal_id: str, run_id: str) -> str:
+def _add_context_to_message(
+    chat_internal_id: str,
+    run_id: str,
+    context_vectors: list[str],
+) -> None:
+    """Add context to the message."""
+    status = _wait_message_for_status(
+        chat_internal_id=chat_internal_id,
+        run_id=run_id,
+        status_list=['completed', 'failed', 'requires_action'],
+    )
+    if status == 'requires_action':
+        run = openai.beta.threads.runs.retrieve(
+            thread_id=chat_internal_id,
+            run_id=run_id,
+        )
+        call = run.required_action.submit_tool_outputs.tool_calls[0]
+        if call.function.name != 'search_documents':
+            raise NotImplementedError(
+                'Only search_documents function is implemented yet.'
+            )
+        openai.beta.threads.runs.submit_tool_outputs(
+            thread_id=chat_internal_id,
+            run_id=run_id,
+            tool_outputs=[{
+                'tool_call_id': call.id,
+                'output': context_vectors,
+            }],
+        )
+
+
+def _wait_message_for_status(
+    chat_internal_id: str,
+    run_id: str,
+    status_list: list[str],
+) -> str:
     """Loop until message has been responded, and return run status."""
     while True:
         run = openai.beta.threads.runs.retrieve(
@@ -57,7 +99,7 @@ def _wait_message_response(chat_internal_id: str, run_id: str) -> str:
         )
         # ToDo (pduran): Can we somehow use RunStatus literal instead of a string?
         #  See: openai/types/beta/threads/run_status.py
-        if run.status in ['completed', 'failed']:
+        if run.status in status_list:
             return run.status
         time.sleep(1)
 
