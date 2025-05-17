@@ -24,6 +24,10 @@ def user_can_read_business(business: BusinessDomain, user: UserDomain) -> bool:
     return business.user_id == user.id
 
 
+def user_can_update_business(business: BusinessDomain, user: UserDomain) -> bool:
+    return business.user_id == user.id
+
+
 def user_can_read_chat(business: BusinessDomain, user: UserDomain) -> bool:
     return business.user_id == user.id
 

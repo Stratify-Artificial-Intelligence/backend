@@ -3,8 +3,10 @@ from .business import (
     BusinessBase,
     BusinessIdea,
     BusinessIdeaBase,
+    BusinessIdeaPartialUpdate,
     EstablishedBusiness,
     EstablishedBusinessBase,
+    EstablishedBusinessPartialUpdate,
 )
 from .business_research import BusinessResearch, BusinessResearchParams
 from .chat import Chat, ChatBase, ChatMessage, ChatMessageContent
