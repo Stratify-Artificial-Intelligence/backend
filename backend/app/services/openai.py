@@ -21,6 +21,7 @@ async def add_message_to_chat_and_get_response(
     message_creation_run_id = add_message_to_chat(
         chat_internal_id=chat_internal_id,
         content=content,
+        add_instructions_prompt=True,
     )
     _add_context_to_message(
         chat_internal_id=chat_internal_id,
@@ -42,8 +43,21 @@ async def create_chat() -> str:
     return thread.id
 
 
-def add_message_to_chat(chat_internal_id: str, content: str) -> str:
+def add_message_to_chat(
+    chat_internal_id: str,
+    content: str,
+    add_instructions_prompt: bool = False,
+) -> str:
     """Add a message to a thread and return run id."""
+    if add_instructions_prompt:
+        content += (
+            '\n\n'
+            'Responde principalmente en formato párrafo. Si en mi solicitud hay una '
+            'acción que no es correcta para mi situación concreta, ya sea mencionada '
+            'directa o indirectamente, dime en tu respuesta que no es correcta, '
+            'explicame porqué y dame alternativas. Debes llamar a la función buscar '
+            'documentos.'
+        )
     openai.beta.threads.messages.create(
         thread_id=chat_internal_id,
         role=ChatMessageSenderEnum.USER.value,
