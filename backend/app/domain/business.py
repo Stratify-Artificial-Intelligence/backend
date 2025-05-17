@@ -80,6 +80,10 @@ class BusinessIdea(Business):
     investment_currency: CurrencyUnitEnum | None = None
 
     @staticmethod
+    def _get_introduction_str(user_position: str, name: str, location: str) -> str:
+        return f'Soy el/la fundador de {name}, una empresa ubicada en {location}.'
+
+    @staticmethod
     def _get_description_str(description: str) -> str:
         return (
             f'La empresa todavía no ha salido al mercado. La empresa trata de lo '
