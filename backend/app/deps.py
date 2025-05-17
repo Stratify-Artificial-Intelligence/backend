@@ -14,6 +14,7 @@ from app.domain import (
     User as UserDomain,
 )
 from app.enums import ChatMessageSenderEnum
+from app.helpers.helpers_rag import search_vectors_for_business
 from app.repositories import (
     BaseRepository,
     BusinessRepository,
@@ -93,10 +94,15 @@ async def add_store_message_and_get_store_response(
     chats_repo: ChatRepository,
 ) -> ChatMessageDomain | None:
     """Register message and get the AI response."""
-    await chats_repo.add_message(message),
+    await chats_repo.add_message(message)
+    context_vectors = search_vectors_for_business(
+        business_id=chat.business_id,
+        query=message.content,
+    )
     response_content = await add_message_to_chat_and_get_response(
         chat_internal_id=chat.internal_id,
         content=message.content,
+        context_vectors=context_vectors,
     )
     # ToDo (pduran): Parallelize these two operations
     # _, response_content = await asyncio.gather(
