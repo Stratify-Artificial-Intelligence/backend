@@ -84,5 +84,6 @@ class RAGSettings(BaseSettings):
     INDEX_NAME: str = 'veyra-index'
     INDEX_DIMENSION: int = 1536
     INDEX_METRIC: str = 'cosine'
+    TOP_K: int = 8
 
     model_config = SettingsConfigDict(env_file='.env', env_prefix='RAG_')

@@ -30,3 +30,17 @@ def upload_vectors(
     vectors: list[tuple[str, list[float], dict[str, str]]],
 ) -> None:
     index.upsert(vectors=vectors, namespace=namespace)
+
+
+def search_vectors(
+    namespace: str,
+    query_vector: list[float],
+    top_k: int,
+) -> list[str]:
+    result = index.query(
+        namespace=namespace,
+        vector=query_vector,
+        top_k=top_k,
+        include_metadata=True,
+    )
+    return [match['metadata']['text'] for match in result.get('matches', [])]
