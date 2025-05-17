@@ -47,9 +47,10 @@ class Business(BaseModel):
         )
         additional_info_str = self._get_additional_info_str()
         goal_str = '' if self.goal is None else self._get_goal_str(self.goal)
+        extra_info_str = '' if self.extra_info is None else self.extra_info
         return (
             f'{introduction_str} {description_str} {additional_info_str} {team_str} '
-            f'{goal_str}'
+            f'{goal_str} {extra_info_str}'
         )
 
     @staticmethod
