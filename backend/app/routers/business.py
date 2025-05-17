@@ -99,6 +99,20 @@ async def create_business_idea(
     return await business_repo.create_idea(business_idea)
 
 
+@router.patch(
+    '/ideas/{business_id}',
+    summary='Update business idea',
+    response_model=BusinessIdea,
+    status_code=status.HTTP_200_OK,
+    responses={
+        status.HTTP_400_BAD_REQUEST: {'model': schemas.HTTP400BadRequest},
+        status.HTTP_401_UNAUTHORIZED: {'model': schemas.HTTP401Unauthorized},
+        status.HTTP_404_NOT_FOUND: {'model': schemas.HTTP404NotFound},
+    },
+)
+async def partial_update_business_idea(
+
+
 @router.get(
     '/established/{business_id}',
     summary='Get established business by ID',

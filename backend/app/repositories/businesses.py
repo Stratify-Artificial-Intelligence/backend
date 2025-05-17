@@ -99,6 +99,38 @@ class BusinessRepository(BaseRepository):
         await self._db.refresh(new_established_business)
         return EstablishedBusinessDomain.model_validate(new_established_business)
 
+    async def update_idea(
+        self,
+        business_id: int,
+        business_update: BusinessIdeaDomain,
+    ) -> BusinessIdeaDomain | None:
+        business = await self._get(business_id=business_id)
+        if business is None or not isinstance(business, BusinessIdea):
+            return None
+        self.update_model(
+            model=business,
+            update=business_update.model_dump(exclude_unset=True),
+        )
+        await self.commit()
+        await self._db.refresh(business)
+        return BusinessIdeaDomain.model_validate(business)
+
+    async def update_established(
+        self,
+        business_id: int,
+        business_update: EstablishedBusinessDomain,
+    ) -> EstablishedBusinessDomain | None:
+        business = await self._get(business_id=business_id)
+        if business is None or not isinstance(business, EstablishedBusiness):
+            return None
+        self.update_model(
+            model=business,
+            update=business_update.model_dump(exclude_unset=True),
+        )
+        await self.commit()
+        await self._db.refresh(business)
+        return EstablishedBusinessDomain.model_validate(business)
+
     async def _get(
         self,
         business_id: int,
