@@ -56,9 +56,9 @@ ESTABLISHED_BUSINESS_EXAMPLE: dict[str, Any] = {
 }
 
 
-class BusinessBase(BaseModel):
-    name: str
-    location: str
+class BusinessBaseOptional(BaseModel):
+    name: str | None = None
+    location: str | None = None
     description: str | None = None
     goal: str | None = None
     team_size: int | None = None
@@ -72,6 +72,11 @@ class BusinessBase(BaseModel):
     )
 
 
+class BusinessBase(BusinessBaseOptional):
+    name: str
+    location: str
+
+
 class Business(BusinessBase):
     id: int
     user_id: int
@@ -83,7 +88,7 @@ class Business(BusinessBase):
     )
 
 
-class BusinessIdeaBase(BusinessBase):
+class BusinessIdeaConcrete(BaseModel):
     competitor_existence: bool | None = None
     competitor_differentiation: str | None = None
     investment: float | None = None
@@ -93,6 +98,14 @@ class BusinessIdeaBase(BusinessBase):
         extra='forbid',
         json_schema_extra={'example': BUSINESS_IDEA_BASE_EXAMPLE},
     )
+
+
+class BusinessIdeaBase(BusinessIdeaConcrete, BusinessBase):
+    pass
+
+
+class BusinessIdeaPartialUpdate(BusinessIdeaConcrete, BusinessBaseOptional):
+    pass
 
 
 class BusinessIdea(BusinessIdeaBase):
@@ -106,7 +119,7 @@ class BusinessIdea(BusinessIdeaBase):
     )
 
 
-class EstablishedBusinessBase(BusinessBase):
+class EstablishedBusinessConcrete(BaseModel):
     mission_and_vision: str | None = None
     billing: float | None = None
     billing_currency: CurrencyUnitEnum | None = None
@@ -118,6 +131,16 @@ class EstablishedBusinessBase(BusinessBase):
         extra='forbid',
         json_schema_extra={'example': ESTABLISHED_BUSINESS_BASE_EXAMPLE},
     )
+
+
+class EstablishedBusinessBase(EstablishedBusinessConcrete, BusinessBase):
+    pass
+
+
+class EstablishedBusinessPartialUpdate(
+    EstablishedBusinessConcrete, BusinessBaseOptional
+):
+    pass
 
 
 class EstablishedBusiness(EstablishedBusinessBase):

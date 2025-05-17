@@ -3,7 +3,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 
 from app import schemas
-from app.authorization_server import user_can_read_business
+from app.authorization_server import user_can_read_business, user_can_update_business
 from app.deps import get_current_active_user, get_repository
 from app.domain import (
     BusinessIdea as BusinessIdeaDomain,
@@ -16,8 +16,10 @@ from app.schemas import (
     Business,
     BusinessIdea,
     BusinessIdeaBase,
+    BusinessIdeaPartialUpdate,
     EstablishedBusiness,
     EstablishedBusinessBase,
+    EstablishedBusinessPartialUpdate,
 )
 
 router = APIRouter(
@@ -99,6 +101,44 @@ async def create_business_idea(
     return await business_repo.create_idea(business_idea)
 
 
+@router.patch(
+    '/ideas/{business_id}',
+    summary='Update business idea',
+    response_model=BusinessIdea,
+    status_code=status.HTTP_200_OK,
+    responses={
+        status.HTTP_400_BAD_REQUEST: {'model': schemas.HTTP400BadRequest},
+        status.HTTP_401_UNAUTHORIZED: {'model': schemas.HTTP401Unauthorized},
+        status.HTTP_404_NOT_FOUND: {'model': schemas.HTTP404NotFound},
+    },
+)
+async def partial_update_business_idea(
+    business_id: int,
+    business_in: BusinessIdeaPartialUpdate,
+    business_repo: BusinessRepository = Depends(get_repository(BusinessRepository)),
+    current_user: UserDomain = Depends(get_current_active_user),
+):
+    """Update a business idea."""
+    business_idea = await business_repo.get_idea(business_id=business_id)
+    if business_idea is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail='Business idea not found',
+        )
+    if not user_can_update_business(business_idea, current_user):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail='User does not have enough privileges.',
+        )
+    update_data = business_in.model_dump(exclude_unset=True)
+    for key, value in update_data.items():
+        setattr(business_idea, key, value)
+    return await business_repo.update_idea(
+        business_id=business_id,
+        business_update=business_idea,
+    )
+
+
 @router.get(
     '/established/{business_id}',
     summary='Get established business by ID',
@@ -154,3 +194,41 @@ async def create_established_business(
         }
     )
     return await business_repo.create_established(established_business)
+
+
+@router.patch(
+    '/established/{business_id}',
+    summary='Update established business',
+    response_model=EstablishedBusiness,
+    status_code=status.HTTP_200_OK,
+    responses={
+        status.HTTP_400_BAD_REQUEST: {'model': schemas.HTTP400BadRequest},
+        status.HTTP_401_UNAUTHORIZED: {'model': schemas.HTTP401Unauthorized},
+        status.HTTP_404_NOT_FOUND: {'model': schemas.HTTP404NotFound},
+    },
+)
+async def partial_update_established_business(
+    business_id: int,
+    business_in: EstablishedBusinessPartialUpdate,
+    business_repo: BusinessRepository = Depends(get_repository(BusinessRepository)),
+    current_user: UserDomain = Depends(get_current_active_user),
+):
+    """Update an established business."""
+    established_business = await business_repo.get_established(business_id=business_id)
+    if established_business is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail='Established business not found',
+        )
+    if not user_can_update_business(established_business, current_user):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail='User does not have enough privileges.',
+        )
+    update_data = business_in.model_dump(exclude_unset=True)
+    for key, value in update_data.items():
+        setattr(established_business, key, value)
+    return await business_repo.update_established(
+        business_id=business_id,
+        business_update=established_business,
+    )
