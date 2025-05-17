@@ -26,6 +26,7 @@ def test_business_idea() -> BusinessIdeaDomain:
         team_size=3,
         team_description='Super nice guys.',
         user_position='CTO and backend developer',
+        extra_info='Here I could explain what the business is about',
         competitor_existence=True,
         competitor_differentiation='Well, we are the best.',
         investment=0,
@@ -46,6 +47,7 @@ def test_established_business() -> EstablishedBusinessDomain:
         team_size=3,
         team_description='Super nice guys.',
         user_position='CTO and backend developer',
+        extra_info='Here I could explain what the business is about',
         mission_and_vision='We try to be the best in class.',
         billing=1000,
         billing_currency=CurrencyUnitEnum.EURO,
@@ -81,6 +83,7 @@ async def test_list_businesses(
             'team_size': test_business_idea.team_size,
             'team_description': test_business_idea.team_description,
             'user_position': test_business_idea.user_position,
+            'extra_info': test_business_idea.extra_info,
         },
         {
             'id': test_established_business.id,
@@ -93,6 +96,7 @@ async def test_list_businesses(
             'team_size': test_established_business.team_size,
             'team_description': test_established_business.team_description,
             'user_position': test_established_business.user_position,
+            'extra_info': test_established_business.extra_info,
         },
     ]
     actual_response = await async_client.get(
