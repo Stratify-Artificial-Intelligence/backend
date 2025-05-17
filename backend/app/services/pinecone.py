@@ -43,4 +43,4 @@ def search_vectors(
         top_k=top_k,
         include_metadata=True,
     )
-    return[match['metadata']['text'] for match in result.get('matches', [])]
+    return [match['metadata']['text'] for match in result.get('matches', [])]

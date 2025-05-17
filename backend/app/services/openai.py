@@ -2,6 +2,7 @@ import openai
 import time
 
 from openai.types.beta.threads import TextContentBlock
+from openai.types.beta.threads.run_submit_tool_outputs_params import ToolOutput
 
 from app.enums import ChatMessageSenderEnum
 from app.settings import OpenAISettings
@@ -71,6 +72,8 @@ def _add_context_to_message(
             thread_id=chat_internal_id,
             run_id=run_id,
         )
+        if run.required_action is None:
+            return
         call = run.required_action.submit_tool_outputs.tool_calls[0]
         if call.function.name != 'search_documents':
             raise NotImplementedError(
@@ -79,10 +82,12 @@ def _add_context_to_message(
         openai.beta.threads.runs.submit_tool_outputs(
             thread_id=chat_internal_id,
             run_id=run_id,
-            tool_outputs=[{
-                'tool_call_id': call.id,
-                'output': context_vectors,
-            }],
+            tool_outputs=[
+                ToolOutput(
+                    tool_call_id=call.id,
+                    output='\n'.join(context_vectors),
+                ),
+            ],
         )
 
 
