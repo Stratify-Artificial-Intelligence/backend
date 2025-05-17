@@ -25,6 +25,7 @@ class Business(Base):
     team_description = Column(String, nullable=True)
     user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
     user_position = Column(String, nullable=True)
+    extra_info = Column(String, nullable=True)
 
     __mapper_args__ = {
         'polymorphic_identity': 'business',

@@ -13,6 +13,7 @@ BUSINESS_BASE_EXAMPLE: dict[str, Any] = {
     'team_size': 3,
     'team_description': 'Super nice guys.',
     'user_position': 'CTO and backend developer',
+    'extra_info': 'Here I could explain what the business is about',
 }
 
 BUSINESS_EXAMPLE: dict[str, Any] = {
@@ -63,6 +64,7 @@ class BusinessBase(BaseModel):
     team_size: int | None = None
     team_description: str | None = None
     user_position: str | None = None
+    extra_info: str | None = None
 
     model_config = ConfigDict(
         extra='forbid',

@@ -21,6 +21,7 @@ class Business(BaseModel):
     team_description: str | None = None
     user_id: int
     user_position: str | None = None
+    extra_info: str | None = None
 
     model_config = ConfigDict(from_attributes=True)
 
