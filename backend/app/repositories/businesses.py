@@ -133,6 +133,20 @@ class BusinessRepository(BaseRepository):
         await self._db.refresh(business)
         return EstablishedBusinessDomain.model_validate(business)
 
+    async def delete_idea(self, business_id: int) -> None:
+        business = await self._get(business_id=business_id)
+        if business is None or not isinstance(business, BusinessIdea):
+            return None
+        await self._db.delete(business)
+        await self.commit()
+
+    async def delete_established(self, business_id: int) -> None:
+        business = await self._get(business_id=business_id)
+        if business is None or not isinstance(business, EstablishedBusiness):
+            return None
+        await self._db.delete(business)
+        await self.commit()
+
     async def _get(
         self,
         business_id: int,
