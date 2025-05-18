@@ -139,6 +139,37 @@ async def partial_update_business_idea(
     )
 
 
+@router.delete(
+    '/ideas/{business_id}',
+    summary='Delete business idea',
+    status_code=status.HTTP_204_NO_CONTENT,
+    responses={
+        status.HTTP_401_UNAUTHORIZED: {'model': schemas.HTTP401Unauthorized},
+        status.HTTP_403_FORBIDDEN: {'model': schemas.HTTP403Forbidden},
+        status.HTTP_404_NOT_FOUND: {'model': schemas.HTTP404NotFound},
+    },
+)
+async def delete_business_idea(
+    business_id: int,
+    business_repo: BusinessRepository = Depends(get_repository(BusinessRepository)),
+    current_user: UserDomain = Depends(get_current_active_user),
+):
+    """Delete a business idea."""
+    business_idea = await business_repo.get_idea(business_id=business_id)
+    if business_idea is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail='Business idea not found',
+        )
+    if not user_can_update_business(business_idea, current_user):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail='User does not have enough privileges.',
+        )
+    await business_repo.delete_idea(business_id=business_id)
+    return None
+
+
 @router.get(
     '/established/{business_id}',
     summary='Get established business by ID',
@@ -232,3 +263,34 @@ async def partial_update_established_business(
         business_id=business_id,
         business_update=established_business,
     )
+
+
+@router.delete(
+    '/established/{business_id}',
+    summary='Delete established business',
+    status_code=status.HTTP_204_NO_CONTENT,
+    responses={
+        status.HTTP_401_UNAUTHORIZED: {'model': schemas.HTTP401Unauthorized},
+        status.HTTP_403_FORBIDDEN: {'model': schemas.HTTP403Forbidden},
+        status.HTTP_404_NOT_FOUND: {'model': schemas.HTTP404NotFound},
+    },
+)
+async def delete_established_business(
+    business_id: int,
+    business_repo: BusinessRepository = Depends(get_repository(BusinessRepository)),
+    current_user: UserDomain = Depends(get_current_active_user),
+):
+    """Delete an established business."""
+    established_business = await business_repo.get_established(business_id=business_id)
+    if established_business is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail='Established business not found',
+        )
+    if not user_can_update_business(established_business, current_user):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail='User does not have enough privileges.',
+        )
+    await business_repo.delete_established(business_id=business_id)
+    return None
