@@ -80,7 +80,7 @@ established_businesses_data = [
 
 chats_data = [
     {
-        'title': 'chat1',
+        'title': 'Chat 1',
         'internal_id': 'internal_id1',
         'start_time': datetime.now(tz=tz.gettz('UTC')),
         'business_id': 1,
@@ -98,7 +98,7 @@ chats_data = [
         ],
     },
     {
-        'title': 'chat2',
+        'title': 'Chat 1',
         'internal_id': 'internal_id2',
         'start_time': datetime.now(tz=tz.gettz('UTC')),
         'business_id': 2,

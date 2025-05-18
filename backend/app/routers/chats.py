@@ -15,7 +15,7 @@ from app.deps import (
     add_store_message_and_get_store_response,
     create_chat_in_service,
     get_business,
-    get_current_active_user,
+    get_chat_title, get_current_active_user,
     get_repository,
 )
 from app.domain import (
@@ -113,10 +113,11 @@ async def create_chat(
         permission_func=user_can_create_chat,
         load_hierarchy=True,
     )
+    chat_title = await get_chat_title(business=business, chats_repo=chats_repo)
     chat_internal_id = await create_chat_in_service()
     chat = ChatDomain(
         internal_id=chat_internal_id,
-        title='Chat title',
+        title=chat_title,
         start_time=datetime.now(),
         business_id=business_id,
     )

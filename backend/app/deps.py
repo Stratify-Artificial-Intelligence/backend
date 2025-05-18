@@ -136,3 +136,10 @@ async def create_chat_in_service() -> str:
     """Create a chat in the external service and return its internal ID."""
     chat_internal_id = await create_chat()
     return chat_internal_id
+
+
+async def get_chat_title(business: BusinessDomain, chats_repo: ChatRepository) -> str:
+    """Get the chat title based on the business."""
+    business_chats = await chats_repo.get_multi(business_id=business.id)
+    num_chat = len(business_chats) + 1
+    return f'Chat {num_chat}'
