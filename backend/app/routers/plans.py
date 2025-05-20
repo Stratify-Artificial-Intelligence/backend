@@ -3,9 +3,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 
 from app import schemas
-from app.authorization_server import RoleChecker
 from app.deps import get_repository
-from app.enums import UserRoleEnum
 from app.repositories import PlanRepository
 from app.schemas import Plan
 
@@ -24,7 +22,6 @@ router = APIRouter(
         status.HTTP_401_UNAUTHORIZED: {'model': schemas.HTTP401Unauthorized},
         status.HTTP_403_FORBIDDEN: {'model': schemas.HTTP403Forbidden},
     },
-    dependencies=[Depends(RoleChecker(allowed_roles=[UserRoleEnum.ADMIN]))],
 )
 async def list_plans(
     plans_repo: PlanRepository = Depends(get_repository(PlanRepository)),
@@ -43,7 +40,6 @@ async def list_plans(
         status.HTTP_403_FORBIDDEN: {'model': schemas.HTTP403Forbidden},
         status.HTTP_404_NOT_FOUND: {'model': schemas.HTTP404NotFound},
     },
-    dependencies=[Depends(RoleChecker(allowed_roles=[UserRoleEnum.ADMIN]))],
 )
 async def get_plan_by_id(
     plan_id: int,
