@@ -9,6 +9,7 @@ class UserBase(BaseModel):
     full_name: str
     is_active: bool
     role: UserRoleEnum
+    plan_id: int | None = None
 
     model_config = ConfigDict(from_attributes=True)
 

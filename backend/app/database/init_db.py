@@ -9,15 +9,33 @@ from app.domain import (
     Chat as ChatDomain,
     ChatMessage as ChatMessageDomain,
     EstablishedBusiness as EstablishedBusinessDomain,
+    Plan as PlanDomain,
     UserWithSecret as UserWithSecretDomain,
 )
 from app.enums import (
     BusinessStageEnum,
     ChatMessageSenderEnum,
     CurrencyUnitEnum,
+    UserPlanEnum,
     UserRoleEnum,
 )
-from app.repositories import BusinessRepository, ChatRepository, UserRepository
+from app.repositories import (
+    BusinessRepository,
+    ChatRepository,
+    PlanRepository,
+    UserRepository,
+)
+
+plans_data = [
+    {
+        'name': UserPlanEnum.STARTER.value,
+        'is_active': True,
+    },
+    {
+        'name': UserPlanEnum.FOUNDER.value,
+        'is_active': True,
+    },
+]
 
 users_data = [
     {
@@ -35,6 +53,7 @@ users_data = [
         'password': 'userpassword',
         'is_active': True,
         'role': UserRoleEnum.BASIC.value,
+        'plan_id': 1,
     },
 ]
 
@@ -108,6 +127,12 @@ chats_data = [
 
 async def main() -> None:
     async with async_session() as session:
+        plans_repo = PlanRepository(session)
+        for plan_data in plans_data:
+            plan = PlanDomain.model_validate(plan_data)
+            await plans_repo.create(plan)
+        print('Initial plans data done')
+
         users_repo = UserRepository(session)
         for user_data in users_data:
             user = UserWithSecretDomain.model_validate(user_data)

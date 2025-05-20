@@ -15,7 +15,8 @@ from app.deps import (
     add_store_message_and_get_store_response,
     create_chat_in_service,
     get_business,
-    get_chat_title, get_current_active_user,
+    get_chat_title,
+    get_current_active_user,
     get_repository,
 )
 from app.domain import (
