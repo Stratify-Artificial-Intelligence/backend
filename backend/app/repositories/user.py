@@ -45,6 +45,7 @@ class UserRepository(BaseRepository):
             full_name=user_in.full_name,
             is_active=user_in.is_active,
             role=user_in.role,
+            plan_id=user_in.plan_id,
         )
         self._db.add(new_user)
         await self.commit()
@@ -96,6 +97,7 @@ class UserRepository(BaseRepository):
                 'is_active': user.is_active,
                 'password': user.hashed_password,
                 'role': user.role,
+                'plan_id': user.plan_id,
             }
         )
 

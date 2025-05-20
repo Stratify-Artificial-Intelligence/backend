@@ -14,6 +14,7 @@ class UserBase(BaseModel):
 class UserBaseExtended(UserBase):
     is_active: bool
     role: UserRoleEnum
+    plan_id: int | None = None
 
 
 class User(UserBaseExtended):
@@ -44,3 +45,4 @@ class UserMePartialUpdate(BaseModel):
 class UserPartialUpdate(UserMePartialUpdate):
     is_active: bool | None = None
     role: UserRoleEnum | None = None
+    plan_id: int | None = None

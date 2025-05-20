@@ -1,4 +1,4 @@
-from sqlalchemy import Boolean, Column, Enum, Integer, String
+from sqlalchemy import Boolean, Column, Enum, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 
 from app.database import Base
@@ -21,6 +21,7 @@ class User(Base):
         ),
         nullable=False,
     )
+    plan_id = Column(Integer, ForeignKey('plans.id'), nullable=True)
 
     # Relationships
     businesses = relationship(
@@ -29,3 +30,4 @@ class User(Base):
         lazy='selectin',
         cascade='all, delete-orphan',
     )
+    plan = relationship('Plan', back_populates='users', lazy='selectin')

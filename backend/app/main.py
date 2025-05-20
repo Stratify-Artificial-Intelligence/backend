@@ -10,6 +10,7 @@ from app.routers import (
     business_router,
     business_research_router,
     chats_router,
+    plans_router,
     tests_router,
     users_router,
 )
@@ -32,6 +33,7 @@ app.include_router(admin_router)
 app.include_router(business_router)
 app.include_router(business_research_router)
 app.include_router(chats_router)
+app.include_router(plans_router)
 app.include_router(tests_router)
 app.include_router(users_router)
 
