@@ -97,7 +97,10 @@ class BusinessIdea(Business):
         return (
             'De momento estoy solo en este proyecto.'
             if team_size == 1
-            else f'No estoy solo en este proyecto. {team_description}.'
+            else (
+                f'No estoy solo en este proyecto. Somos {team_size} '
+                f'fundadores. {team_description}.'
+            )
         )
 
     def _get_competitor_str(self) -> str:
