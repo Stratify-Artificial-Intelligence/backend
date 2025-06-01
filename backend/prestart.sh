@@ -21,7 +21,7 @@ if [ "$DOMAIN" = "localhost" ]; then
   uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 else
   # Production
-  uvicorn app.main:app --host 0.0.0.0 --port 8000
+  uvicorn app.main:app --host 0.0.0.0 --port 80
 fi
 
 echo "Finished prestart.sh"
