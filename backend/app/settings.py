@@ -87,3 +87,11 @@ class RAGSettings(BaseSettings):
     TOP_K: int = 8
 
     model_config = SettingsConfigDict(env_file='.env', env_prefix='RAG_')
+
+
+class StripeSettings(BaseSettings):
+    """Load Stripe settings from environment or .env."""
+
+    API_KEY: str = ''
+
+    model_config = SettingsConfigDict(env_file='.env', env_prefix='STRIPE_')

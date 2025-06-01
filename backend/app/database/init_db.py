@@ -9,7 +9,7 @@ from app.domain import (
     Chat as ChatDomain,
     ChatMessage as ChatMessageDomain,
     EstablishedBusiness as EstablishedBusinessDomain,
-    Plan as PlanDomain,
+    PlanBase as PlanBaseDomain,
     UserWithSecret as UserWithSecretDomain,
 )
 from app.enums import (
@@ -129,7 +129,7 @@ async def main() -> None:
     async with async_session() as session:
         plans_repo = PlanRepository(session)
         for plan_data in plans_data:
-            plan = PlanDomain.model_validate(plan_data)
+            plan = PlanBaseDomain.model_validate(plan_data)
             await plans_repo.create(plan)
         print('Initial plans data done')
 

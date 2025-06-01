@@ -2,11 +2,7 @@ from pydantic import BaseModel, ConfigDict
 
 
 class PlanSubscriptionResponse(BaseModel):
-    name: str
-    is_active: bool
+    id: str
+    payment_client_secret: str
 
     model_config = ConfigDict(from_attributes=True)
-
-
-class Plan(PlanBase):
-    id: int | None = None

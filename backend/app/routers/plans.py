@@ -3,9 +3,11 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 
 from app import schemas
-from app.deps import get_repository
-from app.repositories import PlanRepository
-from app.schemas import Plan
+from app.deps import get_current_active_user, get_repository
+from app.domain import User as UserDomain
+from app.helpers.helpers_payment import create_subscription_and_update_user
+from app.repositories import PlanRepository, UserRepository
+from app.schemas import Plan, PlanSubscriptionResponse
 
 router = APIRouter(
     tags=['Plan'],
@@ -59,7 +61,7 @@ async def get_plan_by_id(
     '{plan_id}/subscribe',
     summary='Subscribe to a plan',
     status_code=status.HTTP_200_OK,
-    response_model=SubscriptionResponse,
+    response_model=PlanSubscriptionResponse,
     responses={
         status.HTTP_401_UNAUTHORIZED: {'model': schemas.HTTP401Unauthorized},
         status.HTTP_403_FORBIDDEN: {'model': schemas.HTTP403Forbidden},
@@ -69,46 +71,18 @@ async def get_plan_by_id(
 async def subscribe_to_plan(
     plan_id: int,
     plans_repo: PlanRepository = Depends(get_repository(PlanRepository)),
+    users_repo: UserRepository = Depends(get_repository(UserRepository)),
     current_user: UserDomain = Depends(get_current_active_user),
 ):
-    """Subscribe to a plan."""
+    """Subscribe user to a plan."""
     plan = await plans_repo.get(plan_id=plan_id)
     if not plan:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail='Plan not found',
         )
-
-    try:
-        # Create or retrieve Stripe customer
-        if not user.stripe_customer_id:
-            customer = stripe.Customer.create(email=user.email)
-            user.stripe_customer_id = customer.id
-        else:
-            customer = stripe.Customer.retrieve(user.stripe_customer_id)
-
-        # Cancel existing subscription if any
-        if user.stripe_subscription_id:
-            stripe.Subscription.delete(user.stripe_subscription_id)
-
-        # Create new subscription
-        subscription = stripe.Subscription.create(
-            customer=customer.id,
-            items=[{"price": plan.price_id}],
-            expand=["latest_invoice.payment_intent"]
-        )
-
-        # Save subscription ID only — wait for webhook to update plan_id
-        user.stripe_subscription_id = subscription.id
-        db.commit()
-
-        # Return client secret for frontend confirmation
-        return {
-            "message": "Subscription created, waiting for payment confirmation",
-            "client_secret": subscription["latest_invoice"]["payment_intent"][
-                "client_secret"]
-        }
-
-    except stripe.error.StripeError as e:
-        raise HTTPException(status_code=400, detail=str(e))
-
+    return await create_subscription_and_update_user(
+        user=current_user,
+        plan=plan,
+        users_repo=users_repo,
+    )

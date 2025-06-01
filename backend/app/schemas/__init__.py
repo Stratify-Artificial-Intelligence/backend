@@ -17,6 +17,7 @@ from .errors import (
     HTTP404NotFound,
     HTTP405MethodNotAllowed,
 )
+from .plan_subscriptions import PlanSubscriptionResponse
 from .plans import Plan, PlanBase
 from .test import Test, TestCreate, TestPartialUpdate
 from .token import Token, TokenData
