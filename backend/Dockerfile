@@ -20,14 +20,14 @@ RUN poetry install --no-root && rm -rf $POETRY_CACHE_DIR
 FROM python:3.10-slim-buster as runtime
 
 ENV VIRTUAL_ENV=/backend/.venv \
-    PATH="/backend/.venv/bin:$PATH"
+    PATH="/backend/.venv/bin:$PATH" \
+    PYTHONPATH=/backend
 
 WORKDIR /backend
 
 COPY --from=builder ${VIRTUAL_ENV} ${VIRTUAL_ENV}
 
-COPY . .
+COPY backend/ ./
 
-COPY ./backend/prestart.sh /prestart.sh
-RUN chmod +x /prestart.sh
+RUN chmod +x ./prestart.sh
 ENTRYPOINT ["/bin/bash", "./prestart.sh"]
