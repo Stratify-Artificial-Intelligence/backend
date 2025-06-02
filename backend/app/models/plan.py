@@ -1,7 +1,7 @@
 from app.database import Base
 from app.enums import UserPlanEnum
 
-from sqlalchemy import Boolean, Column, Enum, Float, Integer
+from sqlalchemy import Boolean, Column, Enum, Float, Integer, String
 from sqlalchemy.orm import relationship
 
 
@@ -19,6 +19,7 @@ class Plan(Base):
     )
     is_active = Column(Boolean, nullable=False, default=True)
     price = Column(Float, nullable=False, default=0)
+    payment_service_price_id = Column(String(100), nullable=True)
 
     # Relationships
     users = relationship(

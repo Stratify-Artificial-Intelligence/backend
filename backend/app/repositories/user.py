@@ -116,7 +116,7 @@ class UserRepository(BaseRepository):
             return None
         if not verify_password(
             plain_password=password,
-            hashed_password=user.hashed_password,
+            hashed_password=user.hashed_password,  # type: ignore[arg-type]
         ):
             return None
         return user

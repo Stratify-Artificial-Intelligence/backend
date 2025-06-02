@@ -24,11 +24,11 @@ async def create_customer(
 
 async def create_subscription(
     customer_id: str,
-    plan_id: int,
+    price_id: str,
 ) -> stripe.Subscription:
     return stripe.Subscription.create(
         customer=customer_id,
-        items=[{'price': 'price_1RVGp2Ive8AXNk92AY707LgP'}],
+        items=[{'price': price_id}],
         expand=['latest_invoice.payment_intent'],
     )
 

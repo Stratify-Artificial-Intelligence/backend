@@ -244,15 +244,12 @@ async def create_user_payment_method(
         status.HTTP_403_FORBIDDEN: {'model': schemas.HTTP403Forbidden},
     },
 )
-async def create_user_payment_method(
+async def setup_user_payment_method(
     payment_method_id: str,
     current_user: UserDomain = Depends(get_current_active_user),
     users_repo: UserRepository = Depends(get_repository(UserRepository)),
 ):
     """Create a payment method for the current user."""
     await setup_payment_method(
-        payment_method_id=payment_method_id,
-        user=current_user,
-        users_repo=users_repo
+        payment_method_id=payment_method_id, user=current_user, users_repo=users_repo
     )
-

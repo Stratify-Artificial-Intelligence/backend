@@ -30,10 +30,14 @@ plans_data = [
     {
         'name': UserPlanEnum.STARTER.value,
         'is_active': True,
+        'price': 0.0,
+        'payment_service_price_id': 'price_1RVGgNIve8AXNk92PPGp2kvZ',
     },
     {
         'name': UserPlanEnum.FOUNDER.value,
         'is_active': True,
+        'price': 9.99,
+        'payment_service_price_id': 'price_1RVGp2Ive8AXNk92AY707LgP',
     },
 ]
 

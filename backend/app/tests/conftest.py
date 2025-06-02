@@ -81,7 +81,6 @@ def test_user() -> UserDomain:
         email='a@gmail.com',
         full_name='User A',
         is_active=True,
-        password='test_password',
         role=UserRoleEnum.ADMIN,
     )
 

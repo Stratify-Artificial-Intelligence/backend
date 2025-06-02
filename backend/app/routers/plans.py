@@ -5,7 +5,10 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from app import schemas
 from app.deps import get_current_active_user, get_repository
 from app.domain import User as UserDomain
-from app.helpers import create_subscription_and_update_user
+from app.helpers import (
+    cancel_subscription_and_update_user,
+    create_subscription_and_update_user,
+)
 from app.repositories import PlanRepository, UserRepository
 from app.schemas import Plan, PlanSubscriptionResponse
 
@@ -58,9 +61,9 @@ async def get_plan_by_id(
 
 
 @router.post(
-    '{plan_id}/subscribe',
+    '/{plan_id}/subscriptions',
     summary='Subscribe to a plan',
-    status_code=status.HTTP_200_OK,
+    status_code=status.HTTP_201_CREATED,
     response_model=PlanSubscriptionResponse,
     responses={
         status.HTTP_401_UNAUTHORIZED: {'model': schemas.HTTP401Unauthorized},
@@ -86,3 +89,32 @@ async def subscribe_to_plan(
         plan=plan,
         users_repo=users_repo,
     )
+
+
+@router.delete(
+    '/{plan_id}/subscriptions',
+    summary='Unsubscribe from a plan',
+    status_code=status.HTTP_204_NO_CONTENT,
+    responses={
+        status.HTTP_401_UNAUTHORIZED: {'model': schemas.HTTP401Unauthorized},
+        status.HTTP_403_FORBIDDEN: {'model': schemas.HTTP403Forbidden},
+        status.HTTP_404_NOT_FOUND: {'model': schemas.HTTP404NotFound},
+    },
+)
+async def unsubscribe_from_plan(
+    plan_id: int,
+    users_repo: UserRepository = Depends(get_repository(UserRepository)),
+    current_user: UserDomain = Depends(get_current_active_user),
+):
+    """Unsubscribe user from a plan."""
+    if current_user.plan_id is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail='User is not subscribed to any plan',
+        )
+    if current_user.plan_id != plan_id:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f'User is not subscribed to plan {plan_id}',
+        )
+    await cancel_subscription_and_update_user(user=current_user, users_repo=users_repo)

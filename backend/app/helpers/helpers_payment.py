@@ -18,6 +18,11 @@ async def create_payment_method(
     """Create a payment method for the user."""
     customer_id = await _get_or_create_customer_id(user, users_repo)
     client_intent = await create_client_intent(customer_id)
+    if client_intent.client_secret is None:
+        raise ValueError(
+            'Failed to create client intent for payment method. Client secret returned '
+            'by Stripe is None.'
+        )
     return PaymentMethodResponse(
         id=client_intent.id,
         client_secret=client_intent.client_secret,
@@ -41,11 +46,12 @@ async def create_subscription_and_update_user(
 ) -> PlanSubscriptionResponse:
     """Create a subscription for the user and update the user with its ID."""
     customer_id = await _get_or_create_customer_id(user, users_repo)
-    if user.payment_service_subscription_id:
-        await cancel_subscription(subscription_id=user.payment_service_subscription_id)
-        user.payment_service_subscription_id = None
-        await users_repo.update(user_id=user.id, user_update=user)
-    subscription = await create_subscription(customer_id, plan.id)
+    await cancel_subscription_and_update_user(user, users_repo)
+    if plan.payment_service_price_id is None:
+        raise ValueError(
+            'Plan does not have a payment service price ID. Cannot create subscription.'
+        )
+    subscription = await create_subscription(customer_id, plan.payment_service_price_id)
     user.payment_service_subscription_id = subscription.id
     await users_repo.update(user_id=user.id, user_update=user)
     return PlanSubscriptionResponse(
@@ -54,6 +60,18 @@ async def create_subscription_and_update_user(
             subscription['latest_invoice']['payment_intent']['client_secret']
         ),
     )
+
+
+async def cancel_subscription_and_update_user(
+    user: UserDomain,
+    users_repo: UserRepository,
+) -> None:
+    """Cancel the user's subscription and update the user."""
+    if user.payment_service_subscription_id is None:
+        return
+    await cancel_subscription(subscription_id=user.payment_service_subscription_id)
+    user.payment_service_subscription_id = None
+    await users_repo.update(user_id=user.id, user_update=user)
 
 
 async def _get_or_create_customer_id(
