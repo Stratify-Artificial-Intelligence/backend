@@ -7,8 +7,10 @@ from app.authorization_server import RoleChecker
 from app.deps import get_current_active_user, get_repository
 from app.domain import User as UserDomain, UserWithSecret as UserWithSecretDomain
 from app.enums import UserRoleEnum
+from app.helpers import create_payment_method, setup_payment_method
 from app.repositories import UserRepository
 from app.schemas import (
+    PaymentMethodResponse,
     User,
     UserBaseCreate,
     UserPartialUpdate,
@@ -213,3 +215,44 @@ async def update_user(
             detail=str(e),
         )
     return user_updated
+
+
+@router.post(
+    '/payment_method',
+    summary='Create user payment method',
+    status_code=status.HTTP_201_CREATED,
+    response_model=PaymentMethodResponse,
+    responses={
+        status.HTTP_401_UNAUTHORIZED: {'model': schemas.HTTP401Unauthorized},
+        status.HTTP_403_FORBIDDEN: {'model': schemas.HTTP403Forbidden},
+    },
+)
+async def create_user_payment_method(
+    current_user: UserDomain = Depends(get_current_active_user),
+    users_repo: UserRepository = Depends(get_repository(UserRepository)),
+):
+    """Create a payment method for the current user."""
+    return await create_payment_method(user=current_user, users_repo=users_repo)
+
+
+@router.put(
+    '/payment_method/{payment_method_id}',
+    summary='Set up user payment method',
+    status_code=status.HTTP_201_CREATED,
+    responses={
+        status.HTTP_401_UNAUTHORIZED: {'model': schemas.HTTP401Unauthorized},
+        status.HTTP_403_FORBIDDEN: {'model': schemas.HTTP403Forbidden},
+    },
+)
+async def create_user_payment_method(
+    payment_method_id: str,
+    current_user: UserDomain = Depends(get_current_active_user),
+    users_repo: UserRepository = Depends(get_repository(UserRepository)),
+):
+    """Create a payment method for the current user."""
+    await setup_payment_method(
+        payment_method_id=payment_method_id,
+        user=current_user,
+        users_repo=users_repo
+    )
+

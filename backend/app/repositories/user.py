@@ -20,9 +20,7 @@ class UserRepository(BaseRepository):
         return await self._user_model_to_domain(user)
 
     async def get_by_username(self, username: str) -> UserDomain | None:
-        query = select(User).where(User.username == username)
-        result = await self._db.execute(query)
-        user = result.scalars().one_or_none()
+        user = await self._get_by_username(username=username)
         if user is None:
             return None
         return await self._user_model_to_domain(user)
@@ -86,6 +84,11 @@ class UserRepository(BaseRepository):
         result = await self._db.execute(query)
         return result.scalars().one_or_none()
 
+    async def _get_by_username(self, username: str) -> User | None:
+        query = select(User).where(User.username == username)
+        result = await self._db.execute(query)
+        return result.scalars().one_or_none()
+
     @staticmethod
     async def _user_model_to_domain(user: User) -> UserDomain:
         return UserDomain.model_validate(
@@ -95,9 +98,11 @@ class UserRepository(BaseRepository):
                 'email': user.email,
                 'full_name': user.full_name,
                 'is_active': user.is_active,
-                'password': user.hashed_password,
+                # 'password': user.hashed_password,
                 'role': user.role,
                 'plan_id': user.plan_id,
+                'payment_service_user_id': user.payment_service_user_id,
+                'payment_service_subscription_id': user.payment_service_subscription_id,
             }
         )
 
@@ -106,9 +111,12 @@ class UserRepository(BaseRepository):
         username: str,
         password: str,
     ) -> UserDomain | None:
-        user = await self.get_by_username(username)
+        user = await self._get_by_username(username)
         if not user:
             return None
-        if not verify_password(plain_password=password, hashed_password=user.password):
+        if not verify_password(
+            plain_password=password,
+            hashed_password=user.hashed_password,
+        ):
             return None
         return user

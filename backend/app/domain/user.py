@@ -20,7 +20,7 @@ class UserWithSecret(UserBase):
     password: str
 
 
-class User(UserWithSecret):
+class User(UserBase):
     id: int
 
     model_config = ConfigDict(from_attributes=True)

@@ -28,8 +28,19 @@ async def create_subscription(
 ) -> stripe.Subscription:
     return stripe.Subscription.create(
         customer=customer_id,
-        items=[{'plan': str(plan_id)}],
+        items=[{'price': 'price_1RVGp2Ive8AXNk92AY707LgP'}],
         expand=['latest_invoice.payment_intent'],
+    )
+
+
+async def create_client_intent(customer_id: str) -> stripe.SetupIntent:
+    return stripe.SetupIntent.create(customer=customer_id)
+
+
+async def setup_client_intent(customer_id: str, payment_method_id: str) -> None:
+    stripe.PaymentMethod.attach(
+        customer=customer_id,
+        payment_method=payment_method_id,
     )
 
 

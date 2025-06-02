@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from app import schemas
 from app.deps import get_current_active_user, get_repository
 from app.domain import User as UserDomain
-from app.helpers.helpers_payment import create_subscription_and_update_user
+from app.helpers import create_subscription_and_update_user
 from app.repositories import PlanRepository, UserRepository
 from app.schemas import Plan, PlanSubscriptionResponse
 

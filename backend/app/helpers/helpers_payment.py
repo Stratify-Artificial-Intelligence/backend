@@ -1,12 +1,37 @@
 from app.domain import Plan as PlanDomain, User as UserDomain
 from app.repositories import UserRepository
-from app.schemas import PlanSubscriptionResponse
+from app.schemas import PaymentMethodResponse, PlanSubscriptionResponse
 from app.services.stripe import (
     cancel_subscription,
+    create_client_intent,
     create_customer,
     create_subscription,
     get_customer,
+    setup_client_intent,
 )
+
+
+async def create_payment_method(
+    user: UserDomain,
+    users_repo: UserRepository,
+) -> PaymentMethodResponse:
+    """Create a payment method for the user."""
+    customer_id = await _get_or_create_customer_id(user, users_repo)
+    client_intent = await create_client_intent(customer_id)
+    return PaymentMethodResponse(
+        id=client_intent.id,
+        client_secret=client_intent.client_secret,
+    )
+
+
+async def setup_payment_method(
+    payment_method_id: str,
+    user: UserDomain,
+    users_repo: UserRepository,
+) -> None:
+    """Set up a payment method for the user."""
+    customer_id = await _get_or_create_customer_id(user, users_repo)
+    await setup_client_intent(customer_id, payment_method_id)
 
 
 async def create_subscription_and_update_user(
