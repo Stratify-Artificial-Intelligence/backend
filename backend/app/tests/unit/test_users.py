@@ -17,7 +17,6 @@ def test_user_2() -> UserDomain:
         email='b@gmail.com',
         full_name='User B',
         is_active=True,
-        password='test_password_2',
         role=UserRoleEnum.ADMIN,
         plan_id=None,
     )
@@ -32,7 +31,6 @@ def test_user_3() -> UserDomain:
         full_name='User C',
         is_active=True,
         role=UserRoleEnum.BASIC,
-        password='test_password_3',
         plan_id=1,
     )
 
@@ -59,11 +57,13 @@ async def test_signup_user(
     del data['role']
     del data['is_active']
     del data['plan_id']
+    del data['payment_service_user_id']
+    del data['payment_service_subscription_id']
+    data['password'] = 'test_password_3'
     actual_response = await async_client.post(
         '/users/signup',
         json=data,
     )
-
     assert status.HTTP_201_CREATED == actual_response.status_code
     assert expected_response == actual_response.json()
 
@@ -82,6 +82,9 @@ async def test_signup_user_already_exists(
     del data['role']
     del data['is_active']
     del data['plan_id']
+    del data['payment_service_user_id']
+    del data['payment_service_subscription_id']
+    data['password'] = 'test_password_3'
     response = await async_client.post(
         '/users/signup',
         json=data,
@@ -333,6 +336,9 @@ async def test_create_user(
     }
     data = test_user.model_dump()
     del data['id']
+    del data['payment_service_user_id']
+    del data['payment_service_subscription_id']
+    data['password'] = 'test_password_3'
     actual_response = await async_client.post(
         '/users',
         json=data,
@@ -358,6 +364,9 @@ async def test_create_user_already_exists(
     expected_response = 'Username already exists'
     data = test_user.model_dump()
     del data['id']
+    del data['payment_service_user_id']
+    del data['payment_service_subscription_id']
+    data['password'] = 'test_password_3'
     response = await async_client.post(
         '/users',
         json=data,

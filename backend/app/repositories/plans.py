@@ -1,6 +1,6 @@
 from sqlalchemy import select
 
-from app.domain import Plan as PlanDomain
+from app.domain import Plan as PlanDomain, PlanBase as PlanBaseDomain
 from app.models.plan import Plan
 from app.repositories import BaseRepository
 
@@ -18,7 +18,7 @@ class PlanRepository(BaseRepository):
         plans = result.scalars().all()
         return [PlanDomain.model_validate(plan) for plan in plans]
 
-    async def create(self, plan_in: PlanDomain) -> PlanDomain:
+    async def create(self, plan_in: PlanBaseDomain) -> PlanDomain:
         new_plan = Plan(
             name=plan_in.name,
             is_active=plan_in.is_active,
