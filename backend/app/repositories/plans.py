@@ -28,6 +28,27 @@ class PlanRepository(BaseRepository):
         await self._db.refresh(new_plan)
         return PlanDomain.model_validate(new_plan)
 
+    async def update(self, plan_id: int, plan_in: PlanBaseDomain) -> PlanDomain | None:
+        plan = await self._get(plan_id=plan_id)
+        if not plan:
+            return None
+
+        for attr, value in plan_in.model_dump().items():
+            setattr(plan, attr, value)
+
+        await self.commit()
+        await self._db.refresh(plan)
+        return PlanDomain.model_validate(plan)
+
+    async def delete(self, plan_id: int) -> None:
+        plan = await self._get(plan_id=plan_id)
+        if not plan:
+            return None
+
+        await self._db.delete(plan)
+        await self.commit()
+        return None
+
     async def _get(self, plan_id: int) -> Plan | None:
         query = select(Plan).where(Plan.id == plan_id)
         result = await self._db.execute(query)

@@ -1,8 +1,10 @@
 from pydantic import BaseModel, ConfigDict
 
+from app.enums import UserPlanEnum
+
 
 class PlanBase(BaseModel):
-    name: str
+    name: UserPlanEnum
     is_active: bool
     price: float
     payment_service_price_id: str | None = None
