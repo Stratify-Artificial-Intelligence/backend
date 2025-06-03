@@ -18,7 +18,7 @@ from .errors import (
     HTTP405MethodNotAllowed,
 )
 from .plan_payments import PaymentMethodResponse, PlanSubscriptionResponse
-from .plans import Plan, PlanBase
+from .plans import Plan, PlanBase, PlanPartialUpdate
 from .test import Test, TestCreate, TestPartialUpdate
 from .token import Token, TokenData
 from .user import (
