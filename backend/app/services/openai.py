@@ -89,9 +89,10 @@ def _add_context_to_message(
         if run.required_action is None:
             return
         call = run.required_action.submit_tool_outputs.tool_calls[0]
-        if call.function.name != 'search_documents':
+        if call.function.name != 'buscar_documentos':
             raise NotImplementedError(
-                'Only search_documents function is implemented yet.'
+                f'Function name {call.function.name} not implemented yet. Only '
+                '`buscar_documentos` function is implemented.'
             )
         openai.beta.threads.runs.submit_tool_outputs(
             thread_id=chat_internal_id,
