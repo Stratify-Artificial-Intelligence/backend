@@ -12,8 +12,16 @@ class PlanRepository(BaseRepository):
             return None
         return PlanDomain.model_validate(plan)
 
-    async def get_multi(self) -> list[PlanDomain]:
+    async def get_multi(
+        self,
+        *,
+        payment_service_price_id: str | None = None,
+    ) -> list[PlanDomain]:
         query = select(Plan)
+        if payment_service_price_id is not None:
+            query = query.where(
+                Plan.payment_service_price_id == payment_service_price_id
+            )
         result = await self._db.execute(query)
         plans = result.scalars().all()
         return [PlanDomain.model_validate(plan) for plan in plans]

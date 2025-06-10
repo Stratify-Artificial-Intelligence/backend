@@ -93,5 +93,6 @@ class StripeSettings(BaseSettings):
     """Load Stripe settings from environment or .env."""
 
     API_KEY: str = ''
+    WEBHOOK_SECRET: str = ''
 
     model_config = SettingsConfigDict(env_file='.env', env_prefix='STRIPE_')
