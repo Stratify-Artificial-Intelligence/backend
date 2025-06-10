@@ -73,7 +73,7 @@ async def create_subscription(
     )
 
 
-@router.get(
+@router.post(
     '/handle',
     summary='Handle subscription',
     status_code=status.HTTP_200_OK,
@@ -88,7 +88,7 @@ async def create_portal_session(
     request_data: SubscriptionHandleRequest,
     current_user: UserDomain = Depends(get_current_active_user),
 ):
-    return get_portal_session(user=current_user, data=request_data)
+    return await get_portal_session(user=current_user, data=request_data)
 
 
 @router.post(
