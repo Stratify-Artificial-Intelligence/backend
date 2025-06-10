@@ -25,8 +25,14 @@ class UserRepository(BaseRepository):
             return None
         return await self._user_model_to_domain(user)
 
-    async def get_multi(self) -> list[UserDomain]:
+    async def get_multi(
+        self,
+        *,
+        payment_service_user_id: str | None = None,
+    ) -> list[UserDomain]:
         query = select(User)
+        if payment_service_user_id is not None:
+            query = query.where(User.payment_service_user_id == payment_service_user_id)
         result = await self._db.execute(query)
         users = result.scalars().all()
         return [await self._user_model_to_domain(user) for user in users]
