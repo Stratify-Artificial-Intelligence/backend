@@ -7,7 +7,7 @@ from app.domain import (
     User as UserDomain,
 )
 from app.enums import ChatMessageSenderEnum, UserPlanEnum
-from app.helpers import get_context_for_business
+from app.helpers.helpers_rag import get_context_for_business
 from app.repositories import ChatRepository, PlanRepository
 from app.services.openai import (
     add_message_to_chat,
