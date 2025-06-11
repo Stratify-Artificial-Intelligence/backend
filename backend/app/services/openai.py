@@ -15,7 +15,7 @@ openai.api_key = settings.API_KEY
 async def add_message_to_chat_and_get_response(
     chat_internal_id: str,
     content: str,
-    context_vectors: list[str],
+    context: str,
 ) -> str:
     """Add a message to a chat and return the response of the AI model."""
     message_creation_run_id = add_message_to_chat(
@@ -26,7 +26,7 @@ async def add_message_to_chat_and_get_response(
     _add_context_to_message(
         chat_internal_id=chat_internal_id,
         run_id=message_creation_run_id,
-        context_vectors=context_vectors,
+        context=context,
     )
     _wait_message_for_status(
         chat_internal_id=chat_internal_id,
@@ -70,11 +70,7 @@ def add_message_to_chat(
     return run.id
 
 
-def _add_context_to_message(
-    chat_internal_id: str,
-    run_id: str,
-    context_vectors: list[str],
-) -> None:
+def _add_context_to_message(chat_internal_id: str, run_id: str, context: str) -> None:
     """Add context to the message."""
     status = _wait_message_for_status(
         chat_internal_id=chat_internal_id,
@@ -97,12 +93,7 @@ def _add_context_to_message(
         openai.beta.threads.runs.submit_tool_outputs(
             thread_id=chat_internal_id,
             run_id=run_id,
-            tool_outputs=[
-                ToolOutput(
-                    tool_call_id=call.id,
-                    output='\n'.join(context_vectors),
-                ),
-            ],
+            tool_outputs=[ToolOutput(tool_call_id=call.id, output=context)],
         )
 
 

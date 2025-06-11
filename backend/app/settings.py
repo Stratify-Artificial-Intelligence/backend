@@ -89,6 +89,18 @@ class RAGSettings(BaseSettings):
     model_config = SettingsConfigDict(env_file='.env', env_prefix='RAG_')
 
 
+class GeneralRAGSettings(RAGSettings):
+    """Load General RAG settings from environment or .env."""
+
+    MAX_TOKENS: int = 400
+    OVERLAP: int = 200
+    NAMESPACE_ID: str = 'general'
+    INDEX_NAME: str = 'veyra-general-index'
+    TOP_K: int = 5
+
+    model_config = SettingsConfigDict(env_file='.env', env_prefix='GENERAL_RAG_')
+
+
 class StripeSettings(BaseSettings):
     """Load Stripe settings from environment or .env."""
 

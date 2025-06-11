@@ -9,10 +9,11 @@ from app.services.pinecone import search_vectors, upload_vectors
 
 from tiktoken import encoding_for_model
 
-from app.settings import OpenAIEmbeddingSettings, RAGSettings
+from app.settings import GeneralRAGSettings, OpenAIEmbeddingSettings, RAGSettings
 
 open_ai_embedding_settings = OpenAIEmbeddingSettings()
 rag_settings = RAGSettings()
+general_rag_settings = GeneralRAGSettings()
 
 
 def deep_research_for_business(
@@ -26,6 +27,40 @@ def deep_research_for_business(
         prompt=f'{research_context} {research_instructions}',
         max_tokens=params.max_tokens,
     )
+
+
+def chunk_and_upload_text_for_business(text: str, business_id: int) -> None:
+    _chunk_and_upload_text(
+        text=text,
+        settings=rag_settings,
+        namespace=rag_settings.NAMESPACE_ID.format(business_id=business_id),
+    )
+
+
+def chunk_and_upload_text_for_general(text: str) -> None:
+    _chunk_and_upload_text(
+        text=text,
+        settings=general_rag_settings,
+        namespace=general_rag_settings.NAMESPACE_ID,
+    )
+
+
+def _chunk_and_upload_text(text: str, settings: RAGSettings, namespace: str) -> None:
+    chunks = chunk_text(
+        text=text,
+        max_tokens=settings.MAX_TOKENS,
+        overlap=settings.OVERLAP,
+    )
+    vectors_to_upsert: list[tuple[str, list[float], dict[str, str]]] = []
+    for chunk_index, chunk in enumerate(chunks):
+        vector_id = settings.VECTOR_ID.format(
+            doc_index=0,
+            chunk_index=chunk_index,
+        )
+        vector = embed_text(text=chunk)
+        metadata = {'text': chunk}
+        vectors_to_upsert.append((vector_id, vector, metadata))
+    upload_vectors(namespace=namespace, vectors=vectors_to_upsert)
 
 
 def chunk_text(text: str, max_tokens: int, overlap: int) -> list[str]:
@@ -53,27 +88,47 @@ def embed_text(text: str) -> list[float]:
     return get_embedding(text=text)
 
 
-def upload_vectors_for_business(
+def get_context_for_business(
     business_id: int,
-    vectors: list[tuple[str, list[float], dict[str, str]]],
-) -> None:
-    """Upload vectors to Pinecone."""
-    upload_vectors(
-        namespace=rag_settings.NAMESPACE_ID.format(business_id=business_id),
-        vectors=vectors,
+    query: str,
+    should_include_general_rag: bool = False,
+) -> str:
+    """Get context for a business based on the query."""
+    context_vectors = search_vectors_for_business(
+        business_id=business_id,
+        query=query,
+    )
+    context_str = '\n'.join(context_vectors)
+    general_context_str = ''
+    if should_include_general_rag:
+        general_context_vectors = search_vectors_for_general(query=query)
+        general_context_str = '\n'.join(general_context_vectors)
+
+    return (
+        f'Información recuperada del sistema RAG:\n\n {context_str}\n\n '
+        f'{general_context_str}\n\n Instrucción: Con base en la información anterior '
+        '(solo si es relevante para la respuesta) y tu propio razonamiento, responde a '
+        'la pregunta.'
     )
 
 
-def search_vectors_for_business(
-    business_id: int,
-    query: str,
-) -> list[str]:
+def search_vectors_for_business(business_id: int, query: str) -> list[str]:
     """Search vectors in Pinecone."""
     query_vector = embed_text(query)
     return search_vectors(
         namespace=rag_settings.NAMESPACE_ID.format(business_id=business_id),
         query_vector=query_vector,
         top_k=rag_settings.TOP_K,
+    )
+
+
+def search_vectors_for_general(query: str) -> list[str]:
+    """Search vectors in Pinecone for general research."""
+    query_vector = embed_text(query)
+    return search_vectors(
+        namespace=general_rag_settings.NAMESPACE_ID,
+        query_vector=query_vector,
+        top_k=general_rag_settings.TOP_K,
     )
 
 
