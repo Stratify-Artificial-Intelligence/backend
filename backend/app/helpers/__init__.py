@@ -1,3 +1,9 @@
+from .helpers_chat import (
+    add_message_to_external_chat,
+    add_store_message_and_get_store_response,
+    create_chat_in_service,
+    get_chat_title,
+)
 from .helpers_payment import (
     create_checkout_session,
     get_checkout_session,
