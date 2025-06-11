@@ -10,21 +10,19 @@ from app.authorization_server import (
     user_can_publish_message,
     user_can_read_chat,
 )
-from app.deps import (
-    add_message_to_external_chat,
-    add_store_message_and_get_store_response,
-    create_chat_in_service,
-    get_business,
-    get_chat_title,
-    get_current_active_user,
-    get_repository,
-)
+from app.deps import get_business, get_current_active_user, get_repository
 from app.domain import (
     Chat as ChatDomain,
     ChatMessage as ChatMessageDomain,
     User as UserDomain,
 )
 from app.enums import ChatMessageSenderEnum
+from app.helpers import (
+    add_message_to_external_chat,
+    add_store_message_and_get_store_response,
+    create_chat_in_service,
+    get_chat_title,
+)
 from app.repositories import (
     ChatRepository,
     BusinessRepository,
