@@ -29,10 +29,7 @@ def deep_research_for_business(
     )
 
 
-def chunk_and_upload_text_for_business(
-    text: str,
-    business_id: int,
-) -> None:
+def chunk_and_upload_text_for_business(text: str, business_id: int) -> None:
     _chunk_and_upload_text(
         text=text,
         settings=rag_settings,
@@ -40,9 +37,7 @@ def chunk_and_upload_text_for_business(
     )
 
 
-def chunk_and_upload_text_for_general(
-    text: str,
-) -> None:
+def chunk_and_upload_text_for_general(text: str) -> None:
     _chunk_and_upload_text(
         text=text,
         settings=general_rag_settings,
@@ -50,11 +45,7 @@ def chunk_and_upload_text_for_general(
     )
 
 
-def _chunk_and_upload_text(
-    text: str,
-    settings: RAGSettings,
-    namespace: str,
-) -> None:
+def _chunk_and_upload_text(text: str, settings: RAGSettings, namespace: str) -> None:
     chunks = chunk_text(
         text=text,
         max_tokens=settings.MAX_TOKENS,
@@ -97,16 +88,47 @@ def embed_text(text: str) -> list[float]:
     return get_embedding(text=text)
 
 
-def search_vectors_for_business(
+def get_context_for_business(
     business_id: int,
     query: str,
-) -> list[str]:
+    should_include_general_rag: bool = False,
+) -> str:
+    """Get context for a business based on the query."""
+    context_vectors = search_vectors_for_business(
+        business_id=business_id,
+        query=query,
+    )
+    context_str = '\n'.join(context_vectors)
+    general_context_str = ''
+    if should_include_general_rag:
+        general_context_vectors = search_vectors_for_general(query=query)
+        general_context_str = '\n'.join(general_context_vectors)
+
+    return (
+        f'Información recuperada del sistema RAG:\n\n {context_str}\n\n '
+        f'{general_context_str}\n\n Instrucción: Con base en la información anterior '
+        '(solo si es relevante para la respuesta) y tu propio razonamiento, responde a '
+        'la pregunta.'
+    )
+
+
+def search_vectors_for_business(business_id: int, query: str) -> list[str]:
     """Search vectors in Pinecone."""
     query_vector = embed_text(query)
     return search_vectors(
         namespace=rag_settings.NAMESPACE_ID.format(business_id=business_id),
         query_vector=query_vector,
         top_k=rag_settings.TOP_K,
+    )
+
+
+def search_vectors_for_general(query: str) -> list[str]:
+    """Search vectors in Pinecone for general research."""
+    query_vector = embed_text(query)
+    return search_vectors(
+        namespace=general_rag_settings.NAMESPACE_ID,
+        query_vector=query_vector,
+        top_k=general_rag_settings.TOP_K,
     )
 
 

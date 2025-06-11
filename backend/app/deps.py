@@ -13,12 +13,13 @@ from app.domain import (
     ChatMessage as ChatMessageDomain,
     User as UserDomain,
 )
-from app.enums import ChatMessageSenderEnum
-from app.helpers.helpers_rag import search_vectors_for_business
+from app.enums import ChatMessageSenderEnum, UserPlanEnum
+from app.helpers import get_context_for_business
 from app.repositories import (
     BaseRepository,
     BusinessRepository,
     ChatRepository,
+    PlanRepository,
     UserRepository,
 )
 from app.schemas import TokenData
@@ -91,18 +92,25 @@ async def get_business(
 async def add_store_message_and_get_store_response(
     chat: ChatDomain,
     message: ChatMessageDomain,
+    user: UserDomain,
     chats_repo: ChatRepository,
+    plans_repo: PlanRepository,
 ) -> ChatMessageDomain | None:
     """Register message and get the AI response."""
     await chats_repo.add_message(message)
-    context_vectors = search_vectors_for_business(
+    should_context_include_general_rag = await should_chat_context_include_general_rag(
+        user=user,
+        plans_repo=plans_repo,
+    )
+    context = get_context_for_business(
         business_id=chat.business_id,
         query=message.content,
+        should_include_general_rag=should_context_include_general_rag,
     )
     response_content = await add_message_to_chat_and_get_response(
         chat_internal_id=chat.internal_id,
         content=message.content,
-        context_vectors=context_vectors,
+        context=context,
     )
     # ToDo (pduran): Parallelize these two operations
     # _, response_content = await asyncio.gather(
@@ -143,3 +151,15 @@ async def get_chat_title(business: BusinessDomain, chats_repo: ChatRepository) -
     business_chats = await chats_repo.get_multi(business_id=business.id)
     num_chat = len(business_chats) + 1
     return f'Chat {num_chat}'
+
+
+async def should_chat_context_include_general_rag(
+    user: UserDomain,
+    plans_repo: PlanRepository,
+) -> bool:
+    """Determine if the general RAG should be included in chat context"""
+    return (
+        user.plan_id is not None
+        and (plan := await plans_repo.get(plan_id=user.plan_id)) is not None
+        and plan.name == UserPlanEnum.CEO
+    )

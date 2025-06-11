@@ -25,7 +25,11 @@ from app.domain import (
     User as UserDomain,
 )
 from app.enums import ChatMessageSenderEnum
-from app.repositories import ChatRepository, BusinessRepository
+from app.repositories import (
+    ChatRepository,
+    BusinessRepository,
+    PlanRepository,
+)
 from app.schemas import Chat, ChatBase, ChatMessage, ChatMessageContent
 
 router = APIRouter(
@@ -148,6 +152,7 @@ async def add_message(
     message_content: ChatMessageContent,
     business_repo: BusinessRepository = Depends(get_repository(BusinessRepository)),
     chats_repo: ChatRepository = Depends(get_repository(ChatRepository)),
+    plans_repo: PlanRepository = Depends(get_repository(PlanRepository)),
     current_user: UserDomain = Depends(get_current_active_user),
 ):
     """Add message to a chat with user as sender."""
@@ -172,7 +177,9 @@ async def add_message(
     response_message = await add_store_message_and_get_store_response(
         chat=chat,
         message=message,
+        user=current_user,
         chats_repo=chats_repo,
+        plans_repo=plans_repo,
     )
     if response_message is None:
         raise HTTPException(
