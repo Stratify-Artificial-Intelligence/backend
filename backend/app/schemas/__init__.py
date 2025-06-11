@@ -8,7 +8,12 @@ from .business import (
     EstablishedBusinessBase,
     EstablishedBusinessPartialUpdate,
 )
-from .business_research import BusinessResearch, BusinessResearchParams
+from .business_research import (
+    BusinessResearch,
+    BusinessResearchParams,
+    GeneralResearch,
+    GeneralResearchParams,
+)
 from .chat import Chat, ChatBase, ChatMessage, ChatMessageContent
 from .errors import (
     HTTP400BadRequest,

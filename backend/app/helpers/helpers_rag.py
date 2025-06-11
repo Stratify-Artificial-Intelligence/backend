@@ -9,10 +9,11 @@ from app.services.pinecone import search_vectors, upload_vectors
 
 from tiktoken import encoding_for_model
 
-from app.settings import OpenAIEmbeddingSettings, RAGSettings
+from app.settings import GeneralRAGSettings, OpenAIEmbeddingSettings, RAGSettings
 
 open_ai_embedding_settings = OpenAIEmbeddingSettings()
 rag_settings = RAGSettings()
+general_rag_settings = GeneralRAGSettings()
 
 
 def deep_research_for_business(
@@ -26,6 +27,49 @@ def deep_research_for_business(
         prompt=f'{research_context} {research_instructions}',
         max_tokens=params.max_tokens,
     )
+
+
+def chunk_and_upload_text_for_business(
+    text: str,
+    business_id: int,
+) -> None:
+    _chunk_and_upload_text(
+        text=text,
+        settings=rag_settings,
+        namespace=rag_settings.NAMESPACE_ID.format(business_id=business_id),
+    )
+
+
+def chunk_and_upload_text_for_general(
+    text: str,
+) -> None:
+    _chunk_and_upload_text(
+        text=text,
+        settings=general_rag_settings,
+        namespace=general_rag_settings.NAMESPACE_ID,
+    )
+
+
+def _chunk_and_upload_text(
+    text: str,
+    settings: RAGSettings,
+    namespace: str,
+) -> None:
+    chunks = chunk_text(
+        text=text,
+        max_tokens=settings.MAX_TOKENS,
+        overlap=settings.OVERLAP,
+    )
+    vectors_to_upsert: list[tuple[str, list[float], dict[str, str]]] = []
+    for chunk_index, chunk in enumerate(chunks):
+        vector_id = settings.VECTOR_ID.format(
+            doc_index=0,
+            chunk_index=chunk_index,
+        )
+        vector = embed_text(text=chunk)
+        metadata = {'text': chunk}
+        vectors_to_upsert.append((vector_id, vector, metadata))
+    upload_vectors(namespace=namespace, vectors=vectors_to_upsert)
 
 
 def chunk_text(text: str, max_tokens: int, overlap: int) -> list[str]:
@@ -51,17 +95,6 @@ def chunk_text(text: str, max_tokens: int, overlap: int) -> list[str]:
 def embed_text(text: str) -> list[float]:
     """Embed text using the OpenAI API."""
     return get_embedding(text=text)
-
-
-def upload_vectors_for_business(
-    business_id: int,
-    vectors: list[tuple[str, list[float], dict[str, str]]],
-) -> None:
-    """Upload vectors to Pinecone."""
-    upload_vectors(
-        namespace=rag_settings.NAMESPACE_ID.format(business_id=business_id),
-        vectors=vectors,
-    )
 
 
 def search_vectors_for_business(

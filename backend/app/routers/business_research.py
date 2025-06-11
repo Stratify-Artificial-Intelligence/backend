@@ -3,29 +3,55 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 
 from app import schemas
-from app.authorization_server import user_can_read_business
+from app.authorization_server import RoleChecker, user_can_read_business
 from app.deps import get_current_active_user, get_repository
 from app.domain import User as UserDomain
+from app.enums import UserRoleEnum
 from app.helpers import (
-    chunk_text,
+    chunk_and_upload_text_for_business,
+    chunk_and_upload_text_for_general,
     deep_research_for_business,
-    embed_text,
-    upload_vectors_for_business,
 )
 from app.repositories import BusinessRepository
-from app.schemas import BusinessResearch, BusinessResearchParams
+from app.schemas import (
+    BusinessResearch,
+    BusinessResearchParams,
+    GeneralResearch,
+    GeneralResearchParams,
+)
 from app.settings import RAGSettings
 
 rag_settings = RAGSettings()
 
 router = APIRouter(
-    tags=['Business research'],
-    prefix='/businesses/{business_id}/researches',
+    tags=['Research'],
+    prefix='/researches',
 )
 
 
 @router.post(
-    '',
+    '/general',
+    summary='Create a general research',
+    response_model=GeneralResearch,
+    status_code=status.HTTP_201_CREATED,
+    responses={
+        status.HTTP_401_UNAUTHORIZED: {'model': schemas.HTTP401Unauthorized},
+        status.HTTP_403_FORBIDDEN: {'model': schemas.HTTP403Forbidden},
+    },
+    dependencies=[Depends(RoleChecker(allowed_roles=[UserRoleEnum.ADMIN]))],
+)
+async def create_general_research(
+    research_params: GeneralResearchParams,
+):
+    """Create a general research."""
+    business_research = GeneralResearch(research=research_params.research)
+    if research_params.store_result:
+        chunk_and_upload_text_for_general(text=business_research.research)
+    return business_research
+
+
+@router.post(
+    '/businesses/{business_id}',
     summary='Create a research for a business',
     response_model=BusinessResearch,
     status_code=status.HTTP_201_CREATED,
@@ -59,21 +85,9 @@ async def create_business_research(
     )
 
     if research_params.store_result:
-        research = business_research.research
-        chunks = chunk_text(
-            text=research,
-            max_tokens=rag_settings.MAX_TOKENS,
-            overlap=rag_settings.OVERLAP,
+        chunk_and_upload_text_for_business(
+            text=business_research.research,
+            business_id=business_id,
         )
-        vectors_to_upsert: list[tuple[str, list[float], dict[str, str]]] = []
-        for chunk_index, chunk in enumerate(chunks):
-            vector_id = rag_settings.VECTOR_ID.format(
-                doc_index=0,
-                chunk_index=chunk_index,
-            )
-            vector = embed_text(text=chunk)
-            metadata = {'text': chunk}
-            vectors_to_upsert.append((vector_id, vector, metadata))
-        upload_vectors_for_business(business_id=business_id, vectors=vectors_to_upsert)
 
     return business_research

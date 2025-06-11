@@ -1,6 +1,15 @@
 from pydantic import BaseModel
 
 
+class GeneralResearchParams(BaseModel):
+    research: str
+    store_result: bool = True
+
+
+class GeneralResearch(BaseModel):
+    research: str
+
+
 class BusinessResearchParams(BaseModel):
     max_tokens: int
     store_result: bool = True
