@@ -1,4 +1,3 @@
-from datetime import timedelta
 from typing import AsyncGenerator
 
 import pytest
@@ -8,7 +7,6 @@ from httpx import ASGITransport, AsyncClient
 from app.domain import User as UserDomain
 from app.enums import UserRoleEnum
 from app.main import app
-from app.security import create_access_token
 from app.settings import SecuritySettings
 
 
@@ -87,12 +85,9 @@ def test_user() -> UserDomain:
 
 @pytest_asyncio.fixture()
 async def superuser_token_headers() -> dict[str, str | None]:
-    return await _get_superuser_token_headers()
-
-
-async def _get_superuser_token_headers() -> dict[str, str | None]:
-    auth_token = create_access_token(
-        username=settings.FIRST_SUPERUSER_USERNAME,
-        expiration_delta=timedelta(minutes=10),
+    auth_token = (
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG'
+        '4gRG9lIiwiYWRtaW4iOnRydWUsImlhdCI6MTUxNjIzOTAyMn0.KMUFsIDTnFmyG3nMiGM6H9FNFUROf'
+        '3wh7SmqJp-QV30'
     )
     return {'Authorization': f'Bearer {auth_token}'}

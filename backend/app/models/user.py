@@ -10,9 +10,9 @@ class User(Base):
 
     id = Column(Integer, primary_key=True)
     username = Column(String(50), unique=True, nullable=False)
-    email = Column(String(50))
+    email = Column(String(50), unique=True, nullable=False)
     full_name = Column(String(50))
-    hashed_password = Column(String(100), nullable=False)
+    external_id = Column(String(50), unique=True, nullable=True)
     is_active = Column(Boolean, default=True)
     role: Column[Enum] = Column(
         Enum(

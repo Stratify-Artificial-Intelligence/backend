@@ -6,7 +6,6 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.routers import (
-    admin_router,
     business_router,
     business_research_router,
     chats_router,
@@ -30,7 +29,6 @@ app.add_middleware(
     allow_headers=['*'],
 )
 
-app.include_router(admin_router)
 app.include_router(business_router)
 app.include_router(business_research_router)
 app.include_router(chats_router)

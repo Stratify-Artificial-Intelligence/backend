@@ -1,4 +1,4 @@
-from pydantic import BaseModel, ConfigDict, SecretStr
+from pydantic import BaseModel, ConfigDict, SecretStr, model_validator
 
 from app.enums import UserRoleEnum
 
@@ -31,7 +31,20 @@ class UserCreate(UserBaseExtended):
 
 
 class UserBaseCreate(UserBase):
-    password: Password
+    password: Password | None = None
+    external_id: str | None = None
+
+    @model_validator(mode='after')
+    def validate_password_xor_external_id(cls):
+        if not (cls.password or cls.external_id):
+            raise ValueError('Either password or external_id must be provided.')
+        if cls.password and cls.external_id:
+            raise ValueError('Only one of password or external_id can be provided.')
+        return cls
+
+
+class UserBaseCreateWithExternalId(UserBase):
+    external_id: str
 
 
 class UserMePartialUpdate(BaseModel):

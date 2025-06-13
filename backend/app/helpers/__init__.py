@@ -1,3 +1,4 @@
+from .helpers_auth import check_auth_token, create_user_in_auth_service
 from .helpers_chat import (
     add_message_to_external_chat,
     add_store_message_and_get_store_response,
