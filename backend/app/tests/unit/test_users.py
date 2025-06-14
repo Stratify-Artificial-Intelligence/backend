@@ -59,7 +59,7 @@ async def test_signup_user(
     del data['plan_id']
     del data['payment_service_user_id']
     del data['payment_service_subscription_id']
-    data['password'] = 'test_password_3'
+    data['external_id'] = 'test_external_id_3'
     actual_response = await async_client.post(
         '/users/signup',
         json=data,
@@ -84,7 +84,7 @@ async def test_signup_user_already_exists(
     del data['plan_id']
     del data['payment_service_user_id']
     del data['payment_service_subscription_id']
-    data['password'] = 'test_password_3'
+    data['external_id'] = 'test_external_id_3'
     response = await async_client.post(
         '/users/signup',
         json=data,
@@ -338,7 +338,7 @@ async def test_create_user(
     del data['id']
     del data['payment_service_user_id']
     del data['payment_service_subscription_id']
-    data['password'] = 'test_password_3'
+    data['external_id'] = 'test_external_id_3'
     actual_response = await async_client.post(
         '/users',
         json=data,
@@ -366,7 +366,7 @@ async def test_create_user_already_exists(
     del data['id']
     del data['payment_service_user_id']
     del data['payment_service_subscription_id']
-    data['password'] = 'test_password_3'
+    data['external_id'] = 'test_external_id_3'
     response = await async_client.post(
         '/users',
         json=data,

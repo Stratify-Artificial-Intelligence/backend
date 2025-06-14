@@ -35,12 +35,12 @@ class UserBaseCreate(UserBase):
     external_id: str | None = None
 
     @model_validator(mode='after')
-    def validate_password_xor_external_id(cls):
-        if not (cls.password or cls.external_id):
+    def validate_password_xor_external_id(self):
+        if not (self.password or self.external_id):
             raise ValueError('Either password or external_id must be provided.')
-        if cls.password and cls.external_id:
+        if self.password and self.external_id:
             raise ValueError('Only one of password or external_id can be provided.')
-        return cls
+        return self
 
 
 class UserBaseCreateWithExternalId(UserBase):

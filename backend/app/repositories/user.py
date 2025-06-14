@@ -129,7 +129,6 @@ class UserRepository(BaseRepository):
                 'email': user.email,
                 'full_name': user.full_name,
                 'is_active': user.is_active,
-                # 'password': user.hashed_password,
                 'role': user.role,
                 'plan_id': user.plan_id,
                 'payment_service_user_id': user.payment_service_user_id,
