@@ -2,8 +2,6 @@ import secrets
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-from app.enums import AuthMethodEnum
-
 
 class SecuritySettings(BaseSettings):
     """General settings for the application."""

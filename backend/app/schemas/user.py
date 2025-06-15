@@ -39,11 +39,11 @@ class UserSecret(BaseModel):
         return self
 
 
-class UserCreate(UserBaseExtended, UserSecret):
+class UserCreate(UserSecret, UserBaseExtended):
     pass
 
 
-class UserBaseCreate(UserBase, UserSecret):
+class UserBaseCreate(UserSecret, UserBase):
     pass
 
 

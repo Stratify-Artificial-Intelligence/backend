@@ -42,8 +42,12 @@ async def signup_user(
             email=user.email,
             password=user.password.get_secret_value(),
         )
-    else:
+    elif user.external_id is not None:
         external_id = user.external_id
+    else:
+        raise NotImplementedError(
+            'User creation without password or external_id is not implemented.'
+        )
     user_to_create = UserWithSecretDomain(
         username=user.username,
         email=user.email,
@@ -173,8 +177,12 @@ async def create_user(
             email=user.email,
             password=user.password.get_secret_value(),
         )
-    else:
+    elif user.external_id is not None:
         external_id = user.external_id
+    else:
+        raise NotImplementedError(
+            'User creation without password or external_id is not implemented.'
+        )
     user_to_create = UserWithSecretDomain(
         username=user.username,
         email=user.email,

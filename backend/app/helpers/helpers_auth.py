@@ -11,7 +11,7 @@ auth_scheme = HTTPBearer(scheme_name='BearerAuth')
 
 
 def check_auth_token(
-    token: str | HTTPAuthorizationCredentials = Depends(auth_scheme),
+    token: HTTPAuthorizationCredentials = Depends(auth_scheme),
 ) -> TokenData:
     """Check and decode the provided authentication token."""
     token_sub = verify_and_decode_auth_token(token=token.credentials)

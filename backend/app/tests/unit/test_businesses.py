@@ -5,18 +5,12 @@ import pytest
 from fastapi import status
 from httpx import AsyncClient
 
-from app.deps import get_current_active_user
 from app.domain import (
     BusinessIdea as BusinessIdeaDomain,
     EstablishedBusiness as EstablishedBusinessDomain,
 )
 from app.enums import BusinessStageEnum, CurrencyUnitEnum
-from app.main import app
-from app.repositories import BusinessRepository, UserRepository
-from app.tests.conftest import test_user
-
-
-# from app.tests.conftest import test_user
+from app.repositories import BusinessRepository
 
 
 @pytest.fixture
