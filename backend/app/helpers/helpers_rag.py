@@ -60,7 +60,11 @@ def _chunk_and_upload_text(text: str, settings: RAGSettings, namespace: str) -> 
         vector = embed_text(text=chunk)
         metadata = {'text': chunk}
         vectors_to_upsert.append((vector_id, vector, metadata))
-    upload_vectors(namespace=namespace, vectors=vectors_to_upsert)
+    upload_vectors(
+        index_name=settings.INDEX_NAME,
+        namespace=namespace,
+        vectors=vectors_to_upsert,
+    )
 
 
 def chunk_text(text: str, max_tokens: int, overlap: int) -> list[str]:
@@ -116,6 +120,7 @@ def search_vectors_for_business(business_id: int, query: str) -> list[str]:
     """Search vectors in Pinecone."""
     query_vector = embed_text(query)
     return search_vectors(
+        index_name=rag_settings.INDEX_NAME,
         namespace=rag_settings.NAMESPACE_ID.format(business_id=business_id),
         query_vector=query_vector,
         top_k=rag_settings.TOP_K,
@@ -126,6 +131,7 @@ def search_vectors_for_general(query: str) -> list[str]:
     """Search vectors in Pinecone for general research."""
     query_vector = embed_text(query)
     return search_vectors(
+        index_name=general_rag_settings.INDEX_NAME,
         namespace=general_rag_settings.NAMESPACE_ID,
         query_vector=query_vector,
         top_k=general_rag_settings.TOP_K,
