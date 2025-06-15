@@ -168,12 +168,19 @@ async def create_user(
     users_repo: UserRepository = Depends(get_repository(UserRepository)),
 ):
     """Create a new user."""
+    if user.password is not None:
+        external_id = create_user_in_auth_service(
+            email=user.email,
+            password=user.password.get_secret_value(),
+        )
+    else:
+        external_id = user.external_id
     user_to_create = UserWithSecretDomain(
         username=user.username,
         email=user.email,
         full_name=user.full_name,
         is_active=user.is_active,
-        external_id=user.password.get_secret_value(),
+        external_id=external_id,
         role=user.role,
     )
     try:

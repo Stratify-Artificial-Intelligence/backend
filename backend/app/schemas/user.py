@@ -26,11 +26,7 @@ class Password(SecretStr):
     max_length = 50
 
 
-class UserCreate(UserBaseExtended):
-    password: Password
-
-
-class UserBaseCreate(UserBase):
+class UserSecret(BaseModel):
     password: Password | None = None
     external_id: str | None = None
 
@@ -43,8 +39,12 @@ class UserBaseCreate(UserBase):
         return self
 
 
-class UserBaseCreateWithExternalId(UserBase):
-    external_id: str
+class UserCreate(UserBaseExtended, UserSecret):
+    pass
+
+
+class UserBaseCreate(UserBase, UserSecret):
+    pass
 
 
 class UserMePartialUpdate(BaseModel):

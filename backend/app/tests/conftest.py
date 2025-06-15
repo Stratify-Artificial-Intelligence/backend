@@ -4,6 +4,7 @@ import pytest
 import pytest_asyncio
 from httpx import ASGITransport, AsyncClient
 
+from app.deps import get_current_active_user
 from app.domain import User as UserDomain
 from app.enums import UserRoleEnum
 from app.main import app
@@ -81,6 +82,16 @@ def test_user() -> UserDomain:
         is_active=True,
         role=UserRoleEnum.ADMIN,
     )
+
+
+@pytest.fixture
+def override_get_current_active_user(test_user):
+    async def _override():
+        return test_user
+
+    app.dependency_overrides[get_current_active_user] = _override
+    yield
+    app.dependency_overrides.clear()
 
 
 @pytest_asyncio.fixture()
