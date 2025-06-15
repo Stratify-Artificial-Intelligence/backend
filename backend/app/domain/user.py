@@ -17,7 +17,7 @@ class UserBase(BaseModel):
 
 
 class UserWithSecret(UserBase):
-    password: str
+    external_id: str
 
 
 class User(UserBase):

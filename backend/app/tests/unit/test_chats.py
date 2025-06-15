@@ -12,7 +12,7 @@ from app.domain import (
     ChatMessage as ChatMessageDomain,
 )
 from app.enums import BusinessStageEnum, ChatMessageSenderEnum
-from app.repositories import ChatRepository, UserRepository, BusinessRepository
+from app.repositories import ChatRepository, BusinessRepository
 from app.services import openai
 from app import deps
 
@@ -80,19 +80,16 @@ def test_chat_2() -> ChatDomain:
 
 @patch.object(ChatRepository, 'get_multi')
 @patch.object(BusinessRepository, 'get')
-@patch.object(UserRepository, 'get_by_username')
 async def test_list_chats(
-    mock_get_user,
     mock_get_business,
     mock_get_multi,
-    test_user,
     test_business,
     test_chat,
     test_chat_2,
+    override_get_current_active_user,
     superuser_token_headers,
     async_client: AsyncClient,
 ):
-    mock_get_user.return_value = test_user
     mock_get_business.return_value = test_business
     mock_get_multi.return_value = [test_chat, test_chat_2]
 
@@ -121,19 +118,16 @@ async def test_list_chats(
 
 @patch.object(ChatRepository, 'get')
 @patch.object(BusinessRepository, 'get')
-@patch.object(UserRepository, 'get_by_username')
 async def test_get_chat_by_id(
-    mock_get_user,
     mock_get_business,
     mock_get,
-    test_user,
     test_business,
     test_chat,
+    override_get_current_active_user,
     superuser_token_headers,
     async_client: AsyncClient,
 ):
     # ToDo (pduran): Add messages to the Chat.
-    mock_get_user.return_value = test_user
     mock_get_business.return_value = test_business
     mock_get.return_value = test_chat
 
@@ -162,17 +156,14 @@ async def test_get_chat_by_id(
 
 @patch.object(ChatRepository, 'get')
 @patch.object(BusinessRepository, 'get')
-@patch.object(UserRepository, 'get_by_username')
 async def test_get_chat_by_id_not_found(
-    mock_get_user,
     mock_get_business,
     mock_get,
-    test_user,
     test_business,
+    override_get_current_active_user,
     superuser_token_headers,
     async_client: AsyncClient,
 ):
-    mock_get_user.return_value = test_user
     mock_get_business.return_value = test_business
     mock_get.return_value = None
 
@@ -193,19 +184,16 @@ async def test_get_chat_by_id_not_found(
 @patch.object(deps, 'create_chat_in_service')
 @patch.object(ChatRepository, 'create')
 @patch.object(BusinessRepository, 'get')
-@patch.object(UserRepository, 'get_by_username')
 async def test_create_chat(
-    mock_get_user,
     mock_get_business,
     mock_create,
     mock_create_chat_openai,
-    test_user,
     test_business,
     test_chat_2,
+    override_get_current_active_user,
     superuser_token_headers,
     async_client: AsyncClient,
 ):
-    mock_get_user.return_value = test_user
     mock_get_business.return_value = test_business
     mock_create.return_value = test_chat_2
     mock_create_chat_openai.return_value = 'id_test'
@@ -267,17 +255,14 @@ async def test_create_message(
 )
 @patch.object(ChatRepository, 'add_message')
 @patch.object(BusinessRepository, 'get')
-@patch.object(UserRepository, 'get_by_username')
 async def test_create_message_chat_not_found(
-    mock_get_user,
     mock_get_business,
     mock_add_message,
-    test_user,
     test_business,
+    override_get_current_active_user,
     superuser_token_headers,
     async_client: AsyncClient,
 ):
-    mock_get_user.return_value = test_user
     mock_get_business.return_value = test_business
     mock_add_message.return_value = None
 
@@ -294,16 +279,13 @@ async def test_create_message_chat_not_found(
 
 
 @patch.object(BusinessRepository, 'get')
-@patch.object(UserRepository, 'get_by_username')
 async def test_create_message_bad_request(
-    mock_get_user,
     mock_get_business,
-    test_user,
     test_business,
+    override_get_current_active_user,
     superuser_token_headers,
     async_client: AsyncClient,
 ):
-    mock_get_user.return_value = test_user
     mock_get_business.return_value = test_business
 
     expected_response = 'Field required'

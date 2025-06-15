@@ -59,7 +59,7 @@ async def test_signup_user(
     del data['plan_id']
     del data['payment_service_user_id']
     del data['payment_service_subscription_id']
-    data['password'] = 'test_password_3'
+    data['external_id'] = 'test_external_id_3'
     actual_response = await async_client.post(
         '/users/signup',
         json=data,
@@ -84,7 +84,7 @@ async def test_signup_user_already_exists(
     del data['plan_id']
     del data['payment_service_user_id']
     del data['payment_service_subscription_id']
-    data['password'] = 'test_password_3'
+    data['external_id'] = 'test_external_id_3'
     response = await async_client.post(
         '/users/signup',
         json=data,
@@ -109,15 +109,11 @@ async def test_signup_user_bad_request(
     assert expected_response == actual_response.json()['detail'][0]['msg']
 
 
-@patch.object(UserRepository, 'get_by_username')
 async def test_read_users_me(
-    mock_get_by_username,
-    test_user,
+    override_get_current_active_user,
     superuser_token_headers,
     async_client: AsyncClient,
 ):
-    mock_get_by_username.return_value = test_user
-
     expected_response = {
         'id': 1,
         'username': 'User A',
@@ -136,15 +132,13 @@ async def test_read_users_me(
 
 
 @patch.object(UserRepository, 'update')
-@patch.object(UserRepository, 'get_by_username')
 async def test_update_users_me(
-    mock_get_by_username,
     mock_update,
     test_user,
+    override_get_current_active_user,
     superuser_token_headers,
     async_client: AsyncClient,
 ):
-    mock_get_by_username.return_value = test_user
     updated_user = test_user.model_copy()
     updated_user.full_name = 'User A with new name'
     mock_update.return_value = updated_user
@@ -172,15 +166,12 @@ async def test_update_users_me(
 
 
 @patch.object(UserRepository, 'update')
-@patch.object(UserRepository, 'get_by_username')
 async def test_update_users_me_already_exists(
-    mock_get_by_username,
     mock_update,
-    test_user,
+    override_get_current_active_user,
     superuser_token_headers,
     async_client: AsyncClient,
 ):
-    mock_get_by_username.return_value = test_user
     mock_update.side_effect = ValueError('Username already exists')
 
     expected_response = {'detail': 'Username already exists'}
@@ -197,15 +188,12 @@ async def test_update_users_me_already_exists(
     assert expected_response == response.json()
 
 
-@patch.object(UserRepository, 'get_by_username')
 async def test_update_users_me_bad_request(
-    mock_get_by_username,
     test_user,
+    override_get_current_active_user,
     superuser_token_headers,
     async_client: AsyncClient,
 ):
-    mock_get_by_username.return_value = test_user
-
     expected_response = 'Extra inputs are not permitted'
     test_data = test_user.model_dump()
     actual_response = await async_client.patch(
@@ -219,16 +207,14 @@ async def test_update_users_me_bad_request(
 
 
 @patch.object(UserRepository, 'get_multi')
-@patch.object(UserRepository, 'get_by_username')
 async def test_list_users(
-    mock_get_by_username,
     mock_get_multi,
     test_user,
     test_user_2,
+    override_get_current_active_user,
     superuser_token_headers,
     async_client: AsyncClient,
 ):
-    mock_get_by_username.return_value = test_user
     mock_get_multi.return_value = [test_user, test_user_2]
 
     expected_response = [
@@ -261,16 +247,13 @@ async def test_list_users(
 
 
 @patch.object(UserRepository, 'get')
-@patch.object(UserRepository, 'get_by_username')
 async def test_read_user_by_id(
-    mock_get_by_username,
     mock_get,
-    test_user,
     test_user_2,
+    override_get_current_active_user,
     superuser_token_headers,
     async_client: AsyncClient,
 ):
-    mock_get_by_username.return_value = test_user
     mock_get.return_value = test_user_2
 
     expected_response = {
@@ -292,15 +275,12 @@ async def test_read_user_by_id(
 
 
 @patch.object(UserRepository, 'get')
-@patch.object(UserRepository, 'get_by_username')
 async def test_read_user_by_id_not_found(
-    mock_get_by_username,
     mock_get,
-    test_user,
+    override_get_current_active_user,
     superuser_token_headers,
     async_client: AsyncClient,
 ):
-    mock_get_by_username.return_value = test_user
     mock_get.return_value = None
 
     expected_response = {'detail': 'User not found'}
@@ -314,15 +294,13 @@ async def test_read_user_by_id_not_found(
 
 
 @patch.object(UserRepository, 'create')
-@patch.object(UserRepository, 'get_by_username')
 async def test_create_user(
-    mock_get_by_username,
     mock_create,
     test_user,
+    override_get_current_active_user,
     superuser_token_headers,
     async_client: AsyncClient,
 ):
-    mock_get_by_username.return_value = test_user
     mock_create.return_value = test_user
 
     expected_response = {
@@ -338,7 +316,7 @@ async def test_create_user(
     del data['id']
     del data['payment_service_user_id']
     del data['payment_service_subscription_id']
-    data['password'] = 'test_password_3'
+    data['external_id'] = 'test_external_id_3'
     actual_response = await async_client.post(
         '/users',
         json=data,
@@ -350,15 +328,13 @@ async def test_create_user(
 
 
 @patch.object(UserRepository, 'create')
-@patch.object(UserRepository, 'get_by_username')
 async def test_create_user_already_exists(
-    mock_get_by_username,
     mock_create,
     test_user,
+    override_get_current_active_user,
     superuser_token_headers,
     async_client: AsyncClient,
 ):
-    mock_get_by_username.return_value = test_user
     mock_create.side_effect = ValueError('Username already exists')
 
     expected_response = 'Username already exists'
@@ -366,7 +342,7 @@ async def test_create_user_already_exists(
     del data['id']
     del data['payment_service_user_id']
     del data['payment_service_subscription_id']
-    data['password'] = 'test_password_3'
+    data['external_id'] = 'test_external_id_3'
     response = await async_client.post(
         '/users',
         json=data,
@@ -377,14 +353,11 @@ async def test_create_user_already_exists(
     assert expected_response == response.json()['detail']
 
 
-@patch.object(UserRepository, 'get_by_username')
 async def test_create_user_bad_request(
-    mock_get_by_username,
-    test_user,
+    override_get_current_active_user,
     superuser_token_headers,
     async_client: AsyncClient,
 ):
-    mock_get_by_username.return_value = test_user
 
     expected_response = 'Field required'
     test_data = {'full_name': 'I am test B'}
@@ -400,17 +373,14 @@ async def test_create_user_bad_request(
 
 @patch.object(UserRepository, 'update')
 @patch.object(UserRepository, 'get')
-@patch.object(UserRepository, 'get_by_username')
 async def test_update_user(
-    mock_get_by_username,
     mock_get,
     mock_update,
-    test_user,
     test_user_2,
+    override_get_current_active_user,
     superuser_token_headers,
     async_client: AsyncClient,
 ):
-    mock_get_by_username.return_value = test_user
     mock_get.return_value = test_user_2
     updated_user = test_user_2.model_copy()
     updated_user.full_name = 'User B with new name'
@@ -440,17 +410,14 @@ async def test_update_user(
 
 @patch.object(UserRepository, 'update')
 @patch.object(UserRepository, 'get')
-@patch.object(UserRepository, 'get_by_username')
 async def test_update_user_already_exists(
-    mock_get_by_username,
     mock_get,
     mock_update,
-    test_user,
     test_user_2,
+    override_get_current_active_user,
     superuser_token_headers,
     async_client: AsyncClient,
 ):
-    mock_get_by_username.return_value = test_user
     mock_get.return_value = test_user_2
     mock_update.side_effect = ValueError('Username already exists')
 
@@ -468,16 +435,12 @@ async def test_update_user_already_exists(
     assert expected_response == response.json()
 
 
-@patch.object(UserRepository, 'get_by_username')
 async def test_update_user_bad_request(
-    mock_get_by_username,
-    test_user,
     test_user_2,
+    override_get_current_active_user,
     superuser_token_headers,
     async_client: AsyncClient,
 ):
-    mock_get_by_username.return_value = test_user
-
     expected_response = 'Extra inputs are not permitted'
     test_data = test_user_2.model_dump()
     actual_response = await async_client.patch(

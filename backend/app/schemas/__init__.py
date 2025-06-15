@@ -33,7 +33,7 @@ from .subscriptions import (
 )
 from .plans import Plan, PlanBase, PlanPartialUpdate
 from .test import Test, TestCreate, TestPartialUpdate
-from .token import Token, TokenData
+from .token import TokenData
 from .user import (
     User,
     UserBaseCreate,

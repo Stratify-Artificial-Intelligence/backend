@@ -7,7 +7,6 @@ from app.domain import (
 )
 from app.models import User
 from app.repositories import BaseRepository
-from app.security import get_password_hash, verify_password
 
 
 class UserRepository(BaseRepository):
@@ -25,6 +24,18 @@ class UserRepository(BaseRepository):
             return None
         return await self._user_model_to_domain(user)
 
+    async def get_by_email(self, email: str) -> UserDomain | None:
+        user = await self._get_by_email(email=email)
+        if user is None:
+            return None
+        return await self._user_model_to_domain(user)
+
+    async def get_by_external_id(self, external_id: str) -> UserDomain | None:
+        user = await self._get_by_external_id(external_id=external_id)
+        if user is None:
+            return None
+        return await self._user_model_to_domain(user)
+
     async def get_multi(
         self,
         *,
@@ -38,15 +49,15 @@ class UserRepository(BaseRepository):
         return [await self._user_model_to_domain(user) for user in users]
 
     async def create(self, user_in: UserWithSecretDomain) -> UserDomain:
-        existing_user = await self.get_by_username(username=user_in.username)
-        if existing_user is not None:
+        if await self.get_by_username(username=user_in.username):
             raise ValueError('Username already exists')
-        hashed_password = get_password_hash(user_in.password)
+        if await self.get_by_email(email=user_in.email):
+            raise ValueError('Email already exists')
         new_user = User(
             username=user_in.username,
-            hashed_password=hashed_password,
             email=user_in.email,
             full_name=user_in.full_name,
+            external_id=user_in.external_id,
             is_active=user_in.is_active,
             role=user_in.role,
             plan_id=user_in.plan_id,
@@ -66,16 +77,20 @@ class UserRepository(BaseRepository):
             return None
 
         user_dict = user_update.model_dump(exclude_unset=True)
-        try:
-            user_dict['hashed_password'] = get_password_hash(user_dict['password'])
-        except KeyError:
-            pass
 
         try:
             username = user_dict['username']
             existing_user = await self.get_by_username(username)
             if existing_user and existing_user.id != user_id:
                 raise ValueError('Username already exists')
+        except KeyError:
+            pass
+
+        try:
+            email = user_dict['email']
+            existing_user = await self.get_by_email(email)
+            if existing_user and existing_user.id != user_id:
+                raise ValueError('Email already exists')
         except KeyError:
             pass
 
@@ -95,6 +110,16 @@ class UserRepository(BaseRepository):
         result = await self._db.execute(query)
         return result.scalars().one_or_none()
 
+    async def _get_by_email(self, email: str) -> User | None:
+        query = select(User).where(User.email == email)
+        result = await self._db.execute(query)
+        return result.scalars().one_or_none()
+
+    async def _get_by_external_id(self, external_id: str) -> User | None:
+        query = select(User).where(User.external_id == external_id)
+        result = await self._db.execute(query)
+        return result.scalars().one_or_none()
+
     @staticmethod
     async def _user_model_to_domain(user: User) -> UserDomain:
         return UserDomain.model_validate(
@@ -104,25 +129,9 @@ class UserRepository(BaseRepository):
                 'email': user.email,
                 'full_name': user.full_name,
                 'is_active': user.is_active,
-                # 'password': user.hashed_password,
                 'role': user.role,
                 'plan_id': user.plan_id,
                 'payment_service_user_id': user.payment_service_user_id,
                 'payment_service_subscription_id': user.payment_service_subscription_id,
             }
         )
-
-    async def authenticate_user(
-        self,
-        username: str,
-        password: str,
-    ) -> UserDomain | None:
-        user = await self._get_by_username(username)
-        if not user:
-            return None
-        if not verify_password(
-            plain_password=password,
-            hashed_password=user.hashed_password,  # type: ignore[arg-type]
-        ):
-            return None
-        return user

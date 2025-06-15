@@ -1,10 +1,10 @@
 from pydantic import BaseModel
 
 
-class Token(BaseModel):
-    access_token: str
-    token_type: str
-
-
 class TokenData(BaseModel):
-    username: str
+    sub: str
+
+    @property
+    def user_external_id(self) -> str:
+        """Return the user external ID."""
+        return self.sub

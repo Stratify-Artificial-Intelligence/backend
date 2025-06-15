@@ -7,6 +7,7 @@ from app.authorization_server import RoleChecker
 from app.deps import get_current_active_user, get_repository
 from app.domain import User as UserDomain, UserWithSecret as UserWithSecretDomain
 from app.enums import UserRoleEnum
+from app.helpers import create_user_in_auth_service
 from app.repositories import UserRepository
 from app.schemas import (
     User,
@@ -36,12 +37,23 @@ async def signup_user(
     users_repo: UserRepository = Depends(get_repository(UserRepository)),
 ):
     """Sign up a new user."""
+    if user.password is not None:
+        external_id = create_user_in_auth_service(
+            email=user.email,
+            password=user.password.get_secret_value(),
+        )
+    elif user.external_id is not None:
+        external_id = user.external_id
+    else:
+        raise NotImplementedError(
+            'User creation without password or external_id is not implemented.'
+        )
     user_to_create = UserWithSecretDomain(
         username=user.username,
         email=user.email,
         full_name=user.full_name,
         is_active=True,
-        password=user.password.get_secret_value(),
+        external_id=external_id,
         role=UserRoleEnum.BASIC,
     )
     try:
@@ -160,12 +172,23 @@ async def create_user(
     users_repo: UserRepository = Depends(get_repository(UserRepository)),
 ):
     """Create a new user."""
+    if user.password is not None:
+        external_id = create_user_in_auth_service(
+            email=user.email,
+            password=user.password.get_secret_value(),
+        )
+    elif user.external_id is not None:
+        external_id = user.external_id
+    else:
+        raise NotImplementedError(
+            'User creation without password or external_id is not implemented.'
+        )
     user_to_create = UserWithSecretDomain(
         username=user.username,
         email=user.email,
         full_name=user.full_name,
         is_active=user.is_active,
-        password=user.password.get_secret_value(),
+        external_id=external_id,
         role=user.role,
     )
     try:

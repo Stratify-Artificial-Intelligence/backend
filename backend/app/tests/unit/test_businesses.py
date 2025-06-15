@@ -10,7 +10,7 @@ from app.domain import (
     EstablishedBusiness as EstablishedBusinessDomain,
 )
 from app.enums import BusinessStageEnum, CurrencyUnitEnum
-from app.repositories import BusinessRepository, UserRepository
+from app.repositories import BusinessRepository
 
 
 @pytest.fixture
@@ -58,17 +58,14 @@ def test_established_business() -> EstablishedBusinessDomain:
 
 
 @patch.object(BusinessRepository, 'get_multi')
-@patch.object(UserRepository, 'get_by_username')
 async def test_list_businesses(
-    mock_get_user,
     mock_get_multi,
-    test_user,
     test_business_idea,
     test_established_business,
+    override_get_current_active_user,
     superuser_token_headers,
     async_client: AsyncClient,
 ):
-    mock_get_user.return_value = test_user
     mock_get_multi.return_value = [test_business_idea, test_established_business]
 
     expected_response = [
@@ -109,16 +106,13 @@ async def test_list_businesses(
 
 
 @patch.object(BusinessRepository, 'get_idea')
-@patch.object(UserRepository, 'get_by_username')
 async def test_get_business_idea_by_id(
-    mock_get_user,
     mock_get,
-    test_user,
     test_business_idea,
+    override_get_current_active_user,
     superuser_token_headers,
     async_client: AsyncClient,
 ):
-    mock_get_user.return_value = test_user
     mock_get.return_value = test_business_idea
 
     expected_response = test_business_idea.model_dump()
@@ -132,15 +126,12 @@ async def test_get_business_idea_by_id(
 
 
 @patch.object(BusinessRepository, 'get_idea')
-@patch.object(UserRepository, 'get_by_username')
 async def test_get_business_idea_by_id_not_found(
-    mock_get_user,
     mock_get,
-    test_user,
+    override_get_current_active_user,
     superuser_token_headers,
     async_client: AsyncClient,
 ):
-    mock_get_user.return_value = test_user
     mock_get.return_value = None
 
     expected_response = {'detail': 'Business idea not found'}
@@ -154,16 +145,13 @@ async def test_get_business_idea_by_id_not_found(
 
 
 @patch.object(BusinessRepository, 'create_idea')
-@patch.object(UserRepository, 'get_by_username')
 async def test_create_business_idea(
-    mock_get_user,
     mock_create,
-    test_user,
     test_business_idea,
+    override_get_current_active_user,
     superuser_token_headers,
     async_client: AsyncClient,
 ):
-    mock_get_user.return_value = test_user
     mock_create.return_value = test_business_idea
 
     data = test_business_idea.model_dump()
@@ -179,16 +167,12 @@ async def test_create_business_idea(
     assert expected_response == actual_response.json()
 
 
-@patch.object(UserRepository, 'get_by_username')
 async def test_create_business_idea_bad_request(
-    mock_get_user,
-    test_user,
     test_business_idea,
+    override_get_current_active_user,
     superuser_token_headers,
     async_client: AsyncClient,
 ):
-    mock_get_user.return_value = test_user
-
     data = test_business_idea.model_dump()
     del data['id'], data['user_id'], data['stage'], data['name']
     expected_response = 'Field required'
@@ -203,16 +187,13 @@ async def test_create_business_idea_bad_request(
 
 
 @patch.object(BusinessRepository, 'get_established')
-@patch.object(UserRepository, 'get_by_username')
 async def test_get_established_business_by_id(
-    mock_get_user,
     mock_get,
-    test_user,
     test_established_business,
+    override_get_current_active_user,
     superuser_token_headers,
     async_client: AsyncClient,
 ):
-    mock_get_user.return_value = test_user
     mock_get.return_value = test_established_business
 
     expected_response = test_established_business.model_dump()
@@ -226,15 +207,12 @@ async def test_get_established_business_by_id(
 
 
 @patch.object(BusinessRepository, 'get_established')
-@patch.object(UserRepository, 'get_by_username')
 async def test_get_established_business_by_id_not_found(
-    mock_get_user,
     mock_get,
-    test_user,
+    override_get_current_active_user,
     superuser_token_headers,
     async_client: AsyncClient,
 ):
-    mock_get_user.return_value = test_user
     mock_get.return_value = None
 
     expected_response = {'detail': 'Established business not found'}
@@ -248,16 +226,13 @@ async def test_get_established_business_by_id_not_found(
 
 
 @patch.object(BusinessRepository, 'create_established')
-@patch.object(UserRepository, 'get_by_username')
 async def test_create_established_business(
-    mock_get_user,
     mock_create,
-    test_user,
     test_established_business,
+    override_get_current_active_user,
     superuser_token_headers,
     async_client: AsyncClient,
 ):
-    mock_get_user.return_value = test_user
     mock_create.return_value = test_established_business
 
     data = test_established_business.model_dump()
@@ -273,16 +248,12 @@ async def test_create_established_business(
     assert expected_response == actual_response.json()
 
 
-@patch.object(UserRepository, 'get_by_username')
 async def test_create_established_business_bad_request(
-    mock_get_user,
-    test_user,
     test_established_business,
+    override_get_current_active_user,
     superuser_token_headers,
     async_client: AsyncClient,
 ):
-    mock_get_user.return_value = test_user
-
     data = test_established_business.model_dump()
     del data['id'], data['user_id'], data['stage'], data['name']
     expected_response = 'Field required'

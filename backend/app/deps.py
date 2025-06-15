@@ -10,9 +10,9 @@ from app.domain import (
     EstablishedBusiness as EstablishedBusinessDomain,
     User as UserDomain,
 )
+from app.helpers import check_auth_token
 from app.repositories import BaseRepository, BusinessRepository, UserRepository
 from app.schemas import TokenData
-from app.security import check_auth_token
 
 
 def get_repository(repo_type: Type[BaseRepository]) -> Callable:
@@ -26,7 +26,7 @@ async def get_current_user(
     token_data: TokenData = Depends(check_auth_token),
     users_repo: UserRepository = Depends(get_repository(UserRepository)),
 ) -> UserDomain:
-    user = await users_repo.get_by_username(username=token_data.username)
+    user = await users_repo.get_by_external_id(external_id=token_data.user_external_id)
     if user is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
