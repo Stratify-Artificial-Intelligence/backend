@@ -61,12 +61,12 @@ async def custom_swagger_ui_html():
         # - Variables used in custom_swagger_init.js
         # - Custom JS and CSS to render the login with Google button.
         injected_scripts = f"""
-                    <script src='https://www.gstatic.com/firebasejs/10.10.0/firebase-app-compat.js'></script>
-                    <script src='https://www.gstatic.com/firebasejs/10.10.0/firebase-auth-compat.js'></script>
-                    <script>const FIREBASE_CONFIG = '{json.dumps(firebase_auth_settings.API_KEY)}'</script>
-                    <script src='/static/custom_swagger_ui/custom_swagger_init.js'></script>
-                    <link rel='stylesheet' href='/static/custom_swagger_ui/google_login_styles.css'/>
-                    """  # noqa: E501
+            <script src='https://www.gstatic.com/firebasejs/10.10.0/firebase-app-compat.js'></script>
+            <script src='https://www.gstatic.com/firebasejs/10.10.0/firebase-auth-compat.js'></script>
+            <script>const FIREBASE_CONFIG = '{json.dumps(firebase_auth_settings.API_KEY)}'</script>
+            <script src='/static/custom_swagger_ui/custom_swagger_init.js'></script>
+            <link rel='stylesheet' href='/static/custom_swagger_ui/google_login_styles.css'/>
+            """  # noqa: E501
         html = html.replace('</body>', f'{injected_scripts}</body>')
     return HTMLResponse(html)
 
