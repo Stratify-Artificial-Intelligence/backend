@@ -26,20 +26,20 @@ async def get_checkout_session(session_id: str) -> CheckoutSessionResponse | Non
     session = await stripe_get_checkout_session(session_id)
     if session is None:
         return None
-    if session.customer is None or isinstance(session.customer, str):
+    if not isinstance(session.customer, str):
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail='Checkout session does not have a valid customer.',
         )
-    if session.subscription is None or isinstance(session.subscription, str):
+    if not isinstance(session.subscription, str):
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail='Checkout session does not have a valid subscription.',
         )
     return CheckoutSessionResponse(
-        customer=session.customer.id,
+        customer=session.customer,
         status=session.payment_status,
-        subscription=session.subscription.id,
+        subscription=session.subscription,
     )
 
 
