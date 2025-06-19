@@ -6,7 +6,7 @@ from app.domain import (
     ChatMessage as ChatMessageDomain,
     User as UserDomain,
 )
-from app.enums import ChatMessageSenderEnum, UserPlanEnum
+from app.enums import ChatMessageSenderEnum, UserPlanEnum, UserRoleEnum
 from app.helpers.helpers_rag import get_context_for_business
 from app.repositories import ChatRepository, PlanRepository
 from app.services.openai import (
@@ -88,5 +88,5 @@ async def _should_chat_context_include_general_rag(
     return (
         user.plan_id is not None
         and (plan := await plans_repo.get(plan_id=user.plan_id)) is not None
-        and plan.name == UserPlanEnum.CEO
+        and (user.role == UserRoleEnum.ADMIN or plan.name == UserPlanEnum.CEO)
     )
