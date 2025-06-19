@@ -85,8 +85,8 @@ async def _should_chat_context_include_general_rag(
     plans_repo: PlanRepository,
 ) -> bool:
     """Determine if the general RAG should be included in chat context"""
-    return (
+    return user.role == UserRoleEnum.ADMIN or (
         user.plan_id is not None
         and (plan := await plans_repo.get(plan_id=user.plan_id)) is not None
-        and (user.role == UserRoleEnum.ADMIN or plan.name == UserPlanEnum.CEO)
+        and plan.name == UserPlanEnum.CEO
     )
