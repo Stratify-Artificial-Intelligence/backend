@@ -44,6 +44,7 @@ async def get_subscription(session_id: str):
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f'Session {session_id} not found',
         )
+    return response
 
 
 @router.post(
