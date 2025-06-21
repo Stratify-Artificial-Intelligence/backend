@@ -21,6 +21,7 @@ class Business(Base):
             values_callable=(lambda enum_class: [stage.value for stage in enum_class]),
         ),
     )
+    logo_url = Column(String, nullable=True)
     team_size = Column(Integer, nullable=True)
     team_description = Column(String, nullable=True)
     user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
