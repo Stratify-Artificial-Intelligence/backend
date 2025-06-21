@@ -81,6 +81,7 @@ class Business(BusinessBase):
     id: int
     user_id: int
     stage: BusinessStageEnum
+    logo_url: str | None = None
 
     model_config = ConfigDict(
         extra='forbid',
@@ -112,6 +113,7 @@ class BusinessIdea(BusinessIdeaBase):
     id: int
     user_id: int
     stage: BusinessStageEnum
+    logo_url: str | None = None
 
     model_config = ConfigDict(
         extra='forbid',
@@ -147,6 +149,7 @@ class EstablishedBusiness(EstablishedBusinessBase):
     id: int
     user_id: int
     stage: BusinessStageEnum
+    logo_url: str | None = None
 
     model_config = ConfigDict(
         extra='forbid',

@@ -17,6 +17,7 @@ class Business(BaseModel):
     description: str | None = None
     goal: str | None = None
     stage: BusinessStageEnum
+    logo_url: str | None = None
     team_size: int | None = None
     team_description: str | None = None
     user_id: int
