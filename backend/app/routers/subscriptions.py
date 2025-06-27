@@ -59,6 +59,8 @@ async def get_subscription(session_id: str):
 async def create_subscription(
     subscription_data: SubscriptionCreation,
     plans_repo: PlanRepository = Depends(get_repository(PlanRepository)),
+    users_repo: UserRepository = Depends(get_repository(UserRepository)),
+    current_user: UserDomain = Depends(get_current_active_user),
 ):
     """Subscribe user to a plan."""
     plan = await plans_repo.get(plan_id=subscription_data.plan_id)
@@ -69,8 +71,10 @@ async def create_subscription(
         )
     return await create_checkout_session(
         plan=plan,
+        user=current_user,
         success_url=subscription_data.success_url,
         cancel_url=subscription_data.cancel_url,
+        users_repo=users_repo,
     )
 
 
