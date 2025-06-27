@@ -43,6 +43,17 @@ class FirebaseAuthSettings(BaseSettings):
     model_config = SettingsConfigDict(env_file='.env', env_prefix='FIREBASE_AUTH_')
 
 
+class AWSStorageSettings(BaseSettings):
+    """Load AWS S3 storage settings from environment or .env."""
+
+    BUCKET_NAME: str = ''
+    REGION: str = ''
+    ACCESS_KEY_ID: str = ''
+    SECRET_ACCESS_KEY: str = ''
+
+    model_config = SettingsConfigDict(env_file='.env', env_prefix='STORAGE_')
+
+
 class OpenAISettings(BaseSettings):
     """Load Open AI settings from environment or .env."""
 

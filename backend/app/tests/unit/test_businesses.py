@@ -157,13 +157,15 @@ async def test_create_business_idea(
     mock_create.return_value = test_business_idea
 
     data = test_business_idea.model_dump()
-    del data['id'], data['user_id'], data['stage']
+    del data['id'], data['user_id'], data['stage'], data['logo_url']
     expected_response = test_business_idea.model_dump()
     actual_response = await async_client.post(
         '/businesses/ideas',
         json=data,
         headers=superuser_token_headers,
     )
+    print('patata')
+    print(actual_response.text)
 
     assert status.HTTP_201_CREATED == actual_response.status_code
     assert expected_response == actual_response.json()
@@ -238,7 +240,7 @@ async def test_create_established_business(
     mock_create.return_value = test_established_business
 
     data = test_established_business.model_dump()
-    del data['id'], data['user_id'], data['stage']
+    del data['id'], data['user_id'], data['stage'], data['logo_url']
     expected_response = test_established_business.model_dump()
     actual_response = await async_client.post(
         '/businesses/established',
