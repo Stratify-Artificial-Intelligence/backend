@@ -164,8 +164,6 @@ async def test_create_business_idea(
         json=data,
         headers=superuser_token_headers,
     )
-    print('patata')
-    print(actual_response.text)
 
     assert status.HTTP_201_CREATED == actual_response.status_code
     assert expected_response == actual_response.json()
