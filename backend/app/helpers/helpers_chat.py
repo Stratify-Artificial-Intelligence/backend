@@ -24,7 +24,6 @@ async def add_store_message_and_get_store_response(
     plans_repo: PlanRepository,
 ) -> ChatMessageDomain | None:
     """Register message and get the AI response."""
-    await chats_repo.add_message(message)
     should_context_include_general_rag = await _should_chat_context_include_general_rag(
         user=user,
         plans_repo=plans_repo,
@@ -40,6 +39,9 @@ async def add_store_message_and_get_store_response(
         context=context,
         instructions_prompt=_get_instructions_prompt(),
     )
+    # Note: By storing the message after the AI response, we ensure that the message
+    # is only saved after the response is successfully generated.
+    await chats_repo.add_message(message)
     # ToDo (pduran): Parallelize these two operations
     # _, response_content = await asyncio.gather(
     #     chats_repo.add_message(message),
