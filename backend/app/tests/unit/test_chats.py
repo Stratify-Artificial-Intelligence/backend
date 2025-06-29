@@ -13,7 +13,7 @@ from app.domain import (
 )
 from app.enums import BusinessStageEnum, ChatMessageSenderEnum
 from app.repositories import ChatRepository, BusinessRepository
-from app.services import openai
+from app.services.chat_ai_model import openai
 from app import deps
 
 

@@ -9,11 +9,10 @@ from app.domain import (
 from app.enums import ChatMessageSenderEnum, UserPlanEnum, UserRoleEnum
 from app.helpers.helpers_rag import get_context_for_business
 from app.repositories import ChatRepository, PlanRepository
-from app.services.openai import (
-    add_message_to_chat,
-    add_message_to_chat_and_get_response,
-    create_chat,
-)
+from app.services import ServicesFactory
+
+
+chat_ai_model_service = ServicesFactory.get_chat_ai_model_provider()
 
 
 async def add_store_message_and_get_store_response(
@@ -33,7 +32,7 @@ async def add_store_message_and_get_store_response(
         query=message.content,
         should_include_general_rag=should_context_include_general_rag,
     )
-    response_content = await add_message_to_chat_and_get_response(
+    response_content = await chat_ai_model_service.add_message_to_chat_and_get_response(
         chat_internal_id=chat.internal_id,
         content=message.content,
         context=context,
@@ -64,7 +63,7 @@ async def add_message_to_external_chat(
     message_content: str,
 ) -> None:
     """Add a message to an external chat."""
-    add_message_to_chat(
+    chat_ai_model_service.add_message_to_chat(
         chat_internal_id=chat.internal_id,
         content=message_content,
     )
@@ -72,7 +71,7 @@ async def add_message_to_external_chat(
 
 async def create_chat_in_service() -> str:
     """Create a chat in the external service and return its internal ID."""
-    chat_internal_id = await create_chat()
+    chat_internal_id = await chat_ai_model_service.create_chat()
     return chat_internal_id
 
 

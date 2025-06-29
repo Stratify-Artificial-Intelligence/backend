@@ -2,6 +2,8 @@ import secrets
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+from app.enums import ChatAIModelProviderEnum
+
 
 class SecuritySettings(BaseSettings):
     """General settings for the application."""
@@ -52,6 +54,16 @@ class AWSStorageSettings(BaseSettings):
     SECRET_ACCESS_KEY: str = ''
 
     model_config = SettingsConfigDict(env_file='.env', env_prefix='STORAGE_')
+
+
+class ChatAIModelSettings(BaseSettings):
+    """Load Chat AI Model settings from environment or .env."""
+
+    # ToDo (pduran): Think if we maintain this settings and refactor OpenAISettings here
+    #  or if we create a ServicesSettings or something similar to handle all providers.
+    PROVIDER: str = ChatAIModelProviderEnum.OPENAI
+
+    model_config = SettingsConfigDict(env_file='.env', env_prefix='CHAT_AI_MODEL_')
 
 
 class OpenAISettings(BaseSettings):
