@@ -5,10 +5,23 @@ on:
     branches:
       - main
   workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deployment environment'
+        required: true
+        default: 'prod'
+        type: choice
+        options:
+          - prod
+          - dev
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    environment:
+      # If the workflow is triggered manually, use the input environment
+      # On push to main (environment will not be set), automatically deploy to 'dev'
+      name: ${{ github.event.inputs.environment || 'dev' }}
 
     steps:
       - name: Checkout code
@@ -22,16 +35,16 @@ jobs:
           aws-region: ${{ secrets.AWS_REGION }}
 
       - name: Log in to Amazon ECR
-        id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
-      - name: Extract image name
-        id: vars
+      - name: Set environment variables
         run: |
-          echo "REPO_URI=${{ secrets.ECR_REPOSITORY }}" >> "$GITHUB_ENV"
-          echo "IMAGE_TAG=latest" >> "$GITHUB_ENV"
+          echo "REPO_URI=${{ vars.ECR_REPOSITORY }}" >> $GITHUB_ENV
+          echo "CLUSTER=${{ vars.ECS_CLUSTER }}" >> $GITHUB_ENV
+          echo "SERVICE=${{ vars.ECS_SERVICE }}" >> $GITHUB_ENV
+          echo "IMAGE_TAG=latest" >> $GITHUB_ENV
 
-      - name: Build, tag, and push image to ECR
+      - name: Build and push image
         run: |
           docker build -t $REPO_URI:$IMAGE_TAG -f backend/Dockerfile .
           docker push $REPO_URI:$IMAGE_TAG
@@ -39,6 +52,6 @@ jobs:
       - name: Deploy to ECS
         run: |
           aws ecs update-service \
-            --cluster prod-cluster \
-            --service prod-backend \
+            --cluster $CLUSTER \
+            --service $SERVICE \
             --force-new-deployment
