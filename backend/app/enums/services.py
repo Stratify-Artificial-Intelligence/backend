@@ -5,6 +5,10 @@ class ChatAIModelProviderEnum(str, Enum):
     OPENAI = 'openai'
 
 
+class EmbeddingProviderEnum(str, Enum):
+    OPENAI = 'openai'
+
+
 class IdentityProviderEnum(str, Enum):
     FIREBASE_AUTH = 'firebase_auth'
 

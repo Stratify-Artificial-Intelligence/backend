@@ -4,6 +4,9 @@ from app.schemas import BusinessResearch
 from app.settings import PerplexitySettings
 
 
+# ToDo (pduran): Refactor this into the ServiceFactory
+
+
 settings = PerplexitySettings()
 
 

@@ -3,6 +3,10 @@ from pinecone.models import ServerlessSpec
 
 from app.settings import GeneralRAGSettings, PineconeSettings, RAGSettings
 
+
+# ToDo (pduran): Refactor this into the ServiceFactory
+
+
 pinecone_settings = PineconeSettings()
 rag_settings = RAGSettings()
 general_rag_settings = GeneralRAGSettings()

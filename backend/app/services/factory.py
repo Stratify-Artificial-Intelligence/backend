@@ -2,8 +2,14 @@ from __future__ import annotations
 
 from typing import final
 
-from app.enums import ChatAIModelProviderEnum, IdentityProviderEnum, StorageProviderEnum
+from app.enums import (
+    ChatAIModelProviderEnum,
+    EmbeddingProviderEnum,
+    IdentityProviderEnum,
+    StorageProviderEnum,
+)
 from app.services.chat_ai_model import ChatAIModelOpenAI, ChatAIModelProvider
+from app.services.embedding import EmbeddingOpenAI, EmbeddingProvider
 from app.services.identity import IdentityFirebaseAuth, IdentityProvider
 from app.services.storage import StorageAWSS3, StorageProvider
 from app.settings import ServicesSettings
@@ -17,6 +23,7 @@ class ServicesFactory:
 
     _instance: ServicesFactory | None = None
     _chat_ai_model_provider: ChatAIModelProvider | None = None
+    _embedding_provider: EmbeddingProvider | None = None
     _identity_provider: IdentityProvider | None = None
     _storage_provider: StorageProvider | None = None
 
@@ -48,6 +55,16 @@ class ServicesFactory:
                     f'{settings.CHAT_AI_MODEL_PROVIDER}'
                 )
         return self._chat_ai_model_provider
+
+    def get_embedding_provider(self) -> EmbeddingProvider:
+        if self._embedding_provider is None:
+            if settings.EMBEDDING_PROVIDER == EmbeddingProviderEnum.OPENAI:
+                self._embedding_provider = EmbeddingOpenAI()
+            else:
+                raise ValueError(
+                    f'Unexpected embedding provider: {settings.EMBEDDING_PROVIDER}'
+                )
+        return self._embedding_provider
 
     def get_identity_provider(self) -> IdentityProvider:
         if self._identity_provider is None:
