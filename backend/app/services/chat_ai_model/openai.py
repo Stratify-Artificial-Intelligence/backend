@@ -10,10 +10,15 @@ from app.settings import OpenAISettings
 
 
 settings = OpenAISettings()
-openai.api_key = settings.API_KEY
 
 
 class ChatAIModelOpenAI(ChatAIModelProvider):
+    """OpenAI chat AI model provider implementation."""
+
+    def __init__(self):
+        super().__init__()
+        openai.api_key = settings.API_KEY
+
     async def add_message_to_chat_and_get_response(
         self,
         chat_internal_id: str,
@@ -41,12 +46,10 @@ class ChatAIModelOpenAI(ChatAIModelProvider):
         )
         return message_response
 
-
     @staticmethod
     async def create_chat() -> str:
         thread = openai.beta.threads.create()
         return thread.id
-
 
     @staticmethod
     def add_message_to_chat(
@@ -66,7 +69,6 @@ class ChatAIModelOpenAI(ChatAIModelProvider):
             assistant_id=settings.ASSISTANT_ID,
         )
         return run.id
-
 
     def _add_context_to_message(
         self,
@@ -99,7 +101,6 @@ class ChatAIModelOpenAI(ChatAIModelProvider):
                 tool_outputs=[ToolOutput(tool_call_id=call.id, output=context)],
             )
 
-
     @staticmethod
     def _wait_message_for_status(
         chat_internal_id: str,
@@ -117,7 +118,6 @@ class ChatAIModelOpenAI(ChatAIModelProvider):
             if run.status in status_list:
                 return run.status
             time.sleep(1)
-
 
     @staticmethod
     def _get_last_message_in_thread(chat_internal_id: str) -> str:

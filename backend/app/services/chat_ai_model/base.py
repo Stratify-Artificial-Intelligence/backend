@@ -20,9 +20,9 @@ class ChatAIModelProvider(ABC):
         """Add a message to a thread and return run id."""
         raise NotImplementedError
 
-    @staticmethod
     @abstractmethod
     async def add_message_to_chat_and_get_response(
+        self,
         chat_internal_id: str,
         content: str,
         context: str,

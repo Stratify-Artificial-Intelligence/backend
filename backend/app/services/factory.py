@@ -2,9 +2,13 @@ from __future__ import annotations
 
 from typing import final
 
-from app.enums import ChatAIModelProviderEnum
+from app.enums import ChatAIModelProviderEnum, StorageProviderEnum
 from app.services.chat_ai_model import ChatAIModelOpenAI, ChatAIModelProvider
-from app.settings import ChatAIModelSettings
+from app.services.storage import StorageAWSS3, StorageProvider
+from app.settings import ServicesSettings
+
+
+settings = ServicesSettings()
 
 
 class ServicesFactory:
@@ -33,9 +37,16 @@ class ServicesFactory:
 
     @staticmethod
     def get_chat_ai_model_provider() -> ChatAIModelProvider:
-        settings = ChatAIModelSettings()
-        if settings.PROVIDER == ChatAIModelProviderEnum.OPENAI:
+        if settings.CHAT_AI_MODEL_PROVIDER == ChatAIModelProviderEnum.OPENAI:
             return ChatAIModelOpenAI()
         else:
-            raise ValueError(f'Unexpected chat AI model provider: {settings.PROVIDER}')
+            raise ValueError(
+                f'Unexpected chat AI model provider: {settings.CHAT_AI_MODEL_PROVIDER}'
+            )
 
+    @staticmethod
+    def get_storage_provider() -> StorageProvider:
+        if settings.STORAGE_PROVIDER == StorageProviderEnum.AWS_S3:
+            return StorageAWSS3()
+        else:
+            raise ValueError(f'Unexpected storage provider: {settings.STORAGE_PROVIDER}')

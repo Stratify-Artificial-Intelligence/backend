@@ -1,2 +1,2 @@
 from .base import ChatAIModelProvider
-from.openai import ChatAIModelOpenAI
+from .openai import ChatAIModelOpenAI

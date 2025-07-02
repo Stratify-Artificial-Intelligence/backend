@@ -2,7 +2,7 @@ import secrets
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-from app.enums import ChatAIModelProviderEnum
+from app.enums import ChatAIModelProviderEnum, StorageProviderEnum
 
 
 class SecuritySettings(BaseSettings):
@@ -15,6 +15,15 @@ class SecuritySettings(BaseSettings):
     FIRST_BASIC_USER_USERNAME: str = 'user'
 
     model_config = SettingsConfigDict(env_file='.env')
+
+
+class ServicesSettings(BaseSettings):
+    """Load Services settings from environment or .env."""
+
+    CHAT_AI_MODEL_PROVIDER: ChatAIModelProviderEnum = ChatAIModelProviderEnum.OPENAI
+    STORAGE_PROVIDER: StorageProviderEnum = StorageProviderEnum.AWS_S3
+
+    model_config = SettingsConfigDict(env_file='.env', env_prefix='SERVICES_')
 
 
 class PostgresSettings(BaseSettings):
@@ -45,6 +54,7 @@ class FirebaseAuthSettings(BaseSettings):
     model_config = SettingsConfigDict(env_file='.env', env_prefix='FIREBASE_AUTH_')
 
 
+# ToDo (pduran): Rename class to StorageAWSS3Settings. Also rename env_prefix
 class AWSStorageSettings(BaseSettings):
     """Load AWS S3 storage settings from environment or .env."""
 
@@ -56,16 +66,7 @@ class AWSStorageSettings(BaseSettings):
     model_config = SettingsConfigDict(env_file='.env', env_prefix='STORAGE_')
 
 
-class ChatAIModelSettings(BaseSettings):
-    """Load Chat AI Model settings from environment or .env."""
-
-    # ToDo (pduran): Think if we maintain this settings and refactor OpenAISettings here
-    #  or if we create a ServicesSettings or something similar to handle all providers.
-    PROVIDER: str = ChatAIModelProviderEnum.OPENAI
-
-    model_config = SettingsConfigDict(env_file='.env', env_prefix='CHAT_AI_MODEL_')
-
-
+# ToDo (pduran): Rename class to ChatAIModelOpenAISettings. Also rename env_prefix
 class OpenAISettings(BaseSettings):
     """Load Open AI settings from environment or .env."""
 
