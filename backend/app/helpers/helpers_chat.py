@@ -12,7 +12,7 @@ from app.repositories import ChatRepository, PlanRepository
 from app.services import ServicesFactory
 
 
-chat_ai_model_service = ServicesFactory.get_chat_ai_model_provider()
+chat_ai_model_service = ServicesFactory().get_chat_ai_model_provider()
 
 
 async def add_store_message_and_get_store_response(

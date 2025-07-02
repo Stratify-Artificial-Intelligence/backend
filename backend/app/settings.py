@@ -2,7 +2,7 @@ import secrets
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-from app.enums import ChatAIModelProviderEnum, StorageProviderEnum
+from app.enums import ChatAIModelProviderEnum, IdentityProviderEnum, StorageProviderEnum
 
 
 class SecuritySettings(BaseSettings):
@@ -21,6 +21,7 @@ class ServicesSettings(BaseSettings):
     """Load Services settings from environment or .env."""
 
     CHAT_AI_MODEL_PROVIDER: ChatAIModelProviderEnum = ChatAIModelProviderEnum.OPENAI
+    IDENTITY_PROVIDER: IdentityProviderEnum = IdentityProviderEnum.FIREBASE_AUTH
     STORAGE_PROVIDER: StorageProviderEnum = StorageProviderEnum.AWS_S3
 
     model_config = SettingsConfigDict(env_file='.env', env_prefix='SERVICES_')

@@ -6,7 +6,7 @@ from app.services import ServicesFactory
 from urllib.parse import urlparse
 
 
-storage_service = ServicesFactory.get_storage_provider()
+storage_service = ServicesFactory().get_storage_provider()
 
 
 async def upload_business_image(file: UploadFile, business: BusinessDomain) -> str:
