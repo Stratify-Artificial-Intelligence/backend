@@ -46,7 +46,7 @@ users_data = [
         'username': 'admin',
         'email': 'admin@gmail.com',
         'full_name': 'Admin user',
-        'external_id': 'PdroKL2CuKSDU8AGNr6rvsR0buu2',
+        'external_id': 'uEbFulRttShecs64P9s94am727A2',
         'is_active': True,
         'role': UserRoleEnum.ADMIN.value,
     },

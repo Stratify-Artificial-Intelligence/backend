@@ -3,7 +3,7 @@ from app.domain import (
     EstablishedBusiness as EstablishedBusinessDomain,
 )
 from app.schemas import BusinessResearch, BusinessResearchParams
-from app.services.openai_embedding import get_embedding
+from app.services import ServicesFactory
 from app.services.perplexity import deep_research
 from app.services.pinecone import search_vectors, upload_vectors
 
@@ -88,8 +88,9 @@ def chunk_text(text: str, max_tokens: int, overlap: int) -> list[str]:
 
 
 def embed_text(text: str) -> list[float]:
-    """Embed text using the OpenAI API."""
-    return get_embedding(text=text)
+    """Embed text."""
+    embedding_provider = ServicesFactory().get_embedding_provider()
+    return embedding_provider.create_embedding(text=text)
 
 
 def get_context_for_business(

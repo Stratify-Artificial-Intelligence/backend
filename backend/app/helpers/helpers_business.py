@@ -1,9 +1,12 @@
 from fastapi import UploadFile, HTTPException, status
 
 from app.domain import Business as BusinessDomain
-from app.services.aws_storage import remove_file_from_s3, upload_file_to_s3
+from app.services import ServicesFactory
 
 from urllib.parse import urlparse
+
+
+storage_service = ServicesFactory().get_storage_provider()
 
 
 async def upload_business_image(file: UploadFile, business: BusinessDomain) -> str:
@@ -13,7 +16,7 @@ async def upload_business_image(file: UploadFile, business: BusinessDomain) -> s
             detail=f'Invalid image format {file.content_type}. Use JPEG or PNG.',
         )
     file_name = _get_business_image_name(file=file, business=business)
-    return await upload_file_to_s3(
+    return await storage_service.upload_file(
         file_binary=file.file,
         file_name=file_name,
         file_content_type=file.content_type,
@@ -28,7 +31,7 @@ async def remove_business_image(business: BusinessDomain) -> None:
         )
     parsed_url = urlparse(business.logo_url)
     file_name = parsed_url.path.lstrip('/')
-    await remove_file_from_s3(file_name=file_name)
+    await storage_service.remove_file(file_name=file_name)
 
 
 def _get_business_image_name(file: UploadFile, business: BusinessDomain) -> str:

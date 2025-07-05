@@ -2,6 +2,13 @@ import secrets
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+from app.enums import (
+    ChatAIModelProviderEnum,
+    EmbeddingProviderEnum,
+    IdentityProviderEnum,
+    StorageProviderEnum,
+)
+
 
 class SecuritySettings(BaseSettings):
     """General settings for the application."""
@@ -13,6 +20,17 @@ class SecuritySettings(BaseSettings):
     FIRST_BASIC_USER_USERNAME: str = 'user'
 
     model_config = SettingsConfigDict(env_file='.env')
+
+
+class ServicesSettings(BaseSettings):
+    """Load Services settings from environment or .env."""
+
+    CHAT_AI_MODEL_PROVIDER: ChatAIModelProviderEnum = ChatAIModelProviderEnum.OPENAI
+    EMBEDDING_PROVIDER: EmbeddingProviderEnum = EmbeddingProviderEnum.OPENAI
+    IDENTITY_PROVIDER: IdentityProviderEnum = IdentityProviderEnum.FIREBASE_AUTH
+    STORAGE_PROVIDER: StorageProviderEnum = StorageProviderEnum.AWS_S3
+
+    model_config = SettingsConfigDict(env_file='.env', env_prefix='SERVICES_')
 
 
 class PostgresSettings(BaseSettings):
@@ -43,6 +61,7 @@ class FirebaseAuthSettings(BaseSettings):
     model_config = SettingsConfigDict(env_file='.env', env_prefix='FIREBASE_AUTH_')
 
 
+# ToDo (pduran): Rename class to StorageAWSS3Settings. Also rename env_prefix
 class AWSStorageSettings(BaseSettings):
     """Load AWS S3 storage settings from environment or .env."""
 
@@ -54,6 +73,7 @@ class AWSStorageSettings(BaseSettings):
     model_config = SettingsConfigDict(env_file='.env', env_prefix='STORAGE_')
 
 
+# ToDo (pduran): Rename class to ChatAIModelOpenAISettings. Also rename env_prefix
 class OpenAISettings(BaseSettings):
     """Load Open AI settings from environment or .env."""
 

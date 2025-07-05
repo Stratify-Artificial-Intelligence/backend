@@ -3,6 +3,9 @@ import stripe
 from app.settings import StripeSettings
 
 
+# ToDo (pduran): Refactor this into the ServiceFactory
+
+
 settings = StripeSettings()
 stripe.api_key = settings.API_KEY
 
