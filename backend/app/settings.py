@@ -25,7 +25,7 @@ class SecuritySettings(BaseSettings):
 class ServicesSettings(BaseSettings):
     """Load Services settings from environment or .env."""
 
-    CHAT_AI_MODEL_PROVIDER: ChatAIModelProviderEnum = ChatAIModelProviderEnum.OPENAI
+    CHAT_AI_MODEL_PROVIDER: ChatAIModelProviderEnum = ChatAIModelProviderEnum.ANTHROPIC
     EMBEDDING_PROVIDER: EmbeddingProviderEnum = EmbeddingProviderEnum.OPENAI
     IDENTITY_PROVIDER: IdentityProviderEnum = IdentityProviderEnum.FIREBASE_AUTH
     STORAGE_PROVIDER: StorageProviderEnum = StorageProviderEnum.AWS_S3
@@ -81,6 +81,18 @@ class OpenAISettings(BaseSettings):
     ASSISTANT_ID: str = ''
 
     model_config = SettingsConfigDict(env_file='.env', env_prefix='OPEN_AI_')
+
+
+# ToDo (pduran): Rename class to ChatAIModelAnthropicSettings. Also rename env_prefix
+class AnthropicSettings(BaseSettings):
+    """Load Anthropic settings from environment or .env."""
+
+    API_KEY: str = ''
+    MODEL_NAME: str = 'claude-sonnet-4-20250514'
+    MAX_TOKENS: int = 8192
+    TEMPERATURE: float = 1
+
+    model_config = SettingsConfigDict(env_file='.env', env_prefix='ANTHROPIC_')
 
 
 class OpenAIEmbeddingSettings(BaseSettings):

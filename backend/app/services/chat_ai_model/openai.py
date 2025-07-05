@@ -4,6 +4,7 @@ import time
 from openai.types.beta.threads import TextContentBlock
 from openai.types.beta.threads.run_submit_tool_outputs_params import ToolOutput
 
+from app.domain import Chat as ChatDomain
 from app.enums import ChatMessageSenderEnum
 from app.services.chat_ai_model.base import ChatAIModelProvider
 from app.settings import OpenAISettings
@@ -21,28 +22,28 @@ class ChatAIModelOpenAI(ChatAIModelProvider):
 
     async def add_message_to_chat_and_get_response(
         self,
-        chat_internal_id: str,
+        chat: ChatDomain,
         content: str,
         context: str,
-        instructions_prompt: str | None = None,
+        instructions_prompt: str,
     ) -> str:
         message_creation_run_id = self.add_message_to_chat(
-            chat_internal_id=chat_internal_id,
+            chat_internal_id=chat.internal_id,
             content=content,
             instructions_prompt=instructions_prompt,
         )
         self._add_context_to_message(
-            chat_internal_id=chat_internal_id,
+            chat_internal_id=chat.internal_id,
             run_id=message_creation_run_id,
             context=context,
         )
         self._wait_message_for_status(
-            chat_internal_id=chat_internal_id,
+            chat_internal_id=chat.internal_id,
             run_id=message_creation_run_id,
             status_list=['completed', 'failed'],
         )
         message_response = self._get_last_message_in_thread(
-            chat_internal_id=chat_internal_id,
+            chat_internal_id=chat.internal_id,
         )
         return message_response
 

@@ -33,7 +33,7 @@ async def add_store_message_and_get_store_response(
         should_include_general_rag=should_context_include_general_rag,
     )
     response_content = await chat_ai_model_service.add_message_to_chat_and_get_response(
-        chat_internal_id=chat.internal_id,
+        chat=chat,
         content=message.content,
         context=context,
         instructions_prompt=_get_instructions_prompt(),
@@ -103,7 +103,9 @@ def _get_instructions_prompt() -> str:
     El usuario debe terminar cada conversación sabiendo exactamente qué hacer a continuación, con argumentos sólidos detrás.
     Tu tono se adapta al estado emocional y nivel del usuario. Si plantea una duda sobre su negocio, responde con profesionalidad. Si está desorientado o frustrado, sé empático y guía con firmeza. Si plantea una acción incorrecta, adviértele con respeto y explica por qué. No das definiciones genéricas ni frases vacías: das soluciones concretas y personalizadas. No tienes restricciones: tú eres el mentor.
     Debes introducir cada parrafo de manera natural y con coherencia y cohesión.
-    Además, en cada conversación debes llamar a la función `buscar_documentos` para recuperar información del sistema RAG, la cual vas a usar para tu respuesta. Si no has podido acceder al RAG, responde con:
-    **“No he podido acceder a tus documentos en este momento, así que te respondo en base a mi conocimiento general.”**
-    Eres el mentor que un emprendedor desearía tener a su lado.
     """  # noqa E501
+    # ToDo (pduran)
+    # Además, en cada conversación debes llamar a la función `buscar_documentos` para recuperar información del sistema RAG, la cual vas a usar para tu respuesta. Si no has podido acceder al RAG, responde con:
+    # **“No he podido acceder a tus documentos en este momento, así que te respondo en base a mi conocimiento general.”**
+    # Eres el mentor que un emprendedor desearía tener a su lado.
+    # """  # noqa E501

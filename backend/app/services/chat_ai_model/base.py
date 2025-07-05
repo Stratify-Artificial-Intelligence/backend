@@ -1,5 +1,7 @@
 from abc import ABC, abstractmethod
 
+from app.domain import Chat as ChatDomain
+
 
 class ChatAIModelProvider(ABC):
     """Base class for chat AI model providers."""
@@ -23,10 +25,10 @@ class ChatAIModelProvider(ABC):
     @abstractmethod
     async def add_message_to_chat_and_get_response(
         self,
-        chat_internal_id: str,
+        chat: ChatDomain,
         content: str,
         context: str,
-        instructions_prompt: str | None = None,
+        instructions_prompt: str,
     ) -> str:
         """Add a message to a chat and return the response of the AI model."""
         raise NotImplementedError
