@@ -93,28 +93,19 @@ def embed_text(text: str) -> list[float]:
     return embedding_provider.create_embedding(text=text)
 
 
-def get_context_for_business(
-    business_id: int,
-    query: str,
-    should_include_general_rag: bool = False,
-) -> str:
-    """Get context for a business based on the query."""
+def get_business_rag(business_id: int, query: str) -> str:
+    """Get RAG for a business based on the query."""
     context_vectors = search_vectors_for_business(
         business_id=business_id,
         query=query,
     )
-    context_str = '\n'.join(context_vectors)
-    general_context_str = ''
-    if should_include_general_rag:
-        general_context_vectors = search_vectors_for_general(query=query)
-        general_context_str = '\n'.join(general_context_vectors)
+    return '\n'.join(context_vectors)
 
-    return (
-        f'Información recuperada del sistema RAG:\n\n {context_str}\n\n '
-        f'{general_context_str}\n\n Instrucción: Con base en la información anterior '
-        '(solo si es relevante para la respuesta) y tu propio razonamiento, responde a '
-        'la pregunta.'
-    )
+
+def get_general_rag(query: str) -> str:
+    """Get general RAG based on the query."""
+    context_vectors = search_vectors_for_general(query=query)
+    return '\n'.join(context_vectors)
 
 
 def search_vectors_for_business(business_id: int, query: str) -> list[str]:

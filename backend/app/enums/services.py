@@ -3,6 +3,7 @@ from enum import Enum
 
 class ChatAIModelProviderEnum(str, Enum):
     OPENAI = 'openai'
+    ANTHROPIC = 'anthropic'
 
 
 class EmbeddingProviderEnum(str, Enum):

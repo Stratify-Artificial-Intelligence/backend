@@ -8,7 +8,11 @@ from app.enums import (
     IdentityProviderEnum,
     StorageProviderEnum,
 )
-from app.services.chat_ai_model import ChatAIModelOpenAI, ChatAIModelProvider
+from app.services.chat_ai_model import (
+    ChatAIModelAnthropic,
+    ChatAIModelOpenAI,
+    ChatAIModelProvider,
+)
 from app.services.embedding import EmbeddingOpenAI, EmbeddingProvider
 from app.services.identity import IdentityFirebaseAuth, IdentityProvider
 from app.services.storage import StorageAWSS3, StorageProvider
@@ -49,6 +53,8 @@ class ServicesFactory:
         if self._chat_ai_model_provider is None:
             if settings.CHAT_AI_MODEL_PROVIDER == ChatAIModelProviderEnum.OPENAI:
                 self._chat_ai_model_provider = ChatAIModelOpenAI()
+            elif settings.CHAT_AI_MODEL_PROVIDER == ChatAIModelProviderEnum.ANTHROPIC:
+                self._chat_ai_model_provider = ChatAIModelAnthropic()
             else:
                 raise ValueError(
                     f'Unexpected chat AI model provider: '

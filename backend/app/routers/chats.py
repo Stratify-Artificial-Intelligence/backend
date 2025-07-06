@@ -18,7 +18,6 @@ from app.domain import (
 )
 from app.enums import ChatMessageSenderEnum
 from app.helpers import (
-    add_message_to_external_chat,
     add_store_message_and_get_store_response,
     create_chat_in_service,
     get_chat_title,
@@ -124,11 +123,6 @@ async def create_chat(
         start_time=datetime.now(),
         business_id=business_id,
     )
-    # Initialize chat with context
-    await add_message_to_external_chat(
-        chat=chat,
-        message_content=business.get_information(),
-    )
     return await chats_repo.create(chat)
 
 
@@ -154,11 +148,12 @@ async def add_message(
     current_user: UserDomain = Depends(get_current_active_user),
 ):
     """Add message to a chat with user as sender."""
-    await get_business(
+    business = await get_business(
         business_id=business_id,
         user=current_user,
         business_repo=business_repo,
         permission_func=user_can_publish_message,
+        load_hierarchy=True,
     )
     message = ChatMessageDomain(
         chat_id=chat_id,
@@ -173,6 +168,7 @@ async def add_message(
             detail='Chat not found',
         )
     response_message = await add_store_message_and_get_store_response(
+        business=business,
         chat=chat,
         message=message,
         user=current_user,

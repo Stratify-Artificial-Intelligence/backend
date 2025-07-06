@@ -26,6 +26,7 @@ pinecone = {extras = ["asyncio"], version = "6.0.2"}
 stripe = "12.1.0"
 firebase-admin = "6.7.0"
 boto3 = "^1.38.45"
+anthropic = "^0.57.1"
 
 [tool.poetry.group.dev.dependencies]
 tox = "^4.24.1"
