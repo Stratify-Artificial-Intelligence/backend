@@ -4,9 +4,11 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from app.enums import (
     ChatAIModelProviderEnum,
+    DeepResearchProviderEnum,
     EmbeddingProviderEnum,
     IdentityProviderEnum,
     StorageProviderEnum,
+    VectorDatabaseProviderEnum,
 )
 
 
@@ -26,9 +28,15 @@ class ServicesSettings(BaseSettings):
     """Load Services settings from environment or .env."""
 
     CHAT_AI_MODEL_PROVIDER: ChatAIModelProviderEnum = ChatAIModelProviderEnum.ANTHROPIC
+    DEEP_RESEARCH_PROVIDER: DeepResearchProviderEnum = (
+        DeepResearchProviderEnum.PERPLEXITY
+    )
     EMBEDDING_PROVIDER: EmbeddingProviderEnum = EmbeddingProviderEnum.OPENAI
     IDENTITY_PROVIDER: IdentityProviderEnum = IdentityProviderEnum.FIREBASE_AUTH
     STORAGE_PROVIDER: StorageProviderEnum = StorageProviderEnum.AWS_S3
+    VECTOR_DATABASE_PROVIDER: VectorDatabaseProviderEnum = (
+        VectorDatabaseProviderEnum.PINECONE
+    )
 
     model_config = SettingsConfigDict(env_file='.env', env_prefix='SERVICES_')
 

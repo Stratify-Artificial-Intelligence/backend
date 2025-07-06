@@ -4,8 +4,6 @@ from app.domain import (
 )
 from app.schemas import BusinessResearch, BusinessResearchParams
 from app.services import ServicesFactory
-from app.services.perplexity import deep_research
-from app.services.pinecone import search_vectors, upload_vectors
 
 from tiktoken import encoding_for_model
 
@@ -23,7 +21,8 @@ def deep_research_for_business(
     """Perform deep research for a business."""
     research_context = business.get_information()
     research_instructions = _get_deep_search_instructions()
-    return deep_research(
+    deep_research_provider = ServicesFactory().get_deep_research_provider()
+    return deep_research_provider.do_deep_research(
         prompt=f'{research_context} {research_instructions}',
         max_tokens=params.max_tokens,
     )
@@ -60,7 +59,8 @@ def _chunk_and_upload_text(text: str, settings: RAGSettings, namespace: str) -> 
         vector = embed_text(text=chunk)
         metadata = {'text': chunk}
         vectors_to_upsert.append((vector_id, vector, metadata))
-    upload_vectors(
+    vector_database_provider = ServicesFactory().get_vector_database_provider()
+    vector_database_provider.upload_vectors(
         index_name=settings.INDEX_NAME,
         namespace=namespace,
         vectors=vectors_to_upsert,
@@ -111,7 +111,8 @@ def get_general_rag(query: str) -> str:
 def search_vectors_for_business(business_id: int, query: str) -> list[str]:
     """Search vectors in Pinecone."""
     query_vector = embed_text(query)
-    return search_vectors(
+    vector_database_provider = ServicesFactory().get_vector_database_provider()
+    return vector_database_provider.search_vectors(
         index_name=rag_settings.INDEX_NAME,
         namespace=rag_settings.NAMESPACE_ID.format(business_id=business_id),
         query_vector=query_vector,
@@ -122,7 +123,8 @@ def search_vectors_for_business(business_id: int, query: str) -> list[str]:
 def search_vectors_for_general(query: str) -> list[str]:
     """Search vectors in Pinecone for general research."""
     query_vector = embed_text(query)
-    return search_vectors(
+    vector_database_provider = ServicesFactory().get_vector_database_provider()
+    return vector_database_provider.search_vectors(
         index_name=general_rag_settings.INDEX_NAME,
         namespace=general_rag_settings.NAMESPACE_ID,
         query_vector=query_vector,
