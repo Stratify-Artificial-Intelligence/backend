@@ -2,7 +2,11 @@ import uuid
 from anthropic import Anthropic
 from anthropic.types import ToolParam
 
-from app.domain import Chat as ChatDomain, ChatMessage as ChatMessageDomain
+from app.domain import (
+    Business as BusinessDomain,
+    Chat as ChatDomain,
+    ChatMessage as ChatMessageDomain,
+)
 from app.enums import ChatMessageSenderEnum
 from app.services.chat_ai_model.base import ChatAIModelProvider
 from app.settings import AnthropicSettings
@@ -53,30 +57,22 @@ class ChatAIModelAnthropic(ChatAIModelProvider):
     async def create_chat() -> str:
         return str(uuid.uuid4())
 
-    # ToDo (pduran)
-    @staticmethod
-    def add_message_to_chat(
-        chat_internal_id: str,
-        content: str,
-        instructions_prompt: str | None = None,
-    ) -> str:
-        """Appends user message and creates initial Claude response. Returns run_id."""
-        return 'nothing_to_return'
-
     async def add_message_to_chat_and_get_response(
         self,
+        business: BusinessDomain,
         chat: ChatDomain,
         content: str,
-        context: str,
-        instructions_prompt: str,
+        business_rag: str,
+        general_rag: str,
     ) -> str:
-        # ToDo (pduran): Business info
-        messages = []
+        messages = [self._business_info_to_anthropic_message(business=business)]
         if chat.messages is not None:
-            messages = [
-                self._chat_message_domain_to_anthropic_message(msg)
-                for msg in chat.messages
-            ]
+            messages.extend(
+                [
+                    self._chat_message_domain_to_anthropic_message(msg)
+                    for msg in chat.messages
+                ]
+            )
 
         # Add user message to history
         messages.append(
@@ -91,16 +87,24 @@ class ChatAIModelAnthropic(ChatAIModelProvider):
             max_tokens=settings.MAX_TOKENS,
             temperature=settings.TEMPERATURE,
             messages=messages,
-            system=instructions_prompt,
+            system=self.get_instructions_prompt(),
             tools=self.tools,
         )
 
-        return await self._process_response(messages, instructions_prompt, response)
+        return await self._process_response(
+            messages=messages,
+            instructions_prompt=self.get_instructions_prompt(),
+            business_rag=business_rag,
+            general_rag=general_rag,
+            response=response,
+        )
 
     async def _process_response(
         self,
         messages: list[dict],
         instructions_prompt: str,
+        business_rag: str,
+        general_rag: str,
         response,
     ) -> str:
         # Full response of the model
@@ -129,8 +133,9 @@ class ChatAIModelAnthropic(ChatAIModelProvider):
         # If tool_use exists, respond with tool_result
         if tool_use_block:
             tool_result = self._handle_tool_call(
-                tool_use_block.name,
-                tool_use_block.input['query'],
+                tool_name=tool_use_block.name,
+                business_rag=business_rag,
+                general_rag=general_rag,
             )
 
             messages.append(
@@ -155,17 +160,38 @@ class ChatAIModelAnthropic(ChatAIModelProvider):
                 tools=self.tools,
             )
 
-            return await self._process_response(messages, instructions_prompt, resumed)
+            return await self._process_response(
+                messages=messages,
+                instructions_prompt=instructions_prompt,
+                business_rag=business_rag,
+                general_rag=general_rag,
+                response=resumed,
+            )
 
         return full_response
 
-    def _handle_tool_call(self, tool_name: str, query: str) -> str:
-        # ToDo (pduran): Implement real tool calls (RAGs)
+    @staticmethod
+    def _handle_tool_call(tool_name: str, business_rag: str, general_rag: str) -> str:
         if tool_name == 'get_internal_knowledge':
-            return f'[Resultado simulado del RAG interno: {query}]'
+            return business_rag
         elif tool_name == 'get_market_research':
-            return f'[Resultado simulado del RAG de mercado: {query}]'
+            return general_rag
         return '[Error: herramienta desconocida]'
+
+    @staticmethod
+    def _business_info_to_anthropic_message(
+        business: BusinessDomain,
+    ) -> dict:
+        """Convert business info to an Anthropic message format."""
+        return {
+            'role': 'user',
+            'content': [
+                {
+                    'type': 'text',
+                    'text': business.get_information(),
+                }
+            ],
+        }
 
     @staticmethod
     def _chat_message_domain_to_anthropic_message(

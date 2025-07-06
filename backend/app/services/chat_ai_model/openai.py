@@ -4,7 +4,7 @@ import time
 from openai.types.beta.threads import TextContentBlock
 from openai.types.beta.threads.run_submit_tool_outputs_params import ToolOutput
 
-from app.domain import Chat as ChatDomain
+from app.domain import Business as BusinessDomain, Chat as ChatDomain
 from app.enums import ChatMessageSenderEnum
 from app.services.chat_ai_model.base import ChatAIModelProvider
 from app.settings import OpenAISettings
@@ -20,18 +20,28 @@ class ChatAIModelOpenAI(ChatAIModelProvider):
         super().__init__()
         openai.api_key = settings.API_KEY
 
+    @staticmethod
+    async def create_chat() -> str:
+        thread = openai.beta.threads.create()
+        return thread.id
+
     async def add_message_to_chat_and_get_response(
         self,
+        business: BusinessDomain,
         chat: ChatDomain,
         content: str,
-        context: str,
-        instructions_prompt: str,
+        business_rag: str,
+        general_rag: str,
     ) -> str:
-        message_creation_run_id = self.add_message_to_chat(
+        if not chat.messages:
+            # First message in the chat, so we add the business information
+            content = f'Contexto: {business.get_information()}\n\nSolicitud: {content}'
+        message_creation_run_id = self._add_message_to_chat_and_get_run_id(
             chat_internal_id=chat.internal_id,
             content=content,
-            instructions_prompt=instructions_prompt,
+            instructions_prompt=self.get_instructions_prompt(),
         )
+        context = self._get_context(business_rag=business_rag, general_rag=general_rag)
         self._add_context_to_message(
             chat_internal_id=chat.internal_id,
             run_id=message_creation_run_id,
@@ -48,12 +58,15 @@ class ChatAIModelOpenAI(ChatAIModelProvider):
         return message_response
 
     @staticmethod
-    async def create_chat() -> str:
-        thread = openai.beta.threads.create()
-        return thread.id
+    def _get_additional_instructions_prompt() -> str:
+        return """
+        Además, en cada conversación debes llamar a la función `buscar_documentos` para recuperar información del sistema RAG, la cual vas a usar para tu respuesta. Si no has podido acceder al RAG, responde con:
+        **“No he podido acceder a tus documentos en este momento, así que te respondo en base a mi conocimiento general.”**
+        Eres el mentor que un emprendedor desearía tener a su lado.
+        """  # noqa E501
 
     @staticmethod
-    def add_message_to_chat(
+    def _add_message_to_chat_and_get_run_id(
         chat_internal_id: str,
         content: str,
         instructions_prompt: str | None = None,
@@ -141,3 +154,12 @@ class ChatAIModelOpenAI(ChatAIModelProvider):
                 'Message content different from text is not implemented yet.'
             )
         return content_block.text.value
+
+    @staticmethod
+    def _get_context(business_rag: str, general_rag: str) -> str:
+        return (
+            f'Información recuperada del sistema RAG:\n\n {business_rag}\n\n '
+            f'{general_rag}\n\n Instrucción: Con base en la información anterior '
+            '(solo si es relevante para la respuesta) y tu propio razonamiento, '
+            'responde a la pregunta.'
+        )
