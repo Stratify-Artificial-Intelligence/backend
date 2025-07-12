@@ -4,18 +4,22 @@ from typing import final
 
 from app.enums import (
     ChatAIModelProviderEnum,
+    DeepResearchProviderEnum,
     EmbeddingProviderEnum,
     IdentityProviderEnum,
     StorageProviderEnum,
+    VectorDatabaseProviderEnum,
 )
 from app.services.chat_ai_model import (
     ChatAIModelAnthropic,
     ChatAIModelOpenAI,
     ChatAIModelProvider,
 )
+from app.services.deep_research import DeepResearchPerplexity, DeepResearchProvider
 from app.services.embedding import EmbeddingOpenAI, EmbeddingProvider
 from app.services.identity import IdentityFirebaseAuth, IdentityProvider
 from app.services.storage import StorageAWSS3, StorageProvider
+from app.services.vector_database import VectorDatabasePinecone, VectorDatabaseProvider
 from app.settings import ServicesSettings
 
 
@@ -27,9 +31,11 @@ class ServicesFactory:
 
     _instance: ServicesFactory | None = None
     _chat_ai_model_provider: ChatAIModelProvider | None = None
+    _deep_research_provider: DeepResearchProvider | None = None
     _embedding_provider: EmbeddingProvider | None = None
     _identity_provider: IdentityProvider | None = None
     _storage_provider: StorageProvider | None = None
+    _vector_database_provider: VectorDatabaseProvider | None = None
 
     @final
     def __new__(cls) -> ServicesFactory:
@@ -62,6 +68,17 @@ class ServicesFactory:
                 )
         return self._chat_ai_model_provider
 
+    def get_deep_research_provider(self) -> DeepResearchProvider:
+        if self._deep_research_provider is None:
+            if settings.DEEP_RESEARCH_PROVIDER == DeepResearchProviderEnum.PERPLEXITY:
+                self._deep_research_provider = DeepResearchPerplexity()
+            else:
+                raise ValueError(
+                    f'Unexpected deep research provider: '
+                    f'{settings.DEEP_RESEARCH_PROVIDER}'
+                )
+        return self._deep_research_provider
+
     def get_embedding_provider(self) -> EmbeddingProvider:
         if self._embedding_provider is None:
             if settings.EMBEDDING_PROVIDER == EmbeddingProviderEnum.OPENAI:
@@ -91,3 +108,14 @@ class ServicesFactory:
                     f'Unexpected storage provider: {settings.STORAGE_PROVIDER}'
                 )
         return self._storage_provider
+
+    def get_vector_database_provider(self) -> VectorDatabaseProvider:
+        if self._vector_database_provider is None:
+            if settings.VECTOR_DATABASE_PROVIDER == VectorDatabaseProviderEnum.PINECONE:
+                self._vector_database_provider = VectorDatabasePinecone()
+            else:
+                raise ValueError(
+                    f'Unexpected vector database provider: '
+                    f'{settings.VECTOR_DATABASE_PROVIDER}'
+                )
+        return self._vector_database_provider

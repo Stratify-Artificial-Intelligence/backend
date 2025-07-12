@@ -6,6 +6,10 @@ class ChatAIModelProviderEnum(str, Enum):
     ANTHROPIC = 'anthropic'
 
 
+class DeepResearchProviderEnum(str, Enum):
+    PERPLEXITY = 'perplexity'
+
+
 class EmbeddingProviderEnum(str, Enum):
     OPENAI = 'openai'
 
@@ -16,3 +20,7 @@ class IdentityProviderEnum(str, Enum):
 
 class StorageProviderEnum(str, Enum):
     AWS_S3 = 'aws_s3'
+
+
+class VectorDatabaseProviderEnum(str, Enum):
+    PINECONE = 'pinecone'
