@@ -24,6 +24,7 @@ class User(Base):
     plan_id = Column(Integer, ForeignKey('plans.id'), nullable=True)
     payment_service_user_id = Column(String(100), nullable=True)
     payment_service_subscription_id = Column(String(100), nullable=True)
+    available_credits = Column(Integer, nullable=True)
 
     # Relationships
     businesses = relationship(

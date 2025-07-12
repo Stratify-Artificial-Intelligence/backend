@@ -18,6 +18,7 @@ class UserBaseExtended(UserBase):
 
 
 class User(UserBaseExtended):
+    available_credits: int | None = None
     id: int
 
 
@@ -59,3 +60,4 @@ class UserPartialUpdate(UserMePartialUpdate):
     is_active: bool | None = None
     role: UserRoleEnum | None = None
     plan_id: int | None = None
+    available_credits: int | None = None

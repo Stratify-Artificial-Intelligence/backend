@@ -61,6 +61,7 @@ class UserRepository(BaseRepository):
             is_active=user_in.is_active,
             role=user_in.role,
             plan_id=user_in.plan_id,
+            available_credits=user_in.available_credits,
         )
         self._db.add(new_user)
         await self.commit()
@@ -133,5 +134,6 @@ class UserRepository(BaseRepository):
                 'plan_id': user.plan_id,
                 'payment_service_user_id': user.payment_service_user_id,
                 'payment_service_subscription_id': user.payment_service_subscription_id,
+                'available_credits': user.available_credits,
             }
         )

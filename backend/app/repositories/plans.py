@@ -32,6 +32,7 @@ class PlanRepository(BaseRepository):
             is_active=plan_in.is_active,
             price=plan_in.price,
             payment_service_price_id=plan_in.payment_service_price_id,
+            monthly_credits=plan_in.monthly_credits,
         )
         self._db.add(new_plan)
         await self.commit()

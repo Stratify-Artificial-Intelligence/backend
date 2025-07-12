@@ -32,12 +32,14 @@ plans_data = [
         'is_active': True,
         'price': 0.0,
         'payment_service_price_id': 'price_1RVGgNIve8AXNk92PPGp2kvZ',
+        'monthly_credits': 10,
     },
     {
         'name': UserPlanEnum.FOUNDER.value,
         'is_active': True,
         'price': 9.99,
         'payment_service_price_id': 'price_1RVGp2Ive8AXNk92AY707LgP',
+        'monthly_credits': 25,
     },
 ]
 
@@ -49,6 +51,7 @@ users_data = [
         'external_id': 'uEbFulRttShecs64P9s94am727A2',
         'is_active': True,
         'role': UserRoleEnum.ADMIN.value,
+        'available_credits': None,
     },
     {
         'username': 'useruser',
@@ -58,6 +61,7 @@ users_data = [
         'is_active': True,
         'role': UserRoleEnum.BASIC.value,
         'plan_id': 1,
+        'available_credits': 10,
     },
 ]
 
