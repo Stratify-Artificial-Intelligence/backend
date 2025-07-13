@@ -147,4 +147,5 @@ async def handle_subscription_webhook(
         plan = plans[0]
 
         user.plan_id = plan.id
+        user.available_credits = plan.monthly_credits
         await users_repo.update(user_id=user.id, user_update=user)

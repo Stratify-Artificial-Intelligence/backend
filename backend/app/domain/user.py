@@ -12,6 +12,7 @@ class UserBase(BaseModel):
     payment_service_user_id: str | None = None
     payment_service_subscription_id: str | None = None
     plan_id: int | None = None
+    available_credits: int | None = None
 
     model_config = ConfigDict(from_attributes=True)
 

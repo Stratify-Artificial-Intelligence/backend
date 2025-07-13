@@ -19,6 +19,7 @@ class Plan(Base):
     is_active = Column(Boolean, nullable=False, default=True)
     price = Column(Float, nullable=False, default=0)
     payment_service_price_id = Column(String(100), nullable=True)
+    monthly_credits = Column(Integer, nullable=True, default=0)
 
     # Relationships
     users = relationship(

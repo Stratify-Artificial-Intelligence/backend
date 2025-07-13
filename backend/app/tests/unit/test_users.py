@@ -19,6 +19,7 @@ def test_user_2() -> UserDomain:
         is_active=True,
         role=UserRoleEnum.ADMIN,
         plan_id=None,
+        available_credits=None,
     )
 
 
@@ -32,6 +33,7 @@ def test_user_3() -> UserDomain:
         is_active=True,
         role=UserRoleEnum.BASIC,
         plan_id=1,
+        available_credits=None,
     )
 
 
@@ -51,6 +53,7 @@ async def test_signup_user(
         'is_active': True,
         'role': UserRoleEnum.BASIC.value,
         'plan_id': 1,
+        'available_credits': None,
     }
     data = test_user_3.model_dump()
     del data['id']
@@ -59,6 +62,7 @@ async def test_signup_user(
     del data['plan_id']
     del data['payment_service_user_id']
     del data['payment_service_subscription_id']
+    del data['available_credits']
     data['external_id'] = 'test_external_id_3'
     actual_response = await async_client.post(
         '/users/signup',
@@ -84,6 +88,7 @@ async def test_signup_user_already_exists(
     del data['plan_id']
     del data['payment_service_user_id']
     del data['payment_service_subscription_id']
+    del data['available_credits']
     data['external_id'] = 'test_external_id_3'
     response = await async_client.post(
         '/users/signup',
@@ -122,6 +127,7 @@ async def test_read_users_me(
         'is_active': True,
         'role': UserRoleEnum.ADMIN.value,
         'plan_id': None,
+        'available_credits': None,
     }
     actual_response = await async_client.get(
         '/users/me',
@@ -151,6 +157,7 @@ async def test_update_users_me(
         'is_active': True,
         'role': UserRoleEnum.ADMIN.value,
         'plan_id': None,
+        'available_credits': None,
     }
     data = {
         'full_name': 'User A with nem name',
@@ -226,6 +233,7 @@ async def test_list_users(
             'is_active': True,
             'role': UserRoleEnum.ADMIN.value,
             'plan_id': None,
+            'available_credits': None,
         },
         {
             'id': 2,
@@ -235,6 +243,7 @@ async def test_list_users(
             'is_active': True,
             'role': UserRoleEnum.ADMIN.value,
             'plan_id': None,
+            'available_credits': None,
         },
     ]
     actual_response = await async_client.get(
@@ -264,6 +273,7 @@ async def test_read_user_by_id(
         'is_active': True,
         'role': UserRoleEnum.ADMIN.value,
         'plan_id': None,
+        'available_credits': None,
     }
     actual_response = await async_client.get(
         '/users/2',
@@ -311,11 +321,13 @@ async def test_create_user(
         'is_active': True,
         'role': UserRoleEnum.ADMIN.value,
         'plan_id': None,
+        'available_credits': None,
     }
     data = test_user.model_dump()
     del data['id']
     del data['payment_service_user_id']
     del data['payment_service_subscription_id']
+    del data['available_credits']
     data['external_id'] = 'test_external_id_3'
     actual_response = await async_client.post(
         '/users',
@@ -342,6 +354,7 @@ async def test_create_user_already_exists(
     del data['id']
     del data['payment_service_user_id']
     del data['payment_service_subscription_id']
+    del data['available_credits']
     data['external_id'] = 'test_external_id_3'
     response = await async_client.post(
         '/users',
@@ -394,6 +407,7 @@ async def test_update_user(
         'is_active': True,
         'role': UserRoleEnum.ADMIN.value,
         'plan_id': None,
+        'available_credits': None,
     }
     data = {
         'full_name': 'User B with nem name',
