@@ -39,3 +39,7 @@ class ChatAIModelProvider(ABC):
     @staticmethod
     def _get_additional_instructions_prompt() -> str:
         return ''
+
+    @staticmethod
+    def get_new_message_credit_cost(chat: ChatDomain) -> int:
+        return 0

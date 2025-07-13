@@ -1,5 +1,7 @@
 from datetime import datetime
 
+from fastapi import HTTPException, status
+
 from app.domain import (
     Business as BusinessDomain,
     Chat as ChatDomain,
@@ -8,7 +10,7 @@ from app.domain import (
 )
 from app.enums import ChatMessageSenderEnum, UserPlanEnum, UserRoleEnum
 from app.helpers.helpers_rag import get_business_rag, get_general_rag
-from app.repositories import ChatRepository, PlanRepository
+from app.repositories import ChatRepository, PlanRepository, UserRepository
 from app.services import ServicesFactory
 
 
@@ -84,3 +86,36 @@ async def _should_chat_context_include_general_rag(
         and (plan := await plans_repo.get(plan_id=user.plan_id)) is not None
         and plan.name == UserPlanEnum.CEO
     )
+
+
+async def subtract_user_credits_for_new_message_in_chat(
+    user: UserDomain,
+    chat: ChatDomain,
+    users_repo: UserRepository,
+) -> None:
+    """Subtract credits from user for sending a new message in a chat.
+
+    Note:
+    - If the user has `None` credits, no credits will be subtracted nor exception raised.
+
+    Raises
+    ------
+    HTTPException
+        If the user has not enough credits to cover sending the message.
+    """
+    if user.available_credits is None:
+        return
+
+    message_credit_cost = chat_ai_model_service.get_new_message_credit_cost(chat=chat)
+    if user.available_credits < message_credit_cost:
+        raise HTTPException(
+            status_code=status.HTTP_402_PAYMENT_REQUIRED,
+            detail=(
+                f'User {user.id} does not have enough credits to send a message in chat '
+                f'{chat.id}. User has {user.available_credits} credits, but the message '
+                f'costs {message_credit_cost} credits.'
+            ),
+        )
+
+    user.available_credits -= message_credit_cost
+    await users_repo.update(user_id=user.id, user_update=user)

@@ -99,6 +99,29 @@ class ChatAIModelAnthropic(ChatAIModelProvider):
             response=response,
         )
 
+    @staticmethod
+    def get_new_message_credit_cost(chat: ChatDomain) -> int:
+        if chat.messages is None:
+            raise ValueError(
+                'Credit cost cannot be calculated for a chat without messages '
+                'information.'
+            )
+        new_message_num = len(chat.messages) + 1
+        if new_message_num == 1:
+            return 2
+        elif 2 <= new_message_num <= 6:
+            return 3
+        elif 7 <= new_message_num <= 9:
+            return 4
+        elif 10 <= new_message_num <= 14:
+            return 5
+        elif 15 <= new_message_num <= 18:
+            return 6
+        elif 19 <= new_message_num <= 20:
+            return 7
+        else:
+            return 8
+
     async def _process_response(
         self,
         messages: list[dict],
