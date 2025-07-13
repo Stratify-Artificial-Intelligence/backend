@@ -3,10 +3,8 @@
 echo "Running prestart.sh"
 
 # Run migrations
-if [ "$DOMAIN" = "localhost" ]; then
-  echo "Running alembic"
-  alembic upgrade head
-fi
+echo "Running alembic"
+alembic upgrade head
 
 # Create initial data in DB
 if [ "$DOMAIN" = "localhost" ]; then
