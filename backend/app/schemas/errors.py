@@ -15,6 +15,14 @@ class HTTP401Unauthorized(BaseModel):
     )
 
 
+class HTTP402PaymentRequired(BaseModel):
+    detail: str
+
+    model_config = ConfigDict(
+        json_schema_extra={'example': {'detail': 'Payment required'}},
+    )
+
+
 class HTTP403Forbidden(BaseModel):
     detail: str
 

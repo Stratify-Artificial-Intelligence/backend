@@ -4,6 +4,7 @@ from .helpers_chat import (
     add_store_message_and_get_store_response,
     create_chat_in_service,
     get_chat_title,
+    subtract_user_credits_for_new_message_in_chat,
 )
 from .helpers_payment import (
     create_checkout_session,

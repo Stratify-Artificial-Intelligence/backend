@@ -21,11 +21,13 @@ from app.helpers import (
     add_store_message_and_get_store_response,
     create_chat_in_service,
     get_chat_title,
+    subtract_user_credits_for_new_message_in_chat,
 )
 from app.repositories import (
     ChatRepository,
     BusinessRepository,
     PlanRepository,
+    UserRepository,
 )
 from app.schemas import Chat, ChatBase, ChatMessage, ChatMessageContent
 
@@ -134,6 +136,7 @@ async def create_chat(
     responses={
         status.HTTP_400_BAD_REQUEST: {'model': schemas.HTTP400BadRequest},
         status.HTTP_401_UNAUTHORIZED: {'model': schemas.HTTP401Unauthorized},
+        status.HTTP_402_PAYMENT_REQUIRED: {'model': schemas.HTTP402PaymentRequired},
         status.HTTP_403_FORBIDDEN: {'model': schemas.HTTP403Forbidden},
         status.HTTP_404_NOT_FOUND: {'model': schemas.HTTP404NotFound},
     },
@@ -145,6 +148,7 @@ async def add_message(
     business_repo: BusinessRepository = Depends(get_repository(BusinessRepository)),
     chats_repo: ChatRepository = Depends(get_repository(ChatRepository)),
     plans_repo: PlanRepository = Depends(get_repository(PlanRepository)),
+    users_repo: UserRepository = Depends(get_repository(UserRepository)),
     current_user: UserDomain = Depends(get_current_active_user),
 ):
     """Add message to a chat with user as sender."""
@@ -167,6 +171,11 @@ async def add_message(
             status_code=status.HTTP_404_NOT_FOUND,
             detail='Chat not found',
         )
+    await subtract_user_credits_for_new_message_in_chat(
+        user=current_user,
+        chat=chat,
+        users_repo=users_repo,
+    )
     response_message = await add_store_message_and_get_store_response(
         business=business,
         chat=chat,
