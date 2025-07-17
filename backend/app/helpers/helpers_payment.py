@@ -117,7 +117,7 @@ async def handle_subscription_webhook(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail='Invalid signature',
         ) from e
-    if event.type == 'checkout.session.completed':
+    if event.type in ('checkout.session.completed', 'invoice.payment_succeeded'):
         object = event.data.object
         logger.info(f'Handle subscription webhook object {object}')
 
