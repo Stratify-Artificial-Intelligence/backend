@@ -3,6 +3,7 @@
 from datetime import datetime
 
 from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.responses import StreamingResponse
 
 from app import schemas
 from app.authorization_server import (
@@ -19,6 +20,7 @@ from app.domain import (
 from app.enums import ChatMessageSenderEnum
 from app.helpers import (
     add_store_message_and_get_store_response,
+    add_store_message_and_get_store_response_stream,
     create_chat_in_service,
     get_chat_title,
     subtract_user_credits_for_new_message_in_chat,
@@ -190,3 +192,62 @@ async def add_message(
             detail='Chat not found',
         )
     return response_message
+
+
+@router.post(
+    '/{chat_id}/messages/stream',
+    summary='Add message to a chat and stream response',
+    response_class=StreamingResponse,
+    status_code=status.HTTP_201_CREATED,
+    responses={
+        status.HTTP_400_BAD_REQUEST: {'model': schemas.HTTP400BadRequest},
+        status.HTTP_401_UNAUTHORIZED: {'model': schemas.HTTP401Unauthorized},
+        status.HTTP_402_PAYMENT_REQUIRED: {'model': schemas.HTTP402PaymentRequired},
+        status.HTTP_403_FORBIDDEN: {'model': schemas.HTTP403Forbidden},
+        status.HTTP_404_NOT_FOUND: {'model': schemas.HTTP404NotFound},
+    },
+)
+async def add_message_stream(
+    business_id: int,
+    chat_id: int,
+    message_content: ChatMessageContent,
+    business_repo: BusinessRepository = Depends(get_repository(BusinessRepository)),
+    chats_repo: ChatRepository = Depends(get_repository(ChatRepository)),
+    plans_repo: PlanRepository = Depends(get_repository(PlanRepository)),
+    users_repo: UserRepository = Depends(get_repository(UserRepository)),
+    current_user: UserDomain = Depends(get_current_active_user),
+):
+    """Add message to a chat with user as sender and stream response."""
+    business = await get_business(
+        business_id=business_id,
+        user=current_user,
+        business_repo=business_repo,
+        permission_func=user_can_publish_message,
+        load_hierarchy=True,
+    )
+    message = ChatMessageDomain(
+        chat_id=chat_id,
+        time=datetime.now(),
+        sender=ChatMessageSenderEnum.USER,
+        content=message_content.content,
+    )
+    chat = await chats_repo.get(business_id=business_id, chat_id=chat_id)
+    if chat is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail='Chat not found',
+        )
+    await subtract_user_credits_for_new_message_in_chat(
+        user=current_user,
+        chat=chat,
+        users_repo=users_repo,
+    )
+    stream_generator = add_store_message_and_get_store_response_stream(
+        business=business,
+        chat=chat,
+        message=message,
+        user=current_user,
+        chats_repo=chats_repo,
+        plans_repo=plans_repo,
+    )
+    return StreamingResponse(stream_generator, media_type="text/plain")

@@ -1,4 +1,6 @@
 import uuid
+from typing import AsyncGenerator
+
 from anthropic import Anthropic
 from anthropic.types import ToolParam
 
@@ -98,6 +100,80 @@ class ChatAIModelAnthropic(ChatAIModelProvider):
             general_rag=general_rag,
             response=response,
         )
+
+    async def add_message_to_chat_and_get_response_stream(
+        self,
+        business: BusinessDomain,
+        chat: ChatDomain,
+        content: str,
+        business_rag: str,
+        general_rag: str,
+    ) -> AsyncGenerator[str, None]:
+        """Streams Claude's response, handling tool_use blocks (RAG injection)."""
+
+        messages = [self._business_info_to_anthropic_message(business=business)]
+        if chat.messages:
+            messages.extend(
+                [self._chat_message_domain_to_anthropic_message(msg) for msg in
+                 chat.messages]
+            )
+        messages.append(
+            {
+                'role': 'user',
+                'content': [{'type': 'text', 'text': content}],
+            }
+        )
+
+        system_prompt = self.get_instructions_prompt()
+
+        async def stream_from(messages: list[dict]) -> AsyncGenerator[str, None]:
+            with self.client.messages.stream(
+                model=settings.MODEL_NAME,
+                max_tokens=settings.MAX_TOKENS,
+                temperature=settings.TEMPERATURE,
+                messages=messages,
+                system=system_prompt,
+                tools=self.tools,
+            ) as stream:
+                assistant_blocks = []
+                tool_use_block = None
+
+                for block in stream:
+                    if block.type == 'text':
+                        yield block.text
+                        assistant_blocks.append(block)
+                    elif block.type == 'tool_use':
+                        tool_use_block = block
+                        assistant_blocks.append(block)
+                        # Pause stream to handle tool
+                        break
+
+            messages.append({'role': 'assistant', 'content': assistant_blocks})
+
+            # If tool_use_block was received, inject tool result and resume
+            if tool_use_block:
+                tool_result = self._handle_tool_call(
+                    tool_name=tool_use_block.name,
+                    business_rag=business_rag,
+                    general_rag=general_rag,
+                )
+
+                messages.append(
+                    {
+                        'role': 'user',
+                        'content': [{
+                            'type': 'tool_result',
+                            'tool_use_id': tool_use_block.id,
+                            'content': tool_result,
+                        }],
+                    }
+                )
+
+                # Recursively resume stream
+                async for next_chunk in stream_from(messages):
+                    yield next_chunk
+
+        return stream_from(messages)
 
     @staticmethod
     def get_new_message_credit_cost(chat: ChatDomain) -> int:
