@@ -1,7 +1,8 @@
 import uuid
 from typing import AsyncGenerator
 
-from anthropic import Anthropic
+import anthropic
+from anthropic import AsyncAnthropic
 from anthropic.types import ToolParam
 
 from app.domain import (
@@ -21,7 +22,7 @@ class ChatAIModelAnthropic(ChatAIModelProvider):
     """Anthropic chat model provider using explicit message history."""
 
     def __init__(self):
-        self.client = Anthropic(api_key=settings.API_KEY)
+        self.client = AsyncAnthropic(api_key=settings.API_KEY)
         self.tools = [
             ToolParam(
                 type='custom',
@@ -101,7 +102,7 @@ class ChatAIModelAnthropic(ChatAIModelProvider):
             response=response,
         )
 
-    async def add_message_to_chat_and_get_response_stream(
+    async def add_message_to_chat_and_get_response_stream(  # type: ignore  # noqa: C901
         self,
         business: BusinessDomain,
         chat: ChatDomain,
@@ -110,14 +111,15 @@ class ChatAIModelAnthropic(ChatAIModelProvider):
         general_rag: str,
     ) -> AsyncGenerator[str, None]:
         """Streams Claude's response, handling tool_use blocks (RAG injection)."""
-
-        messages = [self._business_info_to_anthropic_message(business=business)]
+        messages_history = [self._business_info_to_anthropic_message(business=business)]
         if chat.messages:
-            messages.extend(
-                [self._chat_message_domain_to_anthropic_message(msg) for msg in
-                 chat.messages]
+            messages_history.extend(
+                [
+                    self._chat_message_domain_to_anthropic_message(msg)
+                    for msg in chat.messages
+                ]
             )
-        messages.append(
+        messages_history.append(
             {
                 'role': 'user',
                 'content': [{'type': 'text', 'text': content}],
@@ -126,54 +128,94 @@ class ChatAIModelAnthropic(ChatAIModelProvider):
 
         system_prompt = self.get_instructions_prompt()
 
-        async def stream_from(messages: list[dict]) -> AsyncGenerator[str, None]:
-            with self.client.messages.stream(
-                model=settings.MODEL_NAME,
-                max_tokens=settings.MAX_TOKENS,
-                temperature=settings.TEMPERATURE,
-                messages=messages,
-                system=system_prompt,
-                tools=self.tools,
-            ) as stream:
-                assistant_blocks = []
-                tool_use_block = None
+        async def stream_from_anthropic_internal(
+            current_messages: list[dict],
+        ) -> AsyncGenerator[str, None]:
+            """Internal async generator to handle the actual stream and recursivity."""
+            assistant_content_blocks = []
+            tool_use_details = None
 
-                for block in stream:
-                    if block.type == 'text':
-                        yield block.text
-                        assistant_blocks.append(block)
-                    elif block.type == 'tool_use':
-                        tool_use_block = block
-                        assistant_blocks.append(block)
-                        # Pause stream to handle tool
-                        break
+            try:
+                async with self.client.messages.stream(
+                    model=settings.MODEL_NAME,
+                    max_tokens=settings.MAX_TOKENS,
+                    temperature=settings.TEMPERATURE,
+                    messages=current_messages,
+                    system=system_prompt,
+                    tools=self.tools,
+                ) as stream:
+                    async for block in stream:
+                        print(f'Received stream block: {block.type} -> {block}')
 
-            messages.append({'role': 'assistant', 'content': assistant_blocks})
+                        if (
+                            block.type == 'content_block_delta'
+                            and block.delta.type == 'text_delta'
+                        ):
+                            text_chunk = block.delta.text
+                            if text_chunk.strip() != '':
+                                yield text_chunk
+                                assistant_content_blocks.append(
+                                    {'type': 'text', 'text': text_chunk}
+                                )
+                        elif (
+                            block.type == 'content_block_start'
+                            and block.content_block.type == 'tool_use'
+                        ):
+                            tool_use_details = block.content_block
+                            assistant_content_blocks.append(tool_use_details)
+                            break
 
-            # If tool_use_block was received, inject tool result and resume
-            if tool_use_block:
-                tool_result = self._handle_tool_call(
-                    tool_name=tool_use_block.name,
-                    business_rag=business_rag,
-                    general_rag=general_rag,
+            except anthropic.APIError as e:
+                print(f'Anthropic API Error: {e}')
+                yield f'Error from AI model: {e}'
+                return
+            except Exception as e:
+                print(f'General streaming error: {e}')
+                yield f'An unexpected error occurred: {e}'
+                return
+
+            if assistant_content_blocks:
+                current_messages.append(
+                    {'role': 'assistant', 'content': assistant_content_blocks}
                 )
 
-                messages.append(
-                    {
-                        'role': 'user',
-                        'content': [{
-                            'type': 'tool_result',
-                            'tool_use_id': tool_use_block.id,
-                            'content': tool_result,
-                        }],
-                    }
-                )
+            if tool_use_details:
+                print(f'Tool use detected: {tool_use_details.name}')
+                try:
+                    tool_result_content = self._handle_tool_call(
+                        tool_name=tool_use_details.name,
+                        business_rag=business_rag,
+                        general_rag=general_rag,
+                    )
 
-                # Recursively resume stream
-                async for next_chunk in stream_from(messages):
-                    yield next_chunk
+                    current_messages.append(
+                        {
+                            'role': 'user',
+                            'content': [
+                                {
+                                    'type': 'tool_result',
+                                    'tool_use_id': tool_use_details.id,
+                                    'content': tool_result_content,
+                                }
+                            ],
+                        }
+                    )
+                    print(
+                        'Tool result injected. Resuming stream with updated messages:'
+                        f' {current_messages}'
+                    )
 
-        return stream_from(messages)
+                    async for next_chunk in stream_from_anthropic_internal(
+                        current_messages
+                    ):
+                        yield next_chunk
+                except Exception as e:
+                    print(f'Error processing tool call: {e}')
+                    yield f'Error processing tool: {e}'
+                    return
+
+        async for chunk in stream_from_anthropic_internal(messages_history):
+            yield chunk
 
     @staticmethod
     def get_new_message_credit_cost(chat: ChatDomain) -> int:

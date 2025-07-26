@@ -250,4 +250,4 @@ async def add_message_stream(
         chats_repo=chats_repo,
         plans_repo=plans_repo,
     )
-    return StreamingResponse(stream_generator, media_type="text/plain")
+    return StreamingResponse(stream_generator, media_type='text/plain')

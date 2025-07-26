@@ -76,14 +76,13 @@ async def add_store_message_and_get_store_response_stream(
 
     business_rag = get_business_rag(business_id=chat.business_id, query=message.content)
     should_include_general_rag = await _should_chat_context_include_general_rag(
-        user=user, plans_repo=plans_repo,
+        user=user,
+        plans_repo=plans_repo,
     )
     general_rag = (
-        get_general_rag(query=message.content)
-        if should_include_general_rag
-        else ''
+        get_general_rag(query=message.content) if should_include_general_rag else ''
     )
-    stream_gen = await chat_ai_model_service.add_message_to_chat_and_get_response_stream(
+    stream_gen = chat_ai_model_service.add_message_to_chat_and_get_response_stream(
         business=business,
         chat=chat,
         content=message.content,
@@ -92,7 +91,7 @@ async def add_store_message_and_get_store_response_stream(
     )
 
     full_response = ''
-    async for chunk in stream_gen:
+    async for chunk in stream_gen:  # type: ignore
         full_response += chunk
         yield chunk
 
