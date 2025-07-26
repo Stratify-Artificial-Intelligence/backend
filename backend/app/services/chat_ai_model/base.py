@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from typing import AsyncGenerator
 
 from app.domain import Business as BusinessDomain, Chat as ChatDomain
 
@@ -22,6 +23,17 @@ class ChatAIModelProvider(ABC):
         general_rag: str,
     ) -> str:
         """Add a message to a chat and return the response of the AI model."""
+        raise NotImplementedError
+
+    async def add_message_to_chat_and_get_response_stream(
+        self,
+        business: BusinessDomain,
+        chat: ChatDomain,
+        content: str,
+        business_rag: str,
+        general_rag: str,
+    ) -> AsyncGenerator[str, None]:
+        """Add a message to a chat and return the response of the AI model as stream."""
         raise NotImplementedError
 
     def get_instructions_prompt(self) -> str:

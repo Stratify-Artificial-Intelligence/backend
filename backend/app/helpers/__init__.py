@@ -2,6 +2,7 @@ from .helpers_auth import check_auth_token, create_user_in_auth_service
 from .helpers_business import remove_business_image, upload_business_image
 from .helpers_chat import (
     add_store_message_and_get_store_response,
+    add_store_message_and_get_store_response_stream,
     create_chat_in_service,
     get_chat_title,
     subtract_user_credits_for_new_message_in_chat,

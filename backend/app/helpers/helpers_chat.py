@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import AsyncGenerator
 
 from fastapi import HTTPException, status
 
@@ -61,6 +62,46 @@ async def add_store_message_and_get_store_response(
         content=response_content,
     )
     return await chats_repo.add_message(response_message)
+
+
+async def add_store_message_and_get_store_response_stream(
+    business: BusinessDomain,
+    chat: ChatDomain,
+    message: ChatMessageDomain,
+    user: UserDomain,
+    chats_repo: ChatRepository,
+    plans_repo: PlanRepository,
+) -> AsyncGenerator[str, None]:
+    await chats_repo.add_message(message)
+
+    business_rag = get_business_rag(business_id=chat.business_id, query=message.content)
+    should_include_general_rag = await _should_chat_context_include_general_rag(
+        user=user,
+        plans_repo=plans_repo,
+    )
+    general_rag = (
+        get_general_rag(query=message.content) if should_include_general_rag else ''
+    )
+    stream_gen = chat_ai_model_service.add_message_to_chat_and_get_response_stream(
+        business=business,
+        chat=chat,
+        content=message.content,
+        business_rag=business_rag,
+        general_rag=general_rag,
+    )
+
+    full_response = ''
+    async for chunk in stream_gen:  # type: ignore
+        full_response += chunk
+        yield chunk
+
+    response_message = ChatMessageDomain(
+        chat_id=message.chat_id,
+        time=datetime.now(),
+        sender=ChatMessageSenderEnum.AI_MODEL,
+        content=full_response,
+    )
+    await chats_repo.add_message(response_message)
 
 
 async def create_chat_in_service() -> str:
