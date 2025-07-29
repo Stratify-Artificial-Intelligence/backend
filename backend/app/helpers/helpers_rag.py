@@ -2,7 +2,7 @@ from app.domain import (
     BusinessIdea as BusinessIdeaDomain,
     EstablishedBusiness as EstablishedBusinessDomain,
 )
-from app.schemas import BusinessResearch, BusinessResearchParams
+from app.schemas import ResearchExtended, ResearchParams
 from app.services import ServicesFactory
 
 from tiktoken import encoding_for_model
@@ -16,13 +16,33 @@ general_rag_settings = GeneralRAGSettings()
 
 def deep_research_for_business(
     business: BusinessIdeaDomain | EstablishedBusinessDomain,
-    params: BusinessResearchParams,
-) -> BusinessResearch:
+    params: ResearchParams,
+) -> ResearchExtended:
     """Perform deep research for a business."""
     research_context = business.get_information()
     research_instructions = _get_deep_search_instructions()
     deep_research_provider = ServicesFactory().get_deep_research_provider()
     return deep_research_provider.do_deep_research(
+        prompt=f'{research_context} {research_instructions}',
+        max_tokens=params.max_tokens,
+    )
+
+
+def get_deep_research_async(request_id: str) -> ResearchExtended:
+    """Get deep research result asynchronously."""
+    deep_research_provider = ServicesFactory().get_deep_research_provider()
+    return deep_research_provider.get_deep_research_async(request_id=request_id)
+
+
+def deep_research_for_business_async(
+    business: BusinessIdeaDomain | EstablishedBusinessDomain,
+    params: ResearchParams,
+) -> ResearchExtended:
+    """Perform deep research for a business asynchronously."""
+    research_context = business.get_information()
+    research_instructions = _get_deep_search_instructions()
+    deep_research_provider = ServicesFactory().get_deep_research_provider()
+    return deep_research_provider.do_deep_research_async(
         prompt=f'{research_context} {research_instructions}',
         max_tokens=params.max_tokens,
     )
@@ -42,6 +62,22 @@ def chunk_and_upload_text_for_general(text: str) -> None:
         settings=general_rag_settings,
         namespace=general_rag_settings.NAMESPACE_ID,
     )
+
+
+def chunk_and_upload_text(text: str, business_id: int | None = None) -> None:
+    """Chunk and upload text to the vector database."""
+    if business_id is None:
+        _chunk_and_upload_text(
+            text=text,
+            settings=general_rag_settings,
+            namespace=general_rag_settings.NAMESPACE_ID,
+        )
+    else:
+        _chunk_and_upload_text(
+            text=text,
+            settings=rag_settings,
+            namespace=rag_settings.NAMESPACE_ID.format(business_id=business_id),
+        )
 
 
 def _chunk_and_upload_text(text: str, settings: RAGSettings, namespace: str) -> None:

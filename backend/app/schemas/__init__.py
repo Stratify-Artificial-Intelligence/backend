@@ -9,10 +9,10 @@ from .business import (
     EstablishedBusinessPartialUpdate,
 )
 from .business_research import (
-    BusinessResearch,
-    BusinessResearchParams,
-    GeneralResearch,
-    GeneralResearchParams,
+    Research,
+    ResearchExtended,
+    ResearchParams,
+    ResearchStoreParams,
 )
 from .chat import Chat, ChatBase, ChatMessage, ChatMessageContent
 from .errors import (

@@ -14,9 +14,10 @@ from .helpers_payment import (
     handle_subscription_webhook,
 )
 from .helpers_rag import (
+    chunk_and_upload_text,
     chunk_and_upload_text_for_business,
-    chunk_and_upload_text_for_general,
     deep_research_for_business,
+    deep_research_for_business_async,
     get_business_rag,
     get_general_rag,
 )

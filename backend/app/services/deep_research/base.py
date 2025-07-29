@@ -1,13 +1,29 @@
 from abc import ABC, abstractmethod
 
-from app.schemas import BusinessResearch
+from app.schemas import ResearchExtended
 
 
 class DeepResearchProvider(ABC):
     """Base class for deep research providers."""
 
-    @staticmethod
     @abstractmethod
-    def do_deep_research(prompt: str, max_tokens: int) -> BusinessResearch:
+    def do_deep_research(self, prompt: str, max_tokens: int) -> ResearchExtended:
         """Do deep research."""
+        raise NotImplementedError
+
+    @abstractmethod
+    def get_deep_research_async(
+        self,
+        request_id: str,
+    ) -> ResearchExtended:
+        """Get deep research by request ID."""
+        raise NotImplementedError
+
+    @abstractmethod
+    def do_deep_research_async(
+        self,
+        prompt: str,
+        max_tokens: int,
+    ) -> ResearchExtended:
+        """Do deep research async."""
         raise NotImplementedError
