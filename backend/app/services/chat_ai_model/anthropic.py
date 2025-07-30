@@ -85,7 +85,7 @@ class ChatAIModelAnthropic(ChatAIModelProvider):
             }
         )
 
-        response = self.client.messages.create(
+        response = await self.client.messages.create(
             model=settings.MODEL_NAME,
             max_tokens=settings.MAX_TOKENS,
             temperature=settings.TEMPERATURE,
@@ -292,7 +292,7 @@ class ChatAIModelAnthropic(ChatAIModelProvider):
                 }
             )
 
-            resumed = self.client.messages.create(
+            resumed = await self.client.messages.create(
                 model=settings.MODEL_NAME,
                 max_tokens=settings.MAX_TOKENS,
                 temperature=settings.TEMPERATURE,
