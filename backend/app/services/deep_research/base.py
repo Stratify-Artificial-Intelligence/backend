@@ -15,8 +15,8 @@ class DeepResearchProvider(ABC):
     def get_deep_research_async(
         self,
         request_id: str,
-    ) -> ResearchExtended:
-        """Get deep research by request ID."""
+    ) -> ResearchExtended | None:
+        """Get deep research by request ID, if found."""
         raise NotImplementedError
 
     @abstractmethod

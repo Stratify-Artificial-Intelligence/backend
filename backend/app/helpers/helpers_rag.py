@@ -28,7 +28,7 @@ def deep_research_for_business(
     )
 
 
-def get_deep_research_async(request_id: str) -> ResearchExtended:
+def get_deep_research_async(request_id: str) -> ResearchExtended | None:
     """Get deep research result asynchronously."""
     deep_research_provider = ServicesFactory().get_deep_research_provider()
     return deep_research_provider.get_deep_research_async(request_id=request_id)

@@ -23,6 +23,32 @@ router = APIRouter(
 )
 
 
+@router.get(
+    '/{research_id}',
+    summary='Get research by ID',
+    response_model=ResearchExtended,
+    responses={
+        status.HTTP_401_UNAUTHORIZED: {'model': schemas.HTTP401Unauthorized},
+        status.HTTP_403_FORBIDDEN: {'model': schemas.HTTP403Forbidden},
+        status.HTTP_404_NOT_FOUND: {'model': schemas.HTTP404NotFound},
+    },
+)
+async def get_research_by_id(
+    research_id: str,
+):
+    """Get research by ID."""
+    # ToDo (pduran): Implement authorization check for research access. This would
+    #  require to store the mapping of research IDs to business IDs or user IDs, which
+    #  is not currently implemented.
+    research = get_deep_research_async(request_id=research_id)
+    if research is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail='Research not found',
+        )
+    return research
+
+
 @router.post(
     '',
     summary='Create a research',
@@ -90,6 +116,11 @@ async def store_research(
         research_info = get_deep_research_async(
             request_id=research_params.research_id,
         )
+        if research_info is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail='Research not found',
+            )
         if research_info.status is not ResearchRequestStatusEnum.COMPLETED:
             research_status = (
                 research_info.status.value if research_info.status else 'unknown'
@@ -99,6 +130,13 @@ async def store_research(
                 detail=(
                     'Research request is not completed yet. Current status is '
                     f'{research_status}'
+                ),
+            )
+        if research_info.research is None:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=(
+                    f'Research text empty (although status is {research_info.status}).',
                 ),
             )
         research_text = research_info.research

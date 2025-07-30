@@ -30,24 +30,41 @@ class DeepResearchPerplexity(DeepResearchProvider):
         response = requests.post(settings.API_URL, headers=self.headers, json=payload)
         response.raise_for_status()
         response_output = response.json()
-        return self._perplexity_response_to_research_schema(response_output)
+        return ResearchExtended(
+            response_id=response_output['id'],
+            status=response_output.get('status'),
+            prompt_tokens=response_output['usage']['prompt_tokens'],
+            completion_tokens=response_output['usage']['completion_tokens'],
+            total_tokens=response_output['usage']['total_tokens'],
+            citation_tokens=response_output['usage'].get('citation_tokens'),
+            num_search_queries=response_output['usage'].get('num_search_queries'),
+            reasoning_tokens=response_output['usage'].get('reasoning_tokens'),
+            research=response_output['choices'][0]['message']['content'],
+        )
 
-    def get_deep_research_async(self, request_id: str) -> ResearchExtended:
+    def get_deep_research_async(self, request_id: str) -> ResearchExtended | None:
         response = requests.get(
             settings.API_URL_ASYNC + f'/{request_id}',
             headers=self.headers,
         )
-        response.raise_for_status()
+        try:
+            response.raise_for_status()
+        except requests.HTTPError as e:
+            if response.status_code == 404:
+                return None
+            raise e
         response_output = response.json()
-        return self._perplexity_response_to_research_schema(response_output['response'])
+        return self._perplexity_async_response_to_research_schema(response_output)
 
     def do_deep_research_async(self, prompt: str, max_tokens: int) -> ResearchExtended:
         payload = {
-            'model': 'sonar-deep-research',
-            'messages': [
-                {'role': 'user', 'content': prompt},
-            ],
-            'max_tokens': max_tokens,
+            'request': {
+                'model': 'sonar-deep-research',
+                'messages': [
+                    {'role': 'user', 'content': prompt},
+                ],
+                'max_tokens': max_tokens,
+            }
         }
         response = requests.post(
             settings.API_URL_ASYNC,
@@ -56,21 +73,28 @@ class DeepResearchPerplexity(DeepResearchProvider):
         )
         response.raise_for_status()
         response_output = response.json()
-        return self._perplexity_response_to_research_schema(response_output['response'])
+        return self._perplexity_async_response_to_research_schema(response_output)
 
     @staticmethod
-    def _perplexity_response_to_research_schema(
+    def _perplexity_async_response_to_research_schema(
         response: dict[str, Any],
     ) -> ResearchExtended:
         """Convert Perplexity API response to ResearchExtended schema."""
-        return ResearchExtended(
-            response_id=response['id'],
-            status=response.get('status'),
-            prompt_tokens=response['usage']['prompt_tokens'],
-            completion_tokens=response['usage']['completion_tokens'],
-            total_tokens=response['usage']['total_tokens'],
-            citation_tokens=response['usage'].get('citation_tokens'),
-            num_search_queries=response['usage'].get('num_search_queries'),
-            reasoning_tokens=response['usage'].get('reasoning_tokens'),
-            research=response['choices'][0]['message']['content'],
-        )
+        response_info = response.get('response')
+        if response_info is None:
+            return ResearchExtended(
+                response_id=response['id'],
+                status=response['status'],
+            )
+        else:
+            return ResearchExtended(
+                response_id=response['id'],
+                status=response['status'],
+                prompt_tokens=response_info['usage']['prompt_tokens'],
+                completion_tokens=response_info['usage']['completion_tokens'],
+                total_tokens=response_info['usage']['total_tokens'],
+                citation_tokens=response_info['usage'].get('citation_tokens'),
+                num_search_queries=response_info['usage'].get('num_search_queries'),
+                reasoning_tokens=response_info['usage'].get('reasoning_tokens'),
+                research=response_info['choices'][0]['message']['content'],
+            )
