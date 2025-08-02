@@ -63,6 +63,14 @@ users_data = [
         'plan_id': 1,
         'available_credits': 10,
     },
+    {
+        'username': 'service_user',
+        'email': 'service_user@gmail.com',
+        'full_name': 'Service user',
+        'external_id': 'service_user',
+        'is_active': True,
+        'role': UserRoleEnum.SERVICE.value,
+    },
 ]
 
 businesses_idea_data = [

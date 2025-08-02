@@ -15,6 +15,9 @@ def check_auth_token(
     token: HTTPAuthorizationCredentials = Depends(auth_scheme),
 ) -> TokenData:
     """Check and decode the provided authentication token."""
+    # ToDo (pduran): [S-249] Implement this using api gateway instead.
+    if token == settings.SERVICE_USER_TOKEN:
+        return TokenData(sub='service_user')
     token_sub = identity_service.verify_and_decode_auth_token(token=token.credentials)
     return TokenData(sub=token_sub)
 

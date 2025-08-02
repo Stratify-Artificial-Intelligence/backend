@@ -32,6 +32,9 @@ router = APIRouter(
         status.HTTP_403_FORBIDDEN: {'model': schemas.HTTP403Forbidden},
         status.HTTP_404_NOT_FOUND: {'model': schemas.HTTP404NotFound},
     },
+    dependencies=[
+        Depends(RoleChecker(allowed_roles=[UserRoleEnum.ADMIN, UserRoleEnum.SERVICE]))
+    ],
 )
 async def get_research_by_id(
     research_id: str,
@@ -59,6 +62,7 @@ async def get_research_by_id(
         status.HTTP_403_FORBIDDEN: {'model': schemas.HTTP403Forbidden},
         status.HTTP_404_NOT_FOUND: {'model': schemas.HTTP404NotFound},
     },
+    dependencies=[Depends(RoleChecker(allowed_roles=[UserRoleEnum.ADMIN]))],
 )
 async def create_research(
     research_params: ResearchParams,
@@ -106,7 +110,9 @@ async def create_research(
         status.HTTP_401_UNAUTHORIZED: {'model': schemas.HTTP401Unauthorized},
         status.HTTP_403_FORBIDDEN: {'model': schemas.HTTP403Forbidden},
     },
-    dependencies=[Depends(RoleChecker(allowed_roles=[UserRoleEnum.ADMIN]))],
+    dependencies=[
+        Depends(RoleChecker(allowed_roles=[UserRoleEnum.ADMIN, UserRoleEnum.SERVICE]))
+    ],
 )
 async def store_research(
     research_params: ResearchStoreParams,

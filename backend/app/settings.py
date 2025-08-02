@@ -1,5 +1,3 @@
-import secrets
-
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from app.enums import (
@@ -15,13 +13,9 @@ from app.enums import (
 class SecuritySettings(BaseSettings):
     """General settings for the application."""
 
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
-    SECRET_KEY: str = secrets.token_urlsafe(32)
-    TOKEN_ENCRYPTION_ALGORITHM: str = 'HS256'
-    FIRST_SUPERUSER_USERNAME: str = 'admin'
-    FIRST_BASIC_USER_USERNAME: str = 'user'
+    SERVICE_USER_TOKEN: str = ''
 
-    model_config = SettingsConfigDict(env_file='.env')
+    model_config = SettingsConfigDict(env_file='.env', env_prefix='SECURITY_')
 
 
 class ServicesSettings(BaseSettings):
