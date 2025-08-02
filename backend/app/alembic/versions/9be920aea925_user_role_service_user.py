@@ -20,7 +20,7 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade():
-    op.execute("ALTER TYPE userroleenum RENAME TO userroleenum_old")
+    op.execute('ALTER TYPE userroleenum RENAME TO userroleenum_old')
 
     new_user_role_enum = sa.Enum('Admin', 'Basic', 'Service', name='userroleenum')
     new_user_role_enum.create(op.get_bind(), checkfirst=False)
@@ -31,14 +31,14 @@ def upgrade():
         type_=new_user_role_enum,
         existing_type=sa.Enum('Admin', 'Basic', name='userroleenum_old'),
         existing_nullable=True,
-        postgresql_using="role::text::userroleenum",
+        postgresql_using='role::text::userroleenum',
     )
 
-    op.execute("DROP TYPE userroleenum_old")
+    op.execute('DROP TYPE userroleenum_old')
 
 
 def downgrade():
-    op.execute("ALTER TYPE userroleenum RENAME TO userroleenum_new")
+    op.execute('ALTER TYPE userroleenum RENAME TO userroleenum_new')
 
     old_user_role_enum = sa.Enum('Admin', 'Basic', name='userroleenum')
     old_user_role_enum.create(op.get_bind(), checkfirst=False)
@@ -49,7 +49,7 @@ def downgrade():
         type_=old_user_role_enum,
         existing_type=sa.Enum('Admin', 'Basic', 'Premium', name='userroleenum_new'),
         existing_nullable=True,
-        postgresql_using="role::text::userroleenum",
+        postgresql_using='role::text::userroleenum',
     )
 
-    op.execute("DROP TYPE userroleenum_new")
+    op.execute('DROP TYPE userroleenum_new')
