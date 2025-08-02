@@ -4,6 +4,7 @@ from .chat import ChatMessageSenderEnum
 from .research import ResearchRequestStatusEnum
 from .services import (
     ChatAIModelProviderEnum,
+    DeepResearchHandlerProviderEnum,
     DeepResearchProviderEnum,
     EmbeddingProviderEnum,
     IdentityProviderEnum,

@@ -2,6 +2,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from app.enums import (
     ChatAIModelProviderEnum,
+    DeepResearchHandlerProviderEnum,
     DeepResearchProviderEnum,
     EmbeddingProviderEnum,
     IdentityProviderEnum,
@@ -24,6 +25,9 @@ class ServicesSettings(BaseSettings):
     CHAT_AI_MODEL_PROVIDER: ChatAIModelProviderEnum = ChatAIModelProviderEnum.ANTHROPIC
     DEEP_RESEARCH_PROVIDER: DeepResearchProviderEnum = (
         DeepResearchProviderEnum.PERPLEXITY
+    )
+    DEEP_RESEARCH_HANDLER_PROVIDER: DeepResearchHandlerProviderEnum = (
+        DeepResearchHandlerProviderEnum.AWS_STEP_FUNCTION
     )
     EMBEDDING_PROVIDER: EmbeddingProviderEnum = EmbeddingProviderEnum.OPENAI
     IDENTITY_PROVIDER: IdentityProviderEnum = IdentityProviderEnum.FIREBASE_AUTH
@@ -151,6 +155,18 @@ class GeneralRAGSettings(RAGSettings):
     TOP_K: int = 5
 
     model_config = SettingsConfigDict(env_file='.env', env_prefix='GENERAL_RAG_')
+
+
+class DeepResearchHandlerAWSStepFunctionSettings(BaseSettings):
+    """Load Deep Research Handler AWS Step Function settings from environment or .env."""
+
+    REGION: str = ''
+    STATE_MACHINE_ARN: str = ''
+
+    model_config = SettingsConfigDict(
+        env_file='.env',
+        env_prefix='SERVICES_DEEP_RESEARCH_HANDLER_AWS_STEP_FUNCTION_',
+    )
 
 
 class StripeSettings(BaseSettings):

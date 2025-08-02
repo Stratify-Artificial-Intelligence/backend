@@ -4,6 +4,7 @@ from typing import final
 
 from app.enums import (
     ChatAIModelProviderEnum,
+    DeepResearchHandlerProviderEnum,
     DeepResearchProviderEnum,
     EmbeddingProviderEnum,
     IdentityProviderEnum,
@@ -16,6 +17,10 @@ from app.services.chat_ai_model import (
     ChatAIModelProvider,
 )
 from app.services.deep_research import DeepResearchPerplexity, DeepResearchProvider
+from app.services.deep_research_handler import (
+    DeepResearchHandlerAWSStepFunction,
+    DeepResearchHandlerProvider,
+)
 from app.services.embedding import EmbeddingOpenAI, EmbeddingProvider
 from app.services.identity import IdentityFirebaseAuth, IdentityProvider
 from app.services.storage import StorageAWSS3, StorageProvider
@@ -32,6 +37,7 @@ class ServicesFactory:
     _instance: ServicesFactory | None = None
     _chat_ai_model_provider: ChatAIModelProvider | None = None
     _deep_research_provider: DeepResearchProvider | None = None
+    _deep_research_handler_provider: DeepResearchHandlerProvider | None = None
     _embedding_provider: EmbeddingProvider | None = None
     _identity_provider: IdentityProvider | None = None
     _storage_provider: StorageProvider | None = None
@@ -78,6 +84,22 @@ class ServicesFactory:
                     f'{settings.DEEP_RESEARCH_PROVIDER}'
                 )
         return self._deep_research_provider
+
+    def get_deep_research_handler_provider(self) -> DeepResearchHandlerProvider:
+        if self._deep_research_handler_provider is None:
+            if (
+                settings.DEEP_RESEARCH_HANDLER_PROVIDER
+                == DeepResearchHandlerProviderEnum.AWS_STEP_FUNCTION
+            ):
+                self._deep_research_handler_provider = (
+                    DeepResearchHandlerAWSStepFunction()
+                )
+            else:
+                raise ValueError(
+                    f'Unexpected deep research handler provider: '
+                    f'{settings.DEEP_RESEARCH_HANDLER_PROVIDER}'
+                )
+        return self._deep_research_handler_provider
 
     def get_embedding_provider(self) -> EmbeddingProvider:
         if self._embedding_provider is None:
