@@ -12,7 +12,6 @@ from .business_research import (
     Research,
     ResearchExtended,
     ResearchParams,
-    ResearchStoreParams,
 )
 from .chat import Chat, ChatBase, ChatMessage, ChatMessageContent
 from .errors import (

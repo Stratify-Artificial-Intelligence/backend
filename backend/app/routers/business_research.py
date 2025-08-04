@@ -1,6 +1,6 @@
 """API endpoints for business research management."""
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, status
 
 from app import schemas
 from app.authorization_server import RoleChecker, user_can_read_business
@@ -14,7 +14,7 @@ from app.helpers import (
 )
 from app.helpers.helpers_rag import get_deep_research_async
 from app.repositories import BusinessRepository
-from app.schemas import Research, ResearchExtended, ResearchParams, ResearchStoreParams
+from app.schemas import Research, ResearchExtended, ResearchParams
 
 
 router = APIRouter(
@@ -114,14 +114,27 @@ async def create_research(
         Depends(RoleChecker(allowed_roles=[UserRoleEnum.ADMIN, UserRoleEnum.SERVICE]))
     ],
 )
-async def store_research(
-    research_params: ResearchStoreParams,
+async def store_research(  # noqa: C901
+    business_id: int | None = Form(None),
+    research_id: str | None = Form(None),
+    research: str | None = Form(None),
+    research_file: UploadFile | None = File(None),
 ):
     """Store research."""
-    if research_params.research_id is not None:
-        research_info = get_deep_research_async(
-            request_id=research_params.research_id,
+    fields_set = [
+        field for field in [research_id, research, research_file] if field is not None
+    ]
+    if len(fields_set) != 1:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=(
+                'Exactly one of research_id, research, or research_file must be '
+                'provided.'
+            ),
         )
+
+    if research_id is not None:
+        research_info = get_deep_research_async(request_id=research_id)
         if research_info is None:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
@@ -146,15 +159,32 @@ async def store_research(
                 ),
             )
         research_text = research_info.research
-    elif research_params.research is not None:
-        research_text = research_params.research
+    elif research is not None:
+        research_text = research
+    elif research_file is not None:
+        if research_file.filename is None:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail='Filename is required for research_file.',
+            )
+        if not research_file.filename.endswith('.txt'):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail='Only .txt files are supported for research_file.',
+            )
+        contents = await research_file.read()
+        try:
+            research_text = contents.decode('utf-8')
+        except UnicodeDecodeError:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail='Uploaded file must be UTF-8 encoded.',
+            )
     else:
         raise ValueError(
             'Either research_id or research must be provided. This error should never '
-            'happen, as it is handled by the schema validator.'
+            'happen.'
         )
-    chunk_and_upload_text(
-        text=research_text,
-        business_id=research_params.business_id,
-    )
+
+    chunk_and_upload_text(text=research_text, business_id=business_id)
     return Research(research=research_text)
