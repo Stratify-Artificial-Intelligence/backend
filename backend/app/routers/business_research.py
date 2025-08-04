@@ -53,9 +53,9 @@ async def get_research_by_id(
 
 
 @router.post(
-    '',
-    summary='Create a research',
-    response_model=ResearchExtended,
+    '/businesses/{business_id}',
+    summary='Create a research for a business',
+    response_model=BusinessResearch,
     status_code=status.HTTP_201_CREATED,
     responses={
         status.HTTP_401_UNAUTHORIZED: {'model': schemas.HTTP401Unauthorized},
