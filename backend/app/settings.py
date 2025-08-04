@@ -162,6 +162,8 @@ class DeepResearchHandlerAWSStepFunctionSettings(BaseSettings):
 
     REGION: str = ''
     STATE_MACHINE_ARN: str = ''
+    ACCESS_KEY_ID: str = ''
+    SECRET_ACCESS_KEY: str = ''
 
     model_config = SettingsConfigDict(
         env_file='.env',

@@ -13,7 +13,12 @@ class DeepResearchHandlerAWSStepFunction(DeepResearchHandlerProvider):
     """Implementation of DeepResearchHandlerProvider using AWS Step Function."""
 
     def __init__(self):
-        self.step_function_client = client('stepfunctions', region_name=settings.REGION)
+        self.step_function_client = client(
+            'stepfunctions',
+            region_name=settings.REGION,
+            aws_access_key_id=settings.ACCESS_KEY_ID,
+            aws_secret_access_key=settings.SECRET_ACCESS_KEY,
+        )
 
     def track_and_store_research(self, research_id: str, business_id: int) -> None:
         try:
