@@ -1,3 +1,5 @@
+from fastapi import HTTPException, status
+
 from app.domain import (
     BusinessIdea as BusinessIdeaDomain,
     EstablishedBusiness as EstablishedBusinessDomain,
@@ -42,10 +44,21 @@ def deep_research_for_business_async(
     research_context = business.get_information()
     research_instructions = _get_deep_search_instructions()
     deep_research_provider = ServicesFactory().get_deep_research_provider()
-    return deep_research_provider.do_deep_research_async(
+    research_info = deep_research_provider.do_deep_research_async(
         prompt=f'{research_context} {research_instructions}',
         max_tokens=params.max_tokens,
     )
+    dr_handler_provider = ServicesFactory().get_deep_research_handler_provider()
+    if business.id is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail='Business ID not found.',
+        )
+    dr_handler_provider.track_and_store_research(
+        research_id=research_info.response_id,
+        business_id=business.id,
+    )
+    return research_info
 
 
 def chunk_and_upload_text_for_business(text: str, business_id: int) -> None:

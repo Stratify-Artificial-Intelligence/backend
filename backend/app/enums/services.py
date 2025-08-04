@@ -10,6 +10,10 @@ class DeepResearchProviderEnum(str, Enum):
     PERPLEXITY = 'perplexity'
 
 
+class DeepResearchHandlerProviderEnum(str, Enum):
+    AWS_STEP_FUNCTION = 'aws_step_function'
+
+
 class EmbeddingProviderEnum(str, Enum):
     OPENAI = 'openai'
 
