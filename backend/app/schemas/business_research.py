@@ -3,6 +3,10 @@ from pydantic import BaseModel
 from app.enums import ResearchRequestStatusEnum
 
 
+class ResearchStoreById(BaseModel):
+    business_id: int
+
+
 class Research(BaseModel):
     research: str
 
