@@ -1,6 +1,7 @@
 from .admin import AuthMethodEnum
 from .business import BusinessStageEnum
 from .chat import ChatMessageSenderEnum
+from .research import ResearchRequestStatusEnum
 from .services import (
     ChatAIModelProviderEnum,
     DeepResearchProviderEnum,

@@ -1,26 +1,39 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, model_validator
+
+from app.enums import ResearchRequestStatusEnum
 
 
-class GeneralResearchParams(BaseModel):
-    research: str
-    store_result: bool = True
-
-
-class GeneralResearch(BaseModel):
+class Research(BaseModel):
     research: str
 
 
-class BusinessResearchParams(BaseModel):
+class ResearchExtended(BaseModel):
+    response_id: str
+    status: ResearchRequestStatusEnum | None = None
+    prompt_tokens: int | None = None
+    completion_tokens: int | None = None
+    total_tokens: int | None = None
+    citation_tokens: int | None = None
+    num_search_queries: int | None = None
+    reasoning_tokens: int | None = None
+    research: str | None = None
+
+
+class ResearchParams(BaseModel):
     max_tokens: int
-    store_result: bool = True
+    business_id: int | None = None
+    sync_generation: bool | None = False
 
 
-class BusinessResearch(BaseModel):
-    id: str
-    prompt_tokens: int
-    completion_tokens: int
-    total_tokens: int
-    citation_tokens: int
-    num_search_queries: int
-    reasoning_tokens: int
-    research: str
+class ResearchStoreParams(BaseModel):
+    business_id: int | None = None
+    research_id: str | None = None
+    research: str | None = None
+
+    @model_validator(mode='after')
+    def validate_research_id_xor_research(self):
+        fields = ['research_id', 'research']
+        set_fields = [field for field in fields if getattr(self, field) is not None]
+        if len(set_fields) != 1:
+            raise ValueError('Exactly one of research_id or research must be provided.')
+        return self
