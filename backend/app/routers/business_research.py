@@ -14,8 +14,7 @@ from app.helpers import (
 )
 from app.helpers.helpers_rag import get_deep_research_async
 from app.repositories import BusinessRepository
-from app.schemas import Research, ResearchExtended, ResearchParams
-
+from app.schemas import Research, ResearchExtended, ResearchParams, ResearchStoreById
 
 router = APIRouter(
     tags=['Research'],
@@ -50,6 +49,58 @@ async def get_research_by_id(
             detail='Research not found',
         )
     return research
+
+
+@router.post(
+    '/{research_id}/store',
+    summary='Store research by ID',
+    response_model=Research,
+    status_code=status.HTTP_201_CREATED,
+    responses={
+        status.HTTP_400_BAD_REQUEST: {'model': schemas.HTTP400BadRequest},
+        status.HTTP_401_UNAUTHORIZED: {'model': schemas.HTTP401Unauthorized},
+        status.HTTP_403_FORBIDDEN: {'model': schemas.HTTP403Forbidden},
+        status.HTTP_404_NOT_FOUND: {'model': schemas.HTTP404NotFound},
+    },
+    dependencies=[
+        Depends(RoleChecker(allowed_roles=[UserRoleEnum.ADMIN, UserRoleEnum.SERVICE]))
+    ],
+)
+async def store_research_by_id(  # noqa: C901
+    research_id: str,
+    research_store_params: ResearchStoreById,
+):
+    """Store research by ID."""
+    research_info = get_deep_research_async(request_id=research_id)
+    if research_info is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail='Research not found',
+        )
+    if research_info.status is not ResearchRequestStatusEnum.COMPLETED:
+        research_status = (
+            research_info.status.value if research_info.status else 'unknown'
+        )
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=(
+                'Research request is not completed yet. Current status is '
+                f'{research_status}'
+            ),
+        )
+    if research_info.research is None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=(
+                f'Research text empty (although status is {research_info.status}).',
+            ),
+        )
+    research_text = research_info.research
+    chunk_and_upload_text(
+        text=research_text,
+        business_id=research_store_params.business_id,
+    )
+    return Research(research=research_text)
 
 
 @router.post(
@@ -107,59 +158,26 @@ async def create_research(
     response_model=Research,
     status_code=status.HTTP_201_CREATED,
     responses={
+        status.HTTP_400_BAD_REQUEST: {'model': schemas.HTTP400BadRequest},
         status.HTTP_401_UNAUTHORIZED: {'model': schemas.HTTP401Unauthorized},
         status.HTTP_403_FORBIDDEN: {'model': schemas.HTTP403Forbidden},
     },
-    dependencies=[
-        Depends(RoleChecker(allowed_roles=[UserRoleEnum.ADMIN, UserRoleEnum.SERVICE]))
-    ],
+    dependencies=[Depends(RoleChecker(allowed_roles=[UserRoleEnum.ADMIN]))],
 )
 async def store_research(  # noqa: C901
     business_id: int | None = Form(None),
-    research_id: str | None = Form(None),
     research: str | None = Form(None),
     research_file: UploadFile | None = File(None),
 ):
     """Store research."""
-    fields_set = [
-        field for field in [research_id, research, research_file] if field is not None
-    ]
+    fields_set = [field for field in [research, research_file] if field is not None]
     if len(fields_set) != 1:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=(
-                'Exactly one of research_id, research, or research_file must be '
-                'provided.'
-            ),
+            detail='Exactly one of research, or research_file must be provided.',
         )
 
-    if research_id is not None:
-        research_info = get_deep_research_async(request_id=research_id)
-        if research_info is None:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail='Research not found',
-            )
-        if research_info.status is not ResearchRequestStatusEnum.COMPLETED:
-            research_status = (
-                research_info.status.value if research_info.status else 'unknown'
-            )
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=(
-                    'Research request is not completed yet. Current status is '
-                    f'{research_status}'
-                ),
-            )
-        if research_info.research is None:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=(
-                    f'Research text empty (although status is {research_info.status}).',
-                ),
-            )
-        research_text = research_info.research
-    elif research is not None:
+    if research is not None:
         research_text = research
     elif research_file is not None:
         if research_file.filename is None:

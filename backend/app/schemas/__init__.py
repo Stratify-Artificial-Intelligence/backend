@@ -12,6 +12,7 @@ from .business_research import (
     Research,
     ResearchExtended,
     ResearchParams,
+    ResearchStoreById,
 )
 from .chat import Chat, ChatBase, ChatMessage, ChatMessageContent
 from .errors import (
