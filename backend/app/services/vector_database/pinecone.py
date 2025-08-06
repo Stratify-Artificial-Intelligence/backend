@@ -48,6 +48,13 @@ class VectorDatabasePinecone(VectorDatabaseProvider):
         vectors: list[tuple[str, list[float], dict[str, str]]],
     ) -> None:
         index = self.pc.Index(index_name)
+
+        # Delete the index if it exists and create a new one. This way, every time
+        # we upload vectors, we ensure that the index is clean and contains only the
+        # latest vectors.
+        index.delete(delete_all=True, namespace=namespace)
+
+        # Store the vectors.
         index.upsert(vectors=vectors, namespace=namespace)
 
     def search_vectors(
