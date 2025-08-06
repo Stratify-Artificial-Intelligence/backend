@@ -35,6 +35,7 @@ async def create_checkout_session(
         success_url=success_url,
         cancel_url=cancel_url,
         allow_promotion_codes=True,
+        automatic_tax={"enabled": True},
     )
 
 
