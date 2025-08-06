@@ -36,6 +36,7 @@ async def create_checkout_session(
         cancel_url=cancel_url,
         allow_promotion_codes=True,
         automatic_tax={"enabled": True},
+        customer_update={"address": "auto"},
     )
 
 
@@ -70,11 +71,11 @@ async def create_customer(email: str, name: str | None = None) -> stripe.Custome
         email=email,
         name=name if name is not None else email,
         description='Created from the Backend application. Address hardcoded.',
-        address={
-            'line1': 'Carrer de Pau Claris, 138',
-            'city': 'Barcelona',
-            'postal_code': '08009',
-            'state': 'Barcelona',
-            'country': 'ES',
-        },
+        # address={
+        #     'line1': 'Carrer de Pau Claris, 138',
+        #     'city': 'Barcelona',
+        #     'postal_code': '08009',
+        #     'state': 'Barcelona',
+        #     'country': 'ES',
+        # },
     )
