@@ -1,14 +1,16 @@
 """API endpoints for user management."""
 
+import logging
+
 from fastapi import APIRouter, Depends, HTTPException, status
 
 from app import schemas
 from app.authorization_server import RoleChecker
 from app.deps import get_current_active_user, get_repository
 from app.domain import User as UserDomain, UserWithSecret as UserWithSecretDomain
-from app.enums import UserRoleEnum
+from app.enums import UserPlanEnum, UserRoleEnum
 from app.helpers import create_user_in_auth_service
-from app.repositories import UserRepository
+from app.repositories import PlanRepository, UserRepository
 from app.schemas import (
     User,
     UserBaseCreate,
@@ -17,6 +19,8 @@ from app.schemas import (
     UserMePartialUpdate,
 )
 
+
+logger = logging.getLogger(__name__)
 router = APIRouter(
     tags=['User'],
     prefix='/users',
@@ -35,6 +39,7 @@ router = APIRouter(
 async def signup_user(
     user: UserBaseCreate,
     users_repo: UserRepository = Depends(get_repository(UserRepository)),
+    plans_repo: PlanRepository = Depends(get_repository(PlanRepository)),
 ):
     """Sign up a new user."""
     if user.password is not None:
@@ -48,6 +53,14 @@ async def signup_user(
         raise NotImplementedError(
             'User creation without password or external_id is not implemented.'
         )
+    # Assign starter plan to the user
+    plans = await plans_repo.get_multi(name=UserPlanEnum.STARTER, is_active=True)
+    if plans is None or len(plans) == 1:
+        plan_id = available_credits = None
+        # Warning logging written after user creation
+    else:
+        plan_id = plans[0].id
+        available_credits = plans[0].monthly_credits
     user_to_create = UserWithSecretDomain(
         username=user.username,
         email=user.email,
@@ -55,6 +68,8 @@ async def signup_user(
         is_active=True,
         external_id=external_id,
         role=UserRoleEnum.BASIC,
+        plan_id=plan_id,
+        available_credits=available_credits,
     )
     try:
         user_created = await users_repo.create(user_to_create)
@@ -62,6 +77,11 @@ async def signup_user(
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=str(e),
+        )
+    if plan_id is None:
+        logger.warning(
+            f'Starter plan not assigned to the user {user_created.id}. No starter '
+            'active plan found!'
         )
     return user_created
 

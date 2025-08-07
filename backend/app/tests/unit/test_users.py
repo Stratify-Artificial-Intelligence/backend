@@ -4,9 +4,9 @@ import pytest
 from fastapi import status
 from httpx import AsyncClient
 
-from app.domain import User as UserDomain
-from app.enums import UserRoleEnum
-from app.repositories import UserRepository
+from app.domain import Plan as PlanDomain, User as UserDomain
+from app.enums import UserPlanEnum, UserRoleEnum
+from app.repositories import PlanRepository, UserRepository
 
 
 @pytest.fixture
@@ -37,12 +37,28 @@ def test_user_3() -> UserDomain:
     )
 
 
+@pytest.fixture
+def test_plan() -> PlanDomain:
+    return PlanDomain(
+        id=1,
+        name=UserPlanEnum.STARTER,
+        is_active=True,
+        price=0.0,
+        payment_service_price_id=None,
+        monthly_credits=1000,
+    )
+
+
 @patch.object(UserRepository, 'create')
+@patch.object(PlanRepository, 'get_multi')
 async def test_signup_user(
+    mock_get_multi_plans,
     mock_create,
+    test_plan,
     test_user_3,
     async_client: AsyncClient,
 ):
+    mock_get_multi_plans.return_value = [test_plan]
     mock_create.return_value = test_user_3
 
     expected_response = {
@@ -73,11 +89,15 @@ async def test_signup_user(
 
 
 @patch.object(UserRepository, 'create')
+@patch.object(PlanRepository, 'get_multi')
 async def test_signup_user_already_exists(
+    mock_get_multi_plans,
     mock_create,
+    test_plan,
     test_user_3,
     async_client: AsyncClient,
 ):
+    mock_get_multi_plans.return_value = [test_plan]
     mock_create.side_effect = ValueError('Username already exists')
 
     expected_response = {'detail': 'Username already exists'}
