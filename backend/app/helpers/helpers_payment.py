@@ -138,7 +138,10 @@ async def handle_subscription_webhook(
             )
         subscription = await get_subscription(subscription_id=subscription_id)
         stripe_price_id = subscription['items']['data'][0]['price']['id']
-        plans = await plans_repo.get_multi(payment_service_price_id=stripe_price_id)
+        plans = await plans_repo.get_multi(
+            is_active=True,
+            payment_service_price_id=stripe_price_id,
+        )
         if len(plans) != 1:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,

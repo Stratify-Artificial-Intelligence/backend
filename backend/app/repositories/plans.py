@@ -15,9 +15,15 @@ class PlanRepository(BaseRepository):
     async def get_multi(
         self,
         *,
+        name: str | None = None,
+        is_active: bool | None = None,
         payment_service_price_id: str | None = None,
     ) -> list[PlanDomain]:
         query = select(Plan)
+        if name is not None:
+            query = query.where(Plan.name == name)
+        if is_active is not None:
+            query = query.where(Plan.is_active == is_active)
         if payment_service_price_id is not None:
             query = query.where(
                 Plan.payment_service_price_id == payment_service_price_id
