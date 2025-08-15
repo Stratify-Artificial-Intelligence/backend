@@ -113,7 +113,9 @@ async def store_research_by_id(  # noqa: C901
         status.HTTP_403_FORBIDDEN: {'model': schemas.HTTP403Forbidden},
         status.HTTP_404_NOT_FOUND: {'model': schemas.HTTP404NotFound},
     },
-    dependencies=[Depends(RoleChecker(allowed_roles=[UserRoleEnum.ADMIN]))],
+    dependencies=[
+        Depends(RoleChecker(allowed_roles=[UserRoleEnum.ADMIN, UserRoleEnum.BASIC])),
+    ],
 )
 async def create_research(
     research_params: ResearchParams,
