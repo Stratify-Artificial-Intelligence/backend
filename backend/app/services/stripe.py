@@ -37,6 +37,7 @@ async def create_checkout_session(
         allow_promotion_codes=True,
         automatic_tax={'enabled': True},
         customer_update={'address': 'auto'},
+        billing_address_collection='required',
         locale='es',
     )
 
