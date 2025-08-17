@@ -10,7 +10,6 @@ class UserBase(BaseModel):
     is_active: bool
     role: UserRoleEnum
     payment_service_user_id: str | None = None
-    payment_service_subscription_id: str | None = None
     plan_id: int | None = None
     available_credits: int | None = None
 

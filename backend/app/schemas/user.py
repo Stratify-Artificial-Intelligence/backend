@@ -15,10 +15,11 @@ class UserBaseExtended(UserBase):
     is_active: bool
     role: UserRoleEnum
     plan_id: int | None = None
+    payment_service_user_id: str | None = None
+    available_credits: int | None = None
 
 
 class User(UserBaseExtended):
-    available_credits: int | None = None
     id: int
 
 
@@ -60,4 +61,5 @@ class UserPartialUpdate(UserMePartialUpdate):
     is_active: bool | None = None
     role: UserRoleEnum | None = None
     plan_id: int | None = None
+    payment_service_user_id: str | None = None
     available_credits: int | None = None
