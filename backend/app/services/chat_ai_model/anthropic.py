@@ -314,9 +314,9 @@ class ChatAIModelAnthropic(ChatAIModelProvider):
     @staticmethod
     def _handle_tool_call(tool_name: str, business_rag: str, general_rag: str) -> str:
         if tool_name == 'get_internal_knowledge':
-            return business_rag
-        elif tool_name == 'get_market_research':
             return general_rag
+        elif tool_name == 'get_market_research':
+            return business_rag
         return '[Error: herramienta desconocida]'
 
     @staticmethod
