@@ -133,7 +133,6 @@ class UserRepository(BaseRepository):
                 'role': user.role,
                 'plan_id': user.plan_id,
                 'payment_service_user_id': user.payment_service_user_id,
-                'payment_service_subscription_id': user.payment_service_subscription_id,
                 'available_credits': user.available_credits,
             }
         )
