@@ -55,7 +55,7 @@ async def signup_user(
         )
     # Assign starter plan to the user
     plans = await plans_repo.get_multi(name=UserPlanEnum.STARTER, is_active=True)
-    if plans is None or len(plans) == 1:
+    if plans is None or len(plans) != 1:
         plan_id = available_credits = None
         # Warning logging written after user creation
     else:
