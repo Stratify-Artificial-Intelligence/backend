@@ -130,7 +130,10 @@ async def handle_subscription_webhook(
             )
         user = users[0]
 
-        subscription_id = object.get('subscription')
+        subscription_id = (
+            object.get('subscription')
+            or object.get('parent', {}).get('subscription_details', {}).get('subscription')  # fmt: skip  # noqa: E501
+        )
         if subscription_id is None:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
