@@ -3,6 +3,7 @@ import logging
 from fastapi import HTTPException, Request, status
 
 from app.domain import Plan as PlanDomain, User as UserDomain
+from app.enums import UserPlanEnum
 from app.repositories import PlanRepository, UserRepository
 from app.schemas import (
     CheckoutSession,
@@ -117,20 +118,24 @@ async def handle_subscription_webhook(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail='Invalid signature',
         ) from e
+
+    object = event.data.object
+    logger.info(f'Handle subscription webhook object {object}')
+
+    customer_id = object.get('customer')
+    users = await users_repo.get_multi(payment_service_user_id=customer_id)
+    if len(users) != 1:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail='User not found for the given customer ID.',
+        )
+    user = users[0]
+
     if event.type in ('checkout.session.completed', 'invoice.payment_succeeded'):
-        object = event.data.object
-        logger.info(f'Handle subscription webhook object {object}')
-
-        customer_id = object.get('customer')
-        users = await users_repo.get_multi(payment_service_user_id=customer_id)
-        if len(users) != 1:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail='User not found for the given customer ID.',
-            )
-        user = users[0]
-
-        subscription_id = object.get('subscription')
+        subscription_id = (
+            object.get('subscription')
+            or object.get('parent', {}).get('subscription_details', {}).get('subscription')  # fmt: skip  # noqa: E501
+        )
         if subscription_id is None:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -148,7 +153,29 @@ async def handle_subscription_webhook(
                 detail='Plan not found for the given Stripe price ID.',
             )
         plan = plans[0]
+        plan_id = plan.id
+        available_credits = plan.monthly_credits
 
-        user.plan_id = plan.id
-        user.available_credits = plan.monthly_credits
-        await users_repo.update(user_id=user.id, user_update=user)
+    elif event.type == 'customer.subscription.deleted':
+        plans = await plans_repo.get_multi(name=UserPlanEnum.STARTER, is_active=True)
+        if plans is None or len(plans) != 1:
+            logger.warning(
+                f'Starter plan not assigned to the user {user.id}. No starter '
+                'active plan found!'
+            )
+            plan_id = None
+            available_credits = 0
+        else:
+            plan_id = plans[0].id
+            # Credits available of the user are not changed
+            available_credits = user.available_credits
+
+    else:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f'Unhandled event type: {event.type}',
+        )
+
+    user.plan_id = plan_id
+    user.available_credits = available_credits
+    await users_repo.update(user_id=user.id, user_update=user)
