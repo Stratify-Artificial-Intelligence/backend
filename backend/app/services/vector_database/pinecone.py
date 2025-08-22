@@ -1,6 +1,3 @@
-import json
-from math import floor
-
 from pinecone.grpc import PineconeGRPC as Pinecone
 from pinecone.models import ServerlessSpec
 
@@ -64,7 +61,7 @@ class VectorDatabasePinecone(VectorDatabaseProvider):
         # batches to avoid exceeding this limit.
         batch_size = self._compute_safe_batch_size()
         for i in range(0, len(vectors), batch_size):
-            batch = vectors[i: i + batch_size]
+            batch = vectors[i : i + batch_size]
             index.upsert(vectors=batch, namespace=namespace)
 
     def search_vectors(
@@ -105,4 +102,3 @@ class VectorDatabasePinecone(VectorDatabaseProvider):
         # token (aprox), UTF-8 encoding (1 byte per char).
         metadata_bytes = settings.MAX_TOKENS * 4
         return vector_bytes + metadata_bytes
-
