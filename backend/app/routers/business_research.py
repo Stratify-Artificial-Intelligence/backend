@@ -14,7 +14,7 @@ from app.helpers import (
 )
 from app.helpers.helpers_rag import get_deep_research_async
 from app.repositories import BusinessRepository
-from app.schemas import Research, ResearchExtended, ResearchParams, ResearchStoreById
+from app.schemas import ResearchExtended, ResearchParams, ResearchStoreById
 
 router = APIRouter(
     tags=['Research'],
@@ -54,7 +54,6 @@ async def get_research_by_id(
 @router.post(
     '/{research_id}/store',
     summary='Store research by ID',
-    response_model=Research,
     status_code=status.HTTP_201_CREATED,
     responses={
         status.HTTP_400_BAD_REQUEST: {'model': schemas.HTTP400BadRequest},
@@ -100,7 +99,6 @@ async def store_research_by_id(  # noqa: C901
         text=research_text,
         business_id=research_store_params.business_id,
     )
-    return Research(research=research_text)
 
 
 @router.post(
@@ -157,7 +155,6 @@ async def create_research(
 @router.post(
     '/store',
     summary='Store research',
-    response_model=Research,
     status_code=status.HTTP_201_CREATED,
     responses={
         status.HTTP_400_BAD_REQUEST: {'model': schemas.HTTP400BadRequest},
@@ -207,4 +204,3 @@ async def store_research(  # noqa: C901
         )
 
     chunk_and_upload_text(text=research_text, business_id=business_id)
-    return Research(research=research_text)
