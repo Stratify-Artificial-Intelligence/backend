@@ -51,7 +51,6 @@ class VectorDatabasePinecone(VectorDatabaseProvider):
         vectors: list[tuple[str, list[float], dict[str, str]]],
     ) -> None:
         index = self.pc.Index(index_name)
-        print('holapoma')
 
         # Delete the index if it exists and create a new one. This way, every time
         # we upload vectors, we ensure that the index is clean and contains only the
@@ -63,12 +62,7 @@ class VectorDatabasePinecone(VectorDatabaseProvider):
         # Note: Pinecone has a gRPC message size limit of
         # PineconeSettings.MESSAGE_LIMIT_MB MB. Thus, the upload of vectors is done in
         # batches to avoid exceeding this limit.
-        print('holaaaaaaaaaaaa')
         batch_size = self._compute_safe_batch_size()
-        print(batch_size)
-        print(len(vectors))
-
-        # Upload in batches
         for i in range(0, len(vectors), batch_size):
             batch = vectors[i: i + batch_size]
             index.upsert(vectors=batch, namespace=namespace)

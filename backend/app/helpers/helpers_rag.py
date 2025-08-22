@@ -79,7 +79,6 @@ def chunk_and_upload_text_for_general(text: str) -> None:
 
 def chunk_and_upload_text(text: str, business_id: int | None = None) -> None:
     """Chunk and upload text to the vector database."""
-    print('patataaaaaaaaaaa')
     if business_id is None:
         _chunk_and_upload_text(
             text=text,
