@@ -1,3 +1,6 @@
+import json
+from math import floor
+
 from pinecone.grpc import PineconeGRPC as Pinecone
 from pinecone.models import ServerlessSpec
 
@@ -48,6 +51,7 @@ class VectorDatabasePinecone(VectorDatabaseProvider):
         vectors: list[tuple[str, list[float], dict[str, str]]],
     ) -> None:
         index = self.pc.Index(index_name)
+        print('holapoma')
 
         # Delete the index if it exists and create a new one. This way, every time
         # we upload vectors, we ensure that the index is clean and contains only the
@@ -55,8 +59,19 @@ class VectorDatabasePinecone(VectorDatabaseProvider):
         if namespace in index.describe_index_stats().namespaces:
             index.delete(delete_all=True, namespace=namespace)
 
-        # Store the vectors.
-        index.upsert(vectors=vectors, namespace=namespace)
+        # Store the vectors in batches.
+        # Note: Pinecone has a gRPC message size limit of
+        # PineconeSettings.MESSAGE_LIMIT_MB MB. Thus, the upload of vectors is done in
+        # batches to avoid exceeding this limit.
+        print('holaaaaaaaaaaaa')
+        batch_size = self._compute_safe_batch_size()
+        print(batch_size)
+        print(len(vectors))
+
+        # Upload in batches
+        for i in range(0, len(vectors), batch_size):
+            batch = vectors[i: i + batch_size]
+            index.upsert(vectors=batch, namespace=namespace)
 
     def search_vectors(
         self,
@@ -73,3 +88,27 @@ class VectorDatabasePinecone(VectorDatabaseProvider):
             include_metadata=True,
         )
         return [match['metadata']['text'] for match in result.get('matches', [])]
+
+    def _compute_safe_batch_size(self) -> int:
+        """Estimate a safe batch size for Pinecone upsert to avoid gRPC limit."""
+        # Estimate the size of a single vector. This function can be used to upload
+        # vectors for both RAG and General RAG settings, so the maximum size is used
+        # to be safe.
+        vector_size = max(
+            self._vector_size(rag_settings),
+            self._vector_size(general_rag_settings),
+        )
+        # Use 90% of the limit to be safe.
+        safe_batch = int((pinecone_settings.MESSAGE_LIMIT_BYTES * 0.9) / vector_size)
+        return max(1, safe_batch)
+
+    @staticmethod
+    def _vector_size(settings: RAGSettings) -> int:
+        """Calculate the size of a single vector in bytes."""
+        # 4 bytes per float32
+        vector_bytes = settings.INDEX_DIMENSION * 4
+        # Estimate metadata size by sampling a vector's metadata. Assuming 4 chars per
+        # token (aprox), UTF-8 encoding (1 byte per char).
+        metadata_bytes = settings.MAX_TOKENS * 4
+        return vector_bytes + metadata_bytes
+
