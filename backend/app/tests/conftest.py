@@ -6,7 +6,7 @@ from httpx import ASGITransport, AsyncClient
 
 from app.deps import get_current_active_user
 from app.domain import User as UserDomain
-from app.enums import UserRoleEnum
+from app.enums import UserLanguageEnum, UserRoleEnum
 from app.main import app
 from app.settings import SecuritySettings
 
@@ -81,6 +81,7 @@ def test_user() -> UserDomain:
         full_name='User A',
         is_active=True,
         role=UserRoleEnum.ADMIN,
+        language=UserLanguageEnum.ES,
     )
 
 

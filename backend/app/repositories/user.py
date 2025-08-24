@@ -60,6 +60,7 @@ class UserRepository(BaseRepository):
             external_id=user_in.external_id,
             is_active=user_in.is_active,
             role=user_in.role,
+            language=user_in.language,
             plan_id=user_in.plan_id,
             available_credits=user_in.available_credits,
         )
@@ -131,6 +132,7 @@ class UserRepository(BaseRepository):
                 'full_name': user.full_name,
                 'is_active': user.is_active,
                 'role': user.role,
+                'language': user.language,
                 'plan_id': user.plan_id,
                 'payment_service_user_id': user.payment_service_user_id,
                 'available_credits': user.available_credits,

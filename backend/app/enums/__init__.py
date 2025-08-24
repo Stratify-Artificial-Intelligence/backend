@@ -12,4 +12,4 @@ from .services import (
     VectorDatabaseProviderEnum,
 )
 from .units import CurrencyUnitEnum
-from .user import UserPlanEnum, UserRoleEnum
+from .user import UserLanguageEnum, UserPlanEnum, UserRoleEnum

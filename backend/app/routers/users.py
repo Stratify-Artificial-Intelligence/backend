@@ -68,6 +68,7 @@ async def signup_user(
         is_active=True,
         external_id=external_id,
         role=UserRoleEnum.BASIC,
+        language=user.language,
         plan_id=plan_id,
         available_credits=available_credits,
     )
@@ -210,6 +211,7 @@ async def create_user(
         is_active=user.is_active,
         external_id=external_id,
         role=user.role,
+        language=user.language,
     )
     try:
         user_created = await users_repo.create(user_to_create)

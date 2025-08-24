@@ -2,7 +2,7 @@ from sqlalchemy import Boolean, Column, Enum, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 
 from app.database import Base
-from app.enums import UserRoleEnum
+from app.enums import UserLanguageEnum, UserRoleEnum
 
 
 class User(Base):
@@ -18,6 +18,13 @@ class User(Base):
         Enum(
             UserRoleEnum,
             values_callable=(lambda enum_class: [role.value for role in enum_class]),
+        ),
+        nullable=False,
+    )
+    language: Column[Enum] = Column(
+        Enum(
+            UserLanguageEnum,
+            values_callable=(lambda enum_class: [lang.value for lang in enum_class]),
         ),
         nullable=False,
     )
