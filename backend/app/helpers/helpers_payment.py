@@ -100,12 +100,12 @@ async def get_portal_session(user: UserDomain, data: SubscriptionHandleRequest):
     return SubscriptionHandleResponse(url=session.url)
 
 
-async def handle_subscription_webhook(
+async def handle_subscription_webhook(  # noqa: C901
     request: Request,
     users_repo: UserRepository,
     plans_repo: PlanRepository,
     business_repo: BusinessRepository,
-) -> None:  # noqa: C901
+) -> None:
     payload = await request.body()
     sig_header = request.headers.get('stripe-signature')
     if sig_header is None:
@@ -133,8 +133,6 @@ async def handle_subscription_webhook(
             detail='User not found for the given customer ID.',
         )
     user = users[0]
-    # ToDo (pduran): This function is not the appropriate, as it does not return the
-    #  child elements, but the parent information only.
     user_businesses = await business_repo.get_multi(user_id=user.id)
 
     if event.type in ('checkout.session.completed', 'invoice.payment_succeeded'):
@@ -165,8 +163,7 @@ async def handle_subscription_webhook(
 
         # Deep research for all businesses of the user
         for business in user_businesses:
-            # ToDo (pduran): Validate max tokens
-            research_params = ResearchParams(max_tokens=1000, business_id=business.id)
+            research_params = ResearchParams(max_tokens=50000, business_id=business.id)
             deep_research_for_business_async(business=business, params=research_params)
 
     elif event.type == 'customer.subscription.deleted':
