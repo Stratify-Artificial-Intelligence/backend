@@ -24,3 +24,12 @@ class VectorDatabaseProvider(ABC):
     ) -> None:
         """Upload vectors to a vector database."""
         raise NotImplementedError
+
+    @abstractmethod
+    def delete_vectors(
+        self,
+        index_name: str,
+        namespace: str,
+    ) -> None:
+        """Delete all vectors of a namespace in an index of a vector database."""
+        raise NotImplementedError
