@@ -29,13 +29,17 @@ class BusinessRepository(BaseRepository):
         established_business = await self.get_established(business_id=business_id)
         return established_business
 
-    async def get_multi(self, user_id: int | None = None) -> list[BusinessDomain]:
-        query = select(Business)
+    async def get_multi(
+        self,
+        user_id: int | None = None,
+    ) -> list[BusinessIdeaDomain | EstablishedBusinessDomain]:
+        to_select = with_polymorphic(Business, '*')
+        query = select(to_select)
         if user_id is not None:
             query = query.where(Business.user_id == user_id)
         result = await self._db.execute(query)
         businesses = result.scalars().all()
-        return [BusinessDomain.model_validate(business) for business in businesses]
+        return [self._to_domain(business) for business in businesses]
 
     async def get_idea(self, business_id: int) -> BusinessIdeaDomain | None:
         business = await self._get(business_id=business_id, load_hierarchy=True)
@@ -160,3 +164,14 @@ class BusinessRepository(BaseRepository):
         query = select(business_to_select).where(Business.id == business_id)
         result = await self._db.execute(query)
         return result.scalars().one_or_none()
+
+    def _to_domain(
+        self,
+        business: Business,
+    ) -> BusinessIdeaDomain | EstablishedBusinessDomain:
+        if isinstance(business, BusinessIdea):
+            return BusinessIdeaDomain.model_validate(business)
+        elif isinstance(business, EstablishedBusiness):
+            return EstablishedBusinessDomain.model_validate(business)
+        else:
+            raise ValueError(f'Unexpected business type: {type(business)}')

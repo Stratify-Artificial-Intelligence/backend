@@ -4,10 +4,12 @@ from fastapi import HTTPException, Request, status
 
 from app.domain import Plan as PlanDomain, User as UserDomain
 from app.enums import UserPlanEnum
-from app.repositories import PlanRepository, UserRepository
+from app.helpers import deep_research_for_business_async, delete_business_rag
+from app.repositories import BusinessRepository, PlanRepository, UserRepository
 from app.schemas import (
     CheckoutSession,
     CheckoutSessionResponse,
+    ResearchParams,
     SubscriptionHandleRequest,
     SubscriptionHandleResponse,
 )
@@ -102,7 +104,8 @@ async def handle_subscription_webhook(
     request: Request,
     users_repo: UserRepository,
     plans_repo: PlanRepository,
-) -> None:
+    business_repo: BusinessRepository,
+) -> None:  # noqa: C901
     payload = await request.body()
     sig_header = request.headers.get('stripe-signature')
     if sig_header is None:
@@ -130,8 +133,12 @@ async def handle_subscription_webhook(
             detail='User not found for the given customer ID.',
         )
     user = users[0]
+    # ToDo (pduran): This function is not the appropriate, as it does not return the
+    #  child elements, but the parent information only.
+    user_businesses = await business_repo.get_multi(user_id=user.id)
 
     if event.type in ('checkout.session.completed', 'invoice.payment_succeeded'):
+        # These events are received when a user subscribes to a paid plan
         subscription_id = (
             object.get('subscription')
             or object.get('parent', {}).get('subscription_details', {}).get('subscription')  # fmt: skip  # noqa: E501
@@ -156,7 +163,15 @@ async def handle_subscription_webhook(
         plan_id = plan.id
         available_credits = plan.monthly_credits
 
+        # Deep research for all businesses of the user
+        for business in user_businesses:
+            # ToDo (pduran): Validate max tokens
+            research_params = ResearchParams(max_tokens=1000, business_id=business.id)
+            deep_research_for_business_async(business=business, params=research_params)
+
     elif event.type == 'customer.subscription.deleted':
+        # This event is received when a user cancels their subscription, so it has
+        # to be moved to the free plan
         plans = await plans_repo.get_multi(name=UserPlanEnum.STARTER, is_active=True)
         if plans is None or len(plans) != 1:
             logger.warning(
@@ -169,6 +184,12 @@ async def handle_subscription_webhook(
             plan_id = plans[0].id
             # Credits available of the user are not changed
             available_credits = user.available_credits
+
+        # Remove deep research for all businesses of the user
+        for business in user_businesses:
+            if business.id is None:
+                continue
+            delete_business_rag(business_id=business.id)
 
     else:
         raise HTTPException(

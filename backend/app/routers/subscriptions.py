@@ -11,7 +11,7 @@ from app.helpers import (
     get_portal_session,
     handle_subscription_webhook,
 )
-from app.repositories import PlanRepository, UserRepository
+from app.repositories import BusinessRepository, PlanRepository, UserRepository
 from app.schemas import (
     CheckoutSession,
     CheckoutSessionResponse,
@@ -109,10 +109,12 @@ async def subscription_webhook(
     request: Request,
     users_repo: UserRepository = Depends(get_repository(UserRepository)),
     plans_repo: PlanRepository = Depends(get_repository(PlanRepository)),
+    business_repo: BusinessRepository = Depends(get_repository(BusinessRepository)),
 ):
     """Subscriptions webhook."""
     return await handle_subscription_webhook(
         request=request,
         users_repo=users_repo,
         plans_repo=plans_repo,
+        business_repo=business_repo,
     )

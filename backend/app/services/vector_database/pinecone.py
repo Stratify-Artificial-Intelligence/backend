@@ -1,4 +1,4 @@
-from pinecone.grpc import PineconeGRPC as Pinecone
+from pinecone.grpc import GRPCIndex, PineconeGRPC as Pinecone
 from pinecone.models import ServerlessSpec
 
 from app.services.vector_database.base import VectorDatabaseProvider
@@ -52,8 +52,7 @@ class VectorDatabasePinecone(VectorDatabaseProvider):
         # Delete the index if it exists and create a new one. This way, every time
         # we upload vectors, we ensure that the index is clean and contains only the
         # latest vectors.
-        if namespace in index.describe_index_stats().namespaces:
-            index.delete(delete_all=True, namespace=namespace)
+        self._do_delete_vectors(index=index, namespace=namespace)
 
         # Store the vectors.
         index.upsert(vectors=vectors, namespace=namespace)
@@ -73,3 +72,16 @@ class VectorDatabasePinecone(VectorDatabaseProvider):
             include_metadata=True,
         )
         return [match['metadata']['text'] for match in result.get('matches', [])]
+
+    def delete_vectors(
+        self,
+        index_name: str,
+        namespace: str,
+    ) -> None:
+        index = self.pc.Index(index_name)
+        self._do_delete_vectors(index=index, namespace=namespace)
+
+    @staticmethod
+    def _do_delete_vectors(index: GRPCIndex, namespace: str) -> None:
+        if namespace in index.describe_index_stats().namespaces:
+            index.delete(delete_all=True, namespace=namespace)

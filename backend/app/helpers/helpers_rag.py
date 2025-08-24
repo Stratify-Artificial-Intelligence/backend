@@ -144,6 +144,7 @@ def embed_text(text: str) -> list[float]:
 
 def get_business_rag(business_id: int, query: str) -> str:
     """Get RAG for a business based on the query."""
+    # ToDo (pduran): Should we handle the case when a business has not a RAG
     context_vectors = search_vectors_for_business(
         business_id=business_id,
         query=query,
@@ -178,6 +179,15 @@ def search_vectors_for_general(query: str) -> list[str]:
         namespace=general_rag_settings.NAMESPACE_ID,
         query_vector=query_vector,
         top_k=general_rag_settings.TOP_K,
+    )
+
+
+def delete_business_rag(business_id: int) -> None:
+    """Delete RAG for a business."""
+    vector_database_provider = ServicesFactory().get_vector_database_provider()
+    vector_database_provider.delete_vectors(
+        index_name=rag_settings.INDEX_NAME,
+        namespace=rag_settings.NAMESPACE_ID.format(business_id=business_id),
     )
 
 
