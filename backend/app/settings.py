@@ -126,6 +126,7 @@ class PineconeSettings(BaseSettings):
     API_KEY: str = ''
     REGION: str = ''
     CLOUD: str = ''
+    MESSAGE_LIMIT_BYTES: int = 2 * 1024 * 1024  # 2MB
 
     model_config = SettingsConfigDict(env_file='.env', env_prefix='PINECONE_')
 
