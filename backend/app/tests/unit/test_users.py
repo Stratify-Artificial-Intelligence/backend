@@ -5,7 +5,7 @@ from fastapi import status
 from httpx import AsyncClient
 
 from app.domain import Plan as PlanDomain, User as UserDomain
-from app.enums import UserPlanEnum, UserRoleEnum
+from app.enums import UserLanguageEnum, UserPlanEnum, UserRoleEnum
 from app.repositories import PlanRepository, UserRepository
 
 
@@ -18,6 +18,7 @@ def test_user_2() -> UserDomain:
         full_name='User B',
         is_active=True,
         role=UserRoleEnum.ADMIN,
+        language=UserLanguageEnum.ES,
         plan_id=None,
         payment_service_user_id=None,
         available_credits=None,
@@ -33,6 +34,7 @@ def test_user_3() -> UserDomain:
         full_name='User C',
         is_active=True,
         role=UserRoleEnum.BASIC,
+        language=UserLanguageEnum.ES,
         plan_id=1,
         payment_service_user_id=None,
         available_credits=None,
@@ -70,6 +72,7 @@ async def test_signup_user(
         'full_name': 'User C',
         'is_active': True,
         'role': UserRoleEnum.BASIC.value,
+        'language': UserLanguageEnum.ES.value,
         'plan_id': 1,
         'payment_service_user_id': None,
         'available_credits': None,
@@ -147,6 +150,7 @@ async def test_read_users_me(
         'full_name': 'User A',
         'is_active': True,
         'role': UserRoleEnum.ADMIN.value,
+        'language': UserLanguageEnum.ES.value,
         'plan_id': None,
         'payment_service_user_id': None,
         'available_credits': None,
@@ -178,6 +182,7 @@ async def test_update_users_me(
         'full_name': 'User A with new name',
         'is_active': True,
         'role': UserRoleEnum.ADMIN.value,
+        'language': UserLanguageEnum.ES.value,
         'plan_id': None,
         'payment_service_user_id': None,
         'available_credits': None,
@@ -255,6 +260,7 @@ async def test_list_users(
             'full_name': 'User A',
             'is_active': True,
             'role': UserRoleEnum.ADMIN.value,
+            'language': UserLanguageEnum.ES.value,
             'plan_id': None,
             'payment_service_user_id': None,
             'available_credits': None,
@@ -266,6 +272,7 @@ async def test_list_users(
             'full_name': 'User B',
             'is_active': True,
             'role': UserRoleEnum.ADMIN.value,
+            'language': UserLanguageEnum.ES.value,
             'plan_id': None,
             'payment_service_user_id': None,
             'available_credits': None,
@@ -297,6 +304,7 @@ async def test_read_user_by_id(
         'full_name': 'User B',
         'is_active': True,
         'role': UserRoleEnum.ADMIN.value,
+        'language': UserLanguageEnum.ES.value,
         'plan_id': None,
         'payment_service_user_id': None,
         'available_credits': None,
@@ -346,6 +354,7 @@ async def test_create_user(
         'full_name': 'User A',
         'is_active': True,
         'role': UserRoleEnum.ADMIN.value,
+        'language': UserLanguageEnum.ES.value,
         'plan_id': None,
         'payment_service_user_id': None,
         'available_credits': None,
@@ -431,6 +440,7 @@ async def test_update_user(
         'full_name': 'User B with new name',
         'is_active': True,
         'role': UserRoleEnum.ADMIN.value,
+        'language': UserLanguageEnum.ES.value,
         'plan_id': None,
         'payment_service_user_id': None,
         'available_credits': None,

@@ -7,6 +7,10 @@ class UserRoleEnum(str, Enum):
     SERVICE = 'Service'
 
 
+class UserLanguageEnum(str, Enum):
+    ES = 'es'
+
+
 class UserPlanEnum(str, Enum):
     STARTER = 'Starter'
     FOUNDER = 'Founder'

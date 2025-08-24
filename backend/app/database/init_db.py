@@ -16,6 +16,7 @@ from app.enums import (
     BusinessStageEnum,
     ChatMessageSenderEnum,
     CurrencyUnitEnum,
+    UserLanguageEnum,
     UserPlanEnum,
     UserRoleEnum,
 )
@@ -51,6 +52,7 @@ users_data = [
         'external_id': 'uEbFulRttShecs64P9s94am727A2',
         'is_active': True,
         'role': UserRoleEnum.ADMIN.value,
+        'language': UserLanguageEnum.ES.value,
         'available_credits': None,
     },
     {
@@ -60,6 +62,7 @@ users_data = [
         'external_id': 'userexternalid',
         'is_active': True,
         'role': UserRoleEnum.BASIC.value,
+        'language': UserLanguageEnum.ES.value,
         'plan_id': 1,
         'available_credits': 10,
     },
@@ -70,6 +73,7 @@ users_data = [
         'external_id': 'service_user',
         'is_active': True,
         'role': UserRoleEnum.SERVICE.value,
+        'language': UserLanguageEnum.ES.value,
     },
 ]
 

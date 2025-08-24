@@ -1,12 +1,13 @@
 from pydantic import BaseModel, ConfigDict, SecretStr, model_validator
 
-from app.enums import UserRoleEnum
+from app.enums import UserLanguageEnum, UserRoleEnum
 
 
 class UserBase(BaseModel):
     username: str
     email: str
     full_name: str
+    language: UserLanguageEnum
 
     model_config = ConfigDict(extra='forbid')
 
@@ -53,6 +54,7 @@ class UserMePartialUpdate(BaseModel):
     username: str | None = None
     email: str | None = None
     full_name: str | None = None
+    language: UserLanguageEnum | None = None
 
     model_config = ConfigDict(extra='forbid')
 
@@ -60,6 +62,7 @@ class UserMePartialUpdate(BaseModel):
 class UserPartialUpdate(UserMePartialUpdate):
     is_active: bool | None = None
     role: UserRoleEnum | None = None
+    language: UserLanguageEnum | None = None
     plan_id: int | None = None
     payment_service_user_id: str | None = None
     available_credits: int | None = None
