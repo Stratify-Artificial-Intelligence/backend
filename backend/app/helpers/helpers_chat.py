@@ -9,7 +9,7 @@ from app.domain import (
     ChatMessage as ChatMessageDomain,
     User as UserDomain,
 )
-from app.enums import ChatMessageSenderEnum, UserPlanEnum, UserRoleEnum
+from app.enums import ChatMessageSenderEnum
 from app.helpers.helpers_rag import get_business_rag, get_general_rag
 from app.repositories import ChatRepository, PlanRepository, UserRepository
 from app.services import ServicesFactory

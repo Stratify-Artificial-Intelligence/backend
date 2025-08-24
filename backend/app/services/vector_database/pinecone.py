@@ -54,8 +54,14 @@ class VectorDatabasePinecone(VectorDatabaseProvider):
         # latest vectors.
         self._do_delete_vectors(index=index, namespace=namespace)
 
-        # Store the vectors.
-        index.upsert(vectors=vectors, namespace=namespace)
+        # Store the vectors in batches.
+        # Note: Pinecone has a gRPC message size limit of
+        # PineconeSettings.MESSAGE_LIMIT_MB MB. Thus, the upload of vectors is done in
+        # batches to avoid exceeding this limit.
+        batch_size = self._compute_safe_batch_size()
+        for i in range(0, len(vectors), batch_size):
+            batch = vectors[i : i + batch_size]
+            index.upsert(vectors=batch, namespace=namespace)
 
     def search_vectors(
         self,
@@ -85,3 +91,26 @@ class VectorDatabasePinecone(VectorDatabaseProvider):
     def _do_delete_vectors(index: GRPCIndex, namespace: str) -> None:
         if namespace in index.describe_index_stats().namespaces:
             index.delete(delete_all=True, namespace=namespace)
+
+    def _compute_safe_batch_size(self) -> int:
+        """Estimate a safe batch size for Pinecone upsert to avoid gRPC limit."""
+        # Estimate the size of a single vector. This function can be used to upload
+        # vectors for both RAG and General RAG settings, so the maximum size is used
+        # to be safe.
+        vector_size = max(
+            self._vector_size(rag_settings),
+            self._vector_size(general_rag_settings),
+        )
+        # Use 90% of the limit to be safe.
+        safe_batch = int((pinecone_settings.MESSAGE_LIMIT_BYTES * 0.9) / vector_size)
+        return max(1, safe_batch)
+
+    @staticmethod
+    def _vector_size(settings: RAGSettings) -> int:
+        """Calculate the size of a single vector in bytes."""
+        # 4 bytes per float32
+        vector_bytes = settings.INDEX_DIMENSION * 4
+        # Estimate metadata size by sampling a vector's metadata. Assuming 4 chars per
+        # token (aprox), UTF-8 encoding (1 byte per char).
+        metadata_bytes = settings.MAX_TOKENS * 4
+        return vector_bytes + metadata_bytes
