@@ -22,6 +22,10 @@ class IdentityProviderEnum(str, Enum):
     FIREBASE_AUTH = 'firebase_auth'
 
 
+class SchedulerProviderEnum(str, Enum):
+    AWS_EVENTBRIDGE = 'aws_eventbridge'
+
+
 class StorageProviderEnum(str, Enum):
     AWS_S3 = 'aws_s3'
 

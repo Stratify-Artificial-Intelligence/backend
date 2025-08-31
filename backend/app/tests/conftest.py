@@ -8,10 +8,10 @@ from app.deps import get_current_active_user
 from app.domain import User as UserDomain
 from app.enums import UserLanguageEnum, UserRoleEnum
 from app.main import app
-from app.settings import SecuritySettings
+from app.settings import GeneralSettings
 
 
-settings = SecuritySettings()
+settings = GeneralSettings()
 
 
 # @pytest.fixture(scope='session')

@@ -6,15 +6,17 @@ from app.enums import (
     DeepResearchProviderEnum,
     EmbeddingProviderEnum,
     IdentityProviderEnum,
+    SchedulerProviderEnum,
     StorageProviderEnum,
     VectorDatabaseProviderEnum,
 )
 
 
-class SecuritySettings(BaseSettings):
+class GeneralSettings(BaseSettings):
     """General settings for the application."""
 
     SERVICE_USER_TOKEN: str = ''
+    APP_DOMAIN: str = 'localhost'
 
     model_config = SettingsConfigDict(env_file='.env', env_prefix='SECURITY_')
 
@@ -31,6 +33,7 @@ class ServicesSettings(BaseSettings):
     )
     EMBEDDING_PROVIDER: EmbeddingProviderEnum = EmbeddingProviderEnum.OPENAI
     IDENTITY_PROVIDER: IdentityProviderEnum = IdentityProviderEnum.FIREBASE_AUTH
+    SCHEDULER_PROVIDER: SchedulerProviderEnum = SchedulerProviderEnum.AWS_EVENTBRIDGE
     STORAGE_PROVIDER: StorageProviderEnum = StorageProviderEnum.AWS_S3
     VECTOR_DATABASE_PROVIDER: VectorDatabaseProviderEnum = (
         VectorDatabaseProviderEnum.PINECONE
@@ -169,6 +172,20 @@ class DeepResearchHandlerAWSStepFunctionSettings(BaseSettings):
     model_config = SettingsConfigDict(
         env_file='.env',
         env_prefix='SERVICES_DEEP_RESEARCH_HANDLER_AWS_STEP_FUNCTION_',
+    )
+
+
+class SchedulerAWSEventBridgeSettings(BaseSettings):
+    """Load Scheduler AWS Event Bridge settings from environment or .env."""
+
+    REGION: str = ''
+    ACCESS_KEY_ID: str = ''
+    SECRET_ACCESS_KEY: str = ''
+    ROLE_ARN: str = ''
+
+    model_config = SettingsConfigDict(
+        env_file='.env',
+        env_prefix='SERVICES_SCHEDULER_AWS_EVENTBRIDGE_',
     )
 
 

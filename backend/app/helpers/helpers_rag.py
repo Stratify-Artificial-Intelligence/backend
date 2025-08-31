@@ -1,3 +1,6 @@
+import json
+from datetime import datetime
+
 from fastapi import HTTPException, status
 
 from app.domain import (
@@ -59,6 +62,23 @@ def deep_research_for_business_async(
         business_id=business.id,
     )
     return research_info
+
+
+async def schedule_deep_research_for_business(params: ResearchParams) -> None:
+    """Schedule deep research for a business."""
+    scheduler_provider = ServicesFactory().get_scheduler_provider()
+    await scheduler_provider.create_schedule(
+        name=f'deep_research_business_{params.business_id}',
+        expression=f'cron({_monthly_cron_from_now()})',
+        target_endpoint='/researches',
+        body=json.dumps(params.model_dump()),
+    )
+
+
+def _monthly_cron_from_now():
+    now = datetime.now()
+    cron_expr = f'{now.minute} {now.hour} {now.day} * ? *'
+    return cron_expr
 
 
 def chunk_and_upload_text_for_business(text: str, business_id: int) -> None:
