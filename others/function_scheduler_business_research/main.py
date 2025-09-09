@@ -1,3 +1,4 @@
+import os
 import json
 import urllib3
 
@@ -22,11 +23,11 @@ def lambda_handler(event, context):
         encoded_payload = json.dumps(payload).encode('utf-8')
         response = http.request(
             'POST',
-            'https://dev-backend.veyrai.com/researches',
+            f"{os.environ['BACKEND_DOMAIN']}/researches",
             body=encoded_payload,
             headers={
                 'Content-Type': 'application/json',
-                'Authorization': 'Bearer i54IkCHH7EycKGa-k6MQt7wP6DTJkWHgi2Dq5fc76v0'
+                'Authorization': f"Bearer {os.environ['SERVICE_TOKEN']}",
             }
         )
 

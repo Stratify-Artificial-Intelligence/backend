@@ -157,11 +157,9 @@ async def create_research(
     return research
 
 
-# ToDo (pduran): Remove this endpoint after testing!
 @router.post(
-    '/dummy',
-    summary='Dummy',
-    response_model=ResearchExtended,
+    '/schedule',
+    summary='Schedule a business research',
     status_code=status.HTTP_201_CREATED,
     responses={
         status.HTTP_401_UNAUTHORIZED: {'model': schemas.HTTP401Unauthorized},
@@ -174,13 +172,9 @@ async def create_research(
 )
 async def dummy_research(
     research_params: ResearchParams,
-    business_repo: BusinessRepository = Depends(get_repository(BusinessRepository)),
-    current_user: UserDomain = Depends(get_current_active_user),
 ):
     """Create a research."""
     await schedule_deep_research_for_business(params=research_params)
-    return ResearchExtended(response_id='dummy')
-
 
 
 @router.post(
