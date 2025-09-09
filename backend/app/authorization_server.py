@@ -2,6 +2,7 @@ from fastapi import Depends, HTTPException, status
 
 from app.deps import get_current_active_user
 from app.domain import Business as BusinessDomain, User as UserDomain
+from app.enums import UserRoleEnum
 
 
 class RoleChecker:
@@ -21,11 +22,11 @@ class RoleChecker:
 
 
 def user_can_read_business(business: BusinessDomain, user: UserDomain) -> bool:
-    return business.user_id == user.id
+    return user.role == UserRoleEnum.SERVICE or business.user_id == user.id
 
 
 def user_can_update_business(business: BusinessDomain, user: UserDomain) -> bool:
-    return business.user_id == user.id
+    return user.role == UserRoleEnum.SERVICE or business.user_id == user.id
 
 
 def user_can_read_chat(business: BusinessDomain, user: UserDomain) -> bool:

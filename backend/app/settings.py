@@ -18,7 +18,7 @@ class GeneralSettings(BaseSettings):
     SERVICE_USER_TOKEN: str = ''
     APP_DOMAIN: str = 'localhost'
 
-    model_config = SettingsConfigDict(env_file='.env', env_prefix='SECURITY_')
+    model_config = SettingsConfigDict(env_file='.env', env_prefix='GENERAL_')
 
 
 class ServicesSettings(BaseSettings):
@@ -182,6 +182,7 @@ class SchedulerAWSEventBridgeSettings(BaseSettings):
     ACCESS_KEY_ID: str = ''
     SECRET_ACCESS_KEY: str = ''
     ROLE_ARN: str = ''
+    LAMBDA_FUNCTION_ARN: str = 'arn:aws:lambda:eu-west-1:660100252276:function:dev-business-research-lambda'
 
     model_config = SettingsConfigDict(
         env_file='.env',

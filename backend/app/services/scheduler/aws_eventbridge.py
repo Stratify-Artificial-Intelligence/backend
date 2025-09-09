@@ -1,3 +1,5 @@
+import json
+
 from boto3 import client
 
 from app.services.scheduler import SchedulerProvider
@@ -23,35 +25,25 @@ class SchedulerAWSEventBridge(SchedulerProvider):
     async def create_schedule(
         self,
         name: str,
+        group_name: str,
         expression: str,
-        target_endpoint: str,
-        body: str,
+        body: dict,
     ) -> None:
         """Create a schedule in AWS EventBridge.
 
-        This schedule will request to some of this Backend's endpoint, using the service
-        user token for authentication.
+        This schedule will trigger the lambda function that processes the task.
         ToDo (pduran): Make this schedule more generic.
         """
         self.scheduler_client.create_schedule(
             Name=name,
+            GroupName=group_name,
             ScheduleExpression=expression,
-            FlexibleTimeWindow={'Mode': 'OFF'},
+            ScheduleExpressionTimezone='UTC',
             Target={
-                'Arn': 'arn:aws:scheduler:::http-target',
+                'Arn': settings.LAMBDA_FUNCTION_ARN,
                 'RoleArn': settings.ROLE_ARN,
-                'Endpoint': f'{general_settings.APP_DOMAIN}/{target_endpoint}',
-                'RetryPolicy': {'MaximumRetryAttempts': 3},
-                'HttpParameters': {
-                    'HeaderParameters': {
-                        'Content-Type': 'application/json',
-                        'Authorization': f'Bearer {general_settings.SERVICE_USER_TOKEN}',
-                    },
-                    'PathParameterValues': [],
-                    'QueryStringParameters': {},
-                    'Body': body,
-                },
+                'Input': json.dumps(body)
             },
-            TargetType='Http',
             ActionAfterCompletion='DELETE',
+            FlexibleTimeWindow={'Mode': 'OFF'}
         )

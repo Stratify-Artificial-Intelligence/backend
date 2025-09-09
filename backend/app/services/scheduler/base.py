@@ -8,9 +8,9 @@ class SchedulerProvider(ABC):
     async def create_schedule(
         self,
         name: str,
+        group_name: str,
         expression: str,
-        target_endpoint: str,
-        body: str,
+        body: dict,
     ) -> None:
         """Create a schedule."""
         raise NotImplementedError

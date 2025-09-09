@@ -1,5 +1,5 @@
 import json
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from fastapi import HTTPException, status
 
@@ -69,15 +69,15 @@ async def schedule_deep_research_for_business(params: ResearchParams) -> None:
     scheduler_provider = ServicesFactory().get_scheduler_provider()
     await scheduler_provider.create_schedule(
         name=f'deep_research_business_{params.business_id}',
+        group_name='deep_research_business',
         expression=f'cron({_monthly_cron_from_now()})',
-        target_endpoint='/researches',
-        body=json.dumps(params.model_dump()),
+        body=params.model_dump(),
     )
 
 
 def _monthly_cron_from_now():
-    now = datetime.now()
-    cron_expr = f'{now.minute} {now.hour} {now.day} * ? *'
+    run_time = datetime.now() + timedelta(minutes=2)
+    cron_expr = f'{run_time.minute} {run_time.hour} {run_time.day} * ? *'
     return cron_expr
 
 
