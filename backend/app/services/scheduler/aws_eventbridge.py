@@ -42,8 +42,8 @@ class SchedulerAWSEventBridge(SchedulerProvider):
             Target={
                 'Arn': settings.LAMBDA_FUNCTION_ARN,
                 'RoleArn': settings.ROLE_ARN,
-                'Input': json.dumps(body)
+                'Input': json.dumps(body),
             },
             ActionAfterCompletion='DELETE',
-            FlexibleTimeWindow={'Mode': 'OFF'}
+            FlexibleTimeWindow={'Mode': 'OFF'},
         )

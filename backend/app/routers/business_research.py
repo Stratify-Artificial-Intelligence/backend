@@ -113,11 +113,15 @@ async def store_research_by_id(  # noqa: C901
         status.HTTP_404_NOT_FOUND: {'model': schemas.HTTP404NotFound},
     },
     dependencies=[
-        Depends(RoleChecker(allowed_roles=[
-            UserRoleEnum.ADMIN,
-            UserRoleEnum.BASIC,
-            UserRoleEnum.SERVICE,
-        ])),
+        Depends(
+            RoleChecker(
+                allowed_roles=[
+                    UserRoleEnum.ADMIN,
+                    UserRoleEnum.BASIC,
+                    UserRoleEnum.SERVICE,
+                ]
+            )
+        ),
     ],
 )
 async def create_research(
@@ -170,10 +174,10 @@ async def create_research(
         Depends(RoleChecker(allowed_roles=[UserRoleEnum.ADMIN])),
     ],
 )
-async def dummy_research(
+async def schedule_research(
     research_params: ResearchParams,
 ):
-    """Create a research."""
+    """Schedule a research."""
     await schedule_deep_research_for_business(params=research_params)
 
 
