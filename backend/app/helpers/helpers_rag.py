@@ -74,6 +74,15 @@ async def schedule_deep_research_for_business(params: ResearchParams) -> None:
     )
 
 
+async def delete_scheduled_deep_research_for_business(business_id: int) -> None:
+    """Delete scheduled deep research for a business."""
+    scheduler_provider = ServicesFactory().get_scheduler_provider()
+    await scheduler_provider.delete_schedule(
+        name=f'deep_research_business_{business_id}',
+        group_name='deep_research_business',
+    )
+
+
 def _monthly_cron_from_now():
     run_time = datetime.now() + timedelta(minutes=2)
     cron_expr = f'{run_time.minute} {run_time.hour} {run_time.day} * ? *'

@@ -7,6 +7,7 @@ from app.enums import UserPlanEnum
 from app.helpers import (
     deep_research_for_business_async,
     delete_business_rag,
+    delete_scheduled_deep_research_for_business,
     schedule_deep_research_for_business,
 )
 from app.repositories import BusinessRepository, PlanRepository, UserRepository
@@ -187,11 +188,12 @@ async def handle_subscription_webhook(  # noqa: C901
             # Credits available of the user are not changed
             available_credits = user.available_credits
 
-        # Remove deep research for all businesses of the user
+        # Remove deep research for all businesses of the user (actual & scheduled)
         for business in user_businesses:
             if business.id is None:
                 continue
             delete_business_rag(business_id=business.id)
+            await delete_scheduled_deep_research_for_business(business_id=business.id)
 
     else:
         raise HTTPException(
