@@ -68,7 +68,6 @@ async def schedule_deep_research_for_business(params: ResearchParams) -> None:
     scheduler_provider = ServicesFactory().get_scheduler_provider()
     await scheduler_provider.create_schedule(
         name=f'deep_research_business_{params.business_id}',
-        group_name='deep_research_business',
         expression=f'cron({_monthly_cron_from_now()})',
         body=params.model_dump(),
     )
