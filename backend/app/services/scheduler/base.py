@@ -8,7 +8,6 @@ class SchedulerProvider(ABC):
     async def create_schedule(
         self,
         name: str,
-        group_name: str,
         expression: str,
         body: dict,
     ) -> None:

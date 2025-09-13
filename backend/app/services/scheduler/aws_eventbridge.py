@@ -25,7 +25,6 @@ class SchedulerAWSEventBridge(SchedulerProvider):
     async def create_schedule(
         self,
         name: str,
-        group_name: str,
         expression: str,
         body: dict,
     ) -> None:
@@ -36,7 +35,7 @@ class SchedulerAWSEventBridge(SchedulerProvider):
         """
         self.scheduler_client.create_schedule(
             Name=name,
-            GroupName=group_name,
+            GroupName=settings.GROUP_NAME,
             ScheduleExpression=expression,
             ScheduleExpressionTimezone='UTC',
             Target={
