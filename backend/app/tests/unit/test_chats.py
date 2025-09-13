@@ -260,6 +260,7 @@ async def test_create_message_chat_not_found(
     mock_add_message,
     test_business,
     override_get_current_active_user,
+    override_check_auth_token,
     superuser_token_headers,
     async_client: AsyncClient,
 ):
@@ -283,6 +284,7 @@ async def test_create_message_bad_request(
     mock_get_business,
     test_business,
     override_get_current_active_user,
+    override_check_auth_token,
     superuser_token_headers,
     async_client: AsyncClient,
 ):

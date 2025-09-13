@@ -3,6 +3,8 @@ from fastapi import Depends, HTTPException, status
 from app.deps import get_current_active_user
 from app.domain import Business as BusinessDomain, User as UserDomain
 from app.enums import UserRoleEnum
+from app.helpers import check_auth_token
+from app.schemas import TokenData
 
 
 class RoleChecker:
@@ -19,6 +21,18 @@ class RoleChecker:
             status_code=status.HTTP_403_FORBIDDEN,
             detail='User does not have enough privileges.',
         )
+
+
+class NoImpersonationChecker:
+    def __call__(
+        self,
+        token_data: TokenData = Depends(check_auth_token),
+    ):
+        if token_data.is_impersonation:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail='Impersonation is not allowed for this action.',
+            )
 
 
 def user_can_read_business(business: BusinessDomain, user: UserDomain) -> bool:

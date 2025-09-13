@@ -7,6 +7,7 @@ from fastapi.responses import StreamingResponse
 
 from app import schemas
 from app.authorization_server import (
+    NoImpersonationChecker,
     user_can_create_chat,
     user_can_publish_message,
     user_can_read_chat,
@@ -105,6 +106,7 @@ async def get_chat_by_id(
         status.HTTP_400_BAD_REQUEST: {'model': schemas.HTTP400BadRequest},
         status.HTTP_401_UNAUTHORIZED: {'model': schemas.HTTP401Unauthorized},
     },
+    dependencies=[Depends(NoImpersonationChecker())],
 )
 async def create_chat(
     business_id: int,
@@ -142,6 +144,7 @@ async def create_chat(
         status.HTTP_403_FORBIDDEN: {'model': schemas.HTTP403Forbidden},
         status.HTTP_404_NOT_FOUND: {'model': schemas.HTTP404NotFound},
     },
+    dependencies=[Depends(NoImpersonationChecker())],
 )
 async def add_message(
     business_id: int,
@@ -206,6 +209,7 @@ async def add_message(
         status.HTTP_403_FORBIDDEN: {'model': schemas.HTTP403Forbidden},
         status.HTTP_404_NOT_FOUND: {'model': schemas.HTTP404NotFound},
     },
+    dependencies=[Depends(NoImpersonationChecker())],
 )
 async def add_message_stream(
     business_id: int,

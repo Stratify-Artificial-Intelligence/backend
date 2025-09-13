@@ -170,9 +170,7 @@ async def create_research(
         status.HTTP_403_FORBIDDEN: {'model': schemas.HTTP403Forbidden},
         status.HTTP_404_NOT_FOUND: {'model': schemas.HTTP404NotFound},
     },
-    dependencies=[
-        Depends(RoleChecker(allowed_roles=[UserRoleEnum.ADMIN])),
-    ],
+    dependencies=[Depends(RoleChecker(allowed_roles=[UserRoleEnum.ADMIN]))],
 )
 async def schedule_research(
     research_params: ResearchParams,

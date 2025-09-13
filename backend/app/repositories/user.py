@@ -1,8 +1,8 @@
 from sqlalchemy import select
 
 from app.domain import (
-    User as UserDomain,
     UserBase as UserBaseDomain,
+    UserExtended as UserExtendedDomain,
     UserWithSecret as UserWithSecretDomain,
 )
 from app.models import User
@@ -10,7 +10,7 @@ from app.repositories import BaseRepository
 
 
 class UserRepository(BaseRepository):
-    async def get(self, user_id: int) -> UserDomain | None:
+    async def get(self, user_id: int) -> UserExtendedDomain | None:
         query = select(User).where(User.id == user_id)
         result = await self._db.execute(query)
         user = result.scalars().one_or_none()
@@ -18,19 +18,19 @@ class UserRepository(BaseRepository):
             return None
         return await self._user_model_to_domain(user)
 
-    async def get_by_username(self, username: str) -> UserDomain | None:
+    async def get_by_username(self, username: str) -> UserExtendedDomain | None:
         user = await self._get_by_username(username=username)
         if user is None:
             return None
         return await self._user_model_to_domain(user)
 
-    async def get_by_email(self, email: str) -> UserDomain | None:
+    async def get_by_email(self, email: str) -> UserExtendedDomain | None:
         user = await self._get_by_email(email=email)
         if user is None:
             return None
         return await self._user_model_to_domain(user)
 
-    async def get_by_external_id(self, external_id: str) -> UserDomain | None:
+    async def get_by_external_id(self, external_id: str) -> UserExtendedDomain | None:
         user = await self._get_by_external_id(external_id=external_id)
         if user is None:
             return None
@@ -40,7 +40,7 @@ class UserRepository(BaseRepository):
         self,
         *,
         payment_service_user_id: str | None = None,
-    ) -> list[UserDomain]:
+    ) -> list[UserExtendedDomain]:
         query = select(User)
         if payment_service_user_id is not None:
             query = query.where(User.payment_service_user_id == payment_service_user_id)
@@ -48,7 +48,7 @@ class UserRepository(BaseRepository):
         users = result.scalars().all()
         return [await self._user_model_to_domain(user) for user in users]
 
-    async def create(self, user_in: UserWithSecretDomain) -> UserDomain:
+    async def create(self, user_in: UserWithSecretDomain) -> UserExtendedDomain:
         if await self.get_by_username(username=user_in.username):
             raise ValueError('Username already exists')
         if await self.get_by_email(email=user_in.email):
@@ -73,7 +73,7 @@ class UserRepository(BaseRepository):
         self,
         user_id: int,
         user_update: UserBaseDomain | UserWithSecretDomain,
-    ) -> UserDomain | None:
+    ) -> UserExtendedDomain | None:
         user = await self._get(user_id)
         if user is None:
             return None
@@ -123,8 +123,8 @@ class UserRepository(BaseRepository):
         return result.scalars().one_or_none()
 
     @staticmethod
-    async def _user_model_to_domain(user: User) -> UserDomain:
-        return UserDomain.model_validate(
+    async def _user_model_to_domain(user: User) -> UserExtendedDomain:
+        return UserExtendedDomain.model_validate(
             {
                 'id': user.id,
                 'username': user.username,
@@ -136,5 +136,6 @@ class UserRepository(BaseRepository):
                 'plan_id': user.plan_id,
                 'payment_service_user_id': user.payment_service_user_id,
                 'available_credits': user.available_credits,
+                'external_id': user.external_id,
             }
         )

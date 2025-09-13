@@ -5,7 +5,7 @@ import logging
 from fastapi import APIRouter, Depends, HTTPException, status
 
 from app import schemas
-from app.authorization_server import RoleChecker
+from app.authorization_server import NoImpersonationChecker, RoleChecker
 from app.deps import get_current_active_user, get_repository
 from app.domain import User as UserDomain, UserWithSecret as UserWithSecretDomain
 from app.enums import UserPlanEnum, UserRoleEnum
@@ -112,6 +112,7 @@ async def read_users_me(
         status.HTTP_400_BAD_REQUEST: {'model': schemas.HTTP400BadRequest},
         status.HTTP_401_UNAUTHORIZED: {'model': schemas.HTTP401Unauthorized},
     },
+    dependencies=[Depends(NoImpersonationChecker())],
 )
 async def update_users_me(
     user_data: UserMePartialUpdate,

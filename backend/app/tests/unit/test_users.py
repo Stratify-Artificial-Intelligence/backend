@@ -168,6 +168,7 @@ async def test_update_users_me(
     mock_update,
     test_user,
     override_get_current_active_user,
+    override_check_auth_token,
     superuser_token_headers,
     async_client: AsyncClient,
 ):
@@ -204,6 +205,7 @@ async def test_update_users_me(
 async def test_update_users_me_already_exists(
     mock_update,
     override_get_current_active_user,
+    override_check_auth_token,
     superuser_token_headers,
     async_client: AsyncClient,
 ):
@@ -227,6 +229,7 @@ async def test_update_users_me_bad_request(
     test_user,
     override_get_current_active_user,
     superuser_token_headers,
+    override_check_auth_token,
     async_client: AsyncClient,
 ):
     expected_response = 'Extra inputs are not permitted'
