@@ -15,7 +15,6 @@ class SchedulerProvider(ABC):
         """Create a schedule."""
         raise NotImplementedError
 
-
     @abstractmethod
     async def delete_schedule(
         self,
