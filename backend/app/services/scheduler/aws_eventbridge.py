@@ -47,3 +47,14 @@ class SchedulerAWSEventBridge(SchedulerProvider):
             ActionAfterCompletion='DELETE',
             FlexibleTimeWindow={'Mode': 'OFF'},
         )
+
+    async def delete_schedule(
+        self,
+        name: str,
+        group_name: str,
+    ) -> None:
+        """Delete a schedule in AWS EventBridge."""
+        self.scheduler_client.delete_schedule(
+            Name=name,
+            GroupName=group_name,
+        )

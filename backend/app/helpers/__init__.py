@@ -13,6 +13,7 @@ from .helpers_rag import (
     deep_research_for_business,
     deep_research_for_business_async,
     delete_business_rag,
+    delete_scheduled_deep_research_for_business,
     get_business_rag,
     get_general_rag,
     schedule_deep_research_for_business,

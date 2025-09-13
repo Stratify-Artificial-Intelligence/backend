@@ -14,3 +14,12 @@ class SchedulerProvider(ABC):
     ) -> None:
         """Create a schedule."""
         raise NotImplementedError
+
+    @abstractmethod
+    async def delete_schedule(
+        self,
+        name: str,
+        group_name: str,
+    ) -> None:
+        """Delete a schedule."""
+        raise NotImplementedError
