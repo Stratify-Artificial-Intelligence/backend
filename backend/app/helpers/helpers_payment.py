@@ -4,6 +4,10 @@ from fastapi import HTTPException, Request, status
 
 from app.domain import Plan as PlanDomain, User as UserDomain
 from app.enums import UserPlanEnum
+from app.exceptions.subscriptions import (
+    SubscriptionWebhookBusinessError,
+    SubscriptionWebhookErrors,
+)
 from app.helpers import (
     deep_research_for_business_async,
     delete_business_rag,
@@ -140,6 +144,7 @@ async def handle_subscription_webhook(  # noqa: C901
     user = users[0]
     user_businesses = await business_repo.get_multi(user_id=user.id)
 
+    errors: list[SubscriptionWebhookBusinessError] = []
     if event.type in ('checkout.session.completed', 'invoice.payment_succeeded'):
         # These events are received when a user subscribes to a paid plan
         subscription_id = (
@@ -168,9 +173,32 @@ async def handle_subscription_webhook(  # noqa: C901
 
         # Deep research for all businesses of the user and schedule the next ones
         for business in user_businesses:
+            if business.id is None:
+                continue
             research_params = ResearchParams(max_tokens=50000, business_id=business.id)
-            deep_research_for_business_async(business=business, params=research_params)
-            await schedule_deep_research_for_business(params=research_params)
+
+            try:
+                deep_research_for_business_async(
+                    business=business,
+                    params=research_params,
+                )
+            except Exception as e:
+                error = SubscriptionWebhookBusinessError(
+                    user_id=user.id,
+                    business_id=business.id,
+                    error=e,
+                )
+                errors.append(error)
+
+            try:
+                await schedule_deep_research_for_business(params=research_params)
+            except Exception as e:
+                error = SubscriptionWebhookBusinessError(
+                    user_id=user.id,
+                    business_id=business.id,
+                    error=e,
+                )
+                errors.append(error)
 
     elif event.type == 'customer.subscription.deleted':
         # This event is received when a user cancels their subscription, so it has
@@ -192,8 +220,27 @@ async def handle_subscription_webhook(  # noqa: C901
         for business in user_businesses:
             if business.id is None:
                 continue
-            delete_business_rag(business_id=business.id)
-            await delete_scheduled_deep_research_for_business(business_id=business.id)
+
+            try:
+                delete_business_rag(business_id=business.id)
+            except Exception as e:
+                error = SubscriptionWebhookBusinessError(
+                    user_id=user.id,
+                    business_id=business.id,
+                    error=e,
+                )
+                errors.append(error)
+            try:
+                await delete_scheduled_deep_research_for_business(
+                    business_id=business.id,
+                )
+            except Exception as e:
+                error = SubscriptionWebhookBusinessError(
+                    user_id=user.id,
+                    business_id=business.id,
+                    error=e,
+                )
+                errors.append(error)
 
     else:
         raise HTTPException(
@@ -204,3 +251,6 @@ async def handle_subscription_webhook(  # noqa: C901
     user.plan_id = plan_id
     user.available_credits = available_credits
     await users_repo.update(user_id=user.id, user_update=user)
+
+    if errors:
+        raise SubscriptionWebhookErrors(user_id=user.id, errors=errors)
