@@ -4,7 +4,11 @@ from fastapi import HTTPException, Request, status
 
 from app.domain import Plan as PlanDomain, User as UserDomain
 from app.enums import UserPlanEnum
-from app.helpers import deep_research_for_business_async, delete_business_rag
+from app.helpers import (
+    deep_research_for_business_async,
+    delete_business_rag,
+    schedule_deep_research_for_business,
+)
 from app.repositories import BusinessRepository, PlanRepository, UserRepository
 from app.schemas import (
     CheckoutSession,
@@ -161,10 +165,11 @@ async def handle_subscription_webhook(  # noqa: C901
         plan_id = plan.id
         available_credits = plan.monthly_credits
 
-        # Deep research for all businesses of the user
+        # Deep research for all businesses of the user and schedule the next ones
         for business in user_businesses:
             research_params = ResearchParams(max_tokens=50000, business_id=business.id)
             deep_research_for_business_async(business=business, params=research_params)
+            await schedule_deep_research_for_business(params=research_params)
 
     elif event.type == 'customer.subscription.deleted':
         # This event is received when a user cancels their subscription, so it has

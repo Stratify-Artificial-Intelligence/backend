@@ -8,6 +8,7 @@ from .services import (
     DeepResearchProviderEnum,
     EmbeddingProviderEnum,
     IdentityProviderEnum,
+    SchedulerProviderEnum,
     StorageProviderEnum,
     VectorDatabaseProviderEnum,
 )

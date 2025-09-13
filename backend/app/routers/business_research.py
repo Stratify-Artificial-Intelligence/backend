@@ -11,6 +11,7 @@ from app.helpers import (
     chunk_and_upload_text,
     deep_research_for_business,
     deep_research_for_business_async,
+    schedule_deep_research_for_business,
 )
 from app.helpers.helpers_rag import get_deep_research_async
 from app.repositories import BusinessRepository
@@ -112,7 +113,15 @@ async def store_research_by_id(  # noqa: C901
         status.HTTP_404_NOT_FOUND: {'model': schemas.HTTP404NotFound},
     },
     dependencies=[
-        Depends(RoleChecker(allowed_roles=[UserRoleEnum.ADMIN, UserRoleEnum.BASIC])),
+        Depends(
+            RoleChecker(
+                allowed_roles=[
+                    UserRoleEnum.ADMIN,
+                    UserRoleEnum.BASIC,
+                    UserRoleEnum.SERVICE,
+                ]
+            )
+        ),
     ],
 )
 async def create_research(
@@ -150,6 +159,26 @@ async def create_research(
                 params=research_params,
             )
     return research
+
+
+@router.post(
+    '/schedule',
+    summary='Schedule a business research',
+    status_code=status.HTTP_201_CREATED,
+    responses={
+        status.HTTP_401_UNAUTHORIZED: {'model': schemas.HTTP401Unauthorized},
+        status.HTTP_403_FORBIDDEN: {'model': schemas.HTTP403Forbidden},
+        status.HTTP_404_NOT_FOUND: {'model': schemas.HTTP404NotFound},
+    },
+    dependencies=[
+        Depends(RoleChecker(allowed_roles=[UserRoleEnum.ADMIN])),
+    ],
+)
+async def schedule_research(
+    research_params: ResearchParams,
+):
+    """Schedule a research."""
+    await schedule_deep_research_for_business(params=research_params)
 
 
 @router.post(

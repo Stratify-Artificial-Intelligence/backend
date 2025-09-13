@@ -8,6 +8,7 @@ from app.enums import (
     DeepResearchProviderEnum,
     EmbeddingProviderEnum,
     IdentityProviderEnum,
+    SchedulerProviderEnum,
     StorageProviderEnum,
     VectorDatabaseProviderEnum,
 )
@@ -23,6 +24,7 @@ from app.services.deep_research_handler import (
 )
 from app.services.embedding import EmbeddingOpenAI, EmbeddingProvider
 from app.services.identity import IdentityFirebaseAuth, IdentityProvider
+from app.services.scheduler import SchedulerProvider, SchedulerAWSEventBridge
 from app.services.storage import StorageAWSS3, StorageProvider
 from app.services.vector_database import VectorDatabasePinecone, VectorDatabaseProvider
 from app.settings import ServicesSettings
@@ -40,6 +42,7 @@ class ServicesFactory:
     _deep_research_handler_provider: DeepResearchHandlerProvider | None = None
     _embedding_provider: EmbeddingProvider | None = None
     _identity_provider: IdentityProvider | None = None
+    _scheduler_provider: SchedulerProvider | None = None
     _storage_provider: StorageProvider | None = None
     _vector_database_provider: VectorDatabaseProvider | None = None
 
@@ -120,6 +123,16 @@ class ServicesFactory:
                     f'Unexpected identity provider: {settings.IDENTITY_PROVIDER}'
                 )
         return self._identity_provider
+
+    def get_scheduler_provider(self) -> SchedulerProvider:
+        if self._scheduler_provider is None:
+            if settings.SCHEDULER_PROVIDER == SchedulerProviderEnum.AWS_EVENTBRIDGE:
+                self._scheduler_provider = SchedulerAWSEventBridge()
+            else:
+                raise ValueError(
+                    f'Unexpected scheduler provider: {settings.SCHEDULER_PROVIDER}'
+                )
+        return self._scheduler_provider
 
     def get_storage_provider(self) -> StorageProvider:
         if self._storage_provider is None:

@@ -3,10 +3,10 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 from app.schemas import TokenData
 from app.services import ServicesFactory
-from app.settings import SecuritySettings
+from app.settings import GeneralSettings
 
 
-settings = SecuritySettings()
+settings = GeneralSettings()
 auth_scheme = HTTPBearer(scheme_name='BearerAuth')
 identity_service = ServicesFactory().get_identity_provider()
 
