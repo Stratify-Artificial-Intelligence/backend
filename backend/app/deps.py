@@ -9,6 +9,7 @@ from app.domain import (
     BusinessIdea as BusinessIdeaDomain,
     EstablishedBusiness as EstablishedBusinessDomain,
     User as UserDomain,
+    UserExtended as UserExtendedDomain,
 )
 from app.helpers import check_auth_token
 from app.repositories import BaseRepository, BusinessRepository, UserRepository
@@ -25,8 +26,13 @@ def get_repository(repo_type: Type[BaseRepository]) -> Callable:
 async def get_current_user(
     token_data: TokenData = Depends(check_auth_token),
     users_repo: UserRepository = Depends(get_repository(UserRepository)),
-) -> UserDomain:
-    user = await users_repo.get_by_external_id(external_id=token_data.user_external_id)
+) -> UserExtendedDomain:
+    user_external_id = (
+        token_data.impersonated_user_external_id
+        if token_data.is_impersonation and token_data.impersonated_user_external_id
+        else token_data.user_external_id
+    )
+    user = await users_repo.get_by_external_id(external_id=user_external_id)
     if user is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -36,8 +42,8 @@ async def get_current_user(
 
 
 async def get_current_active_user(
-    current_user: UserDomain = Depends(get_current_user),
-) -> UserDomain:
+    current_user: UserExtendedDomain = Depends(get_current_user),
+) -> UserExtendedDomain:
     if not current_user.is_active:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,

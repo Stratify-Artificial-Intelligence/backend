@@ -151,6 +151,7 @@ async def test_create_business_idea(
     mock_create,
     test_business_idea,
     override_get_current_active_user,
+    override_check_auth_token,
     superuser_token_headers,
     async_client: AsyncClient,
 ):
@@ -172,6 +173,7 @@ async def test_create_business_idea(
 async def test_create_business_idea_bad_request(
     test_business_idea,
     override_get_current_active_user,
+    override_check_auth_token,
     superuser_token_headers,
     async_client: AsyncClient,
 ):
@@ -232,6 +234,7 @@ async def test_create_established_business(
     mock_create,
     test_established_business,
     override_get_current_active_user,
+    override_check_auth_token,
     superuser_token_headers,
     async_client: AsyncClient,
 ):
@@ -253,6 +256,7 @@ async def test_create_established_business(
 async def test_create_established_business_bad_request(
     test_established_business,
     override_get_current_active_user,
+    override_check_auth_token,
     superuser_token_headers,
     async_client: AsyncClient,
 ):

@@ -11,6 +11,7 @@ from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 
 from app.routers import (
+    admin_router,
     business_router,
     business_research_router,
     chats_router,
@@ -71,6 +72,7 @@ async def custom_swagger_ui_html():
     return HTMLResponse(html)
 
 
+app.include_router(admin_router)
 app.include_router(business_router)
 app.include_router(business_research_router)
 app.include_router(chats_router)

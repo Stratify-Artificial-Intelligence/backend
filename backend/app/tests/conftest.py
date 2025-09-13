@@ -7,7 +7,9 @@ from httpx import ASGITransport, AsyncClient
 from app.deps import get_current_active_user
 from app.domain import User as UserDomain
 from app.enums import UserLanguageEnum, UserRoleEnum
+from app.helpers import check_auth_token
 from app.main import app
+from app.schemas import TokenData
 from app.settings import GeneralSettings
 
 
@@ -72,7 +74,7 @@ def pytest_collection_modifyitems(items):
             item.add_marker(pytest.mark.unit)
 
 
-@pytest.fixture
+@pytest.fixture()
 def test_user() -> UserDomain:
     return UserDomain(
         id=1,
@@ -85,7 +87,7 @@ def test_user() -> UserDomain:
     )
 
 
-@pytest.fixture
+@pytest.fixture()
 def override_get_current_active_user(test_user):
     async def _override():
         return test_user
@@ -95,11 +97,25 @@ def override_get_current_active_user(test_user):
     app.dependency_overrides.clear()
 
 
-@pytest_asyncio.fixture()
-async def superuser_token_headers() -> dict[str, str | None]:
-    auth_token = (
+@pytest.fixture()
+def superuser_token() -> str:
+    return (
         'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG'
         '4gRG9lIiwiYWRtaW4iOnRydWUsImlhdCI6MTUxNjIzOTAyMn0.KMUFsIDTnFmyG3nMiGM6H9FNFUROf'
         '3wh7SmqJp-QV30'
     )
-    return {'Authorization': f'Bearer {auth_token}'}
+
+
+@pytest_asyncio.fixture()
+async def superuser_token_headers(superuser_token) -> dict[str, str | None]:
+    return {'Authorization': f'Bearer {superuser_token}'}
+
+
+@pytest.fixture()
+def override_check_auth_token(superuser_token):
+    async def _override():
+        return TokenData(sub=superuser_token)
+
+    app.dependency_overrides[check_auth_token] = _override
+    yield
+    app.dependency_overrides.clear()

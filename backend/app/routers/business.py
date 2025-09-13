@@ -3,7 +3,11 @@
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
 
 from app import schemas
-from app.authorization_server import user_can_read_business, user_can_update_business
+from app.authorization_server import (
+    NoImpersonationChecker,
+    user_can_read_business,
+    user_can_update_business,
+)
 from app.deps import get_current_active_user, get_repository
 from app.domain import (
     BusinessIdea as BusinessIdeaDomain,
@@ -85,6 +89,7 @@ async def get_business_idea_by_id(
         status.HTTP_400_BAD_REQUEST: {'model': schemas.HTTP400BadRequest},
         status.HTTP_401_UNAUTHORIZED: {'model': schemas.HTTP401Unauthorized},
     },
+    dependencies=[Depends(NoImpersonationChecker())],
 )
 async def create_business_idea(
     business_in: BusinessIdeaBase,
@@ -112,6 +117,7 @@ async def create_business_idea(
         status.HTTP_401_UNAUTHORIZED: {'model': schemas.HTTP401Unauthorized},
         status.HTTP_404_NOT_FOUND: {'model': schemas.HTTP404NotFound},
     },
+    dependencies=[Depends(NoImpersonationChecker())],
 )
 async def partial_update_business_idea(
     business_id: int,
@@ -149,6 +155,7 @@ async def partial_update_business_idea(
         status.HTTP_403_FORBIDDEN: {'model': schemas.HTTP403Forbidden},
         status.HTTP_404_NOT_FOUND: {'model': schemas.HTTP404NotFound},
     },
+    dependencies=[Depends(NoImpersonationChecker())],
 )
 async def delete_business_idea(
     business_id: int,
@@ -182,6 +189,7 @@ async def delete_business_idea(
         status.HTTP_403_FORBIDDEN: {'model': schemas.HTTP403Forbidden},
         status.HTTP_404_NOT_FOUND: {'model': schemas.HTTP404NotFound},
     },
+    dependencies=[Depends(NoImpersonationChecker())],
 )
 async def update_business_idea_logo(
     business_id: int,
@@ -218,6 +226,7 @@ async def update_business_idea_logo(
         status.HTTP_403_FORBIDDEN: {'model': schemas.HTTP403Forbidden},
         status.HTTP_404_NOT_FOUND: {'model': schemas.HTTP404NotFound},
     },
+    dependencies=[Depends(NoImpersonationChecker())],
 )
 async def delete_business_idea_logo(
     business_id: int,
@@ -284,6 +293,7 @@ async def get_established_business_by_id(
         status.HTTP_400_BAD_REQUEST: {'model': schemas.HTTP400BadRequest},
         status.HTTP_401_UNAUTHORIZED: {'model': schemas.HTTP401Unauthorized},
     },
+    dependencies=[Depends(NoImpersonationChecker())],
 )
 async def create_established_business(
     business_in: EstablishedBusinessBase,
@@ -311,6 +321,7 @@ async def create_established_business(
         status.HTTP_401_UNAUTHORIZED: {'model': schemas.HTTP401Unauthorized},
         status.HTTP_404_NOT_FOUND: {'model': schemas.HTTP404NotFound},
     },
+    dependencies=[Depends(NoImpersonationChecker())],
 )
 async def partial_update_established_business(
     business_id: int,
@@ -348,6 +359,7 @@ async def partial_update_established_business(
         status.HTTP_403_FORBIDDEN: {'model': schemas.HTTP403Forbidden},
         status.HTTP_404_NOT_FOUND: {'model': schemas.HTTP404NotFound},
     },
+    dependencies=[Depends(NoImpersonationChecker())],
 )
 async def delete_established_business(
     business_id: int,
@@ -381,6 +393,7 @@ async def delete_established_business(
         status.HTTP_403_FORBIDDEN: {'model': schemas.HTTP403Forbidden},
         status.HTTP_404_NOT_FOUND: {'model': schemas.HTTP404NotFound},
     },
+    dependencies=[Depends(NoImpersonationChecker())],
 )
 async def update_established_business_logo(
     business_id: int,
@@ -417,6 +430,7 @@ async def update_established_business_logo(
         status.HTTP_403_FORBIDDEN: {'model': schemas.HTTP403Forbidden},
         status.HTTP_404_NOT_FOUND: {'model': schemas.HTTP404NotFound},
     },
+    dependencies=[Depends(NoImpersonationChecker())],
 )
 async def delete_established_business_logo(
     business_id: int,

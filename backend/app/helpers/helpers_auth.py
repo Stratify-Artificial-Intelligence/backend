@@ -18,8 +18,7 @@ def check_auth_token(
     # ToDo (pduran): [S-249] Implement this using api gateway instead.
     if token.credentials == settings.SERVICE_USER_TOKEN:
         return TokenData(sub='service_user')
-    token_sub = identity_service.verify_and_decode_auth_token(token=token.credentials)
-    return TokenData(sub=token_sub)
+    return identity_service.verify_and_decode_auth_token(token=token.credentials)
 
 
 def create_user_in_auth_service(email: str, password: str) -> str:

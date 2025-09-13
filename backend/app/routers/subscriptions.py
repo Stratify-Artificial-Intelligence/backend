@@ -3,6 +3,7 @@
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 
 from app import schemas
+from app.authorization_server import NoImpersonationChecker
 from app.deps import get_current_active_user, get_repository
 from app.domain import User as UserDomain
 from app.helpers import (
@@ -55,6 +56,7 @@ async def get_subscription(session_id: str):
     responses={
         status.HTTP_400_BAD_REQUEST: {'model': schemas.HTTP400BadRequest},
     },
+    dependencies=[Depends(NoImpersonationChecker())],
 )
 async def create_subscription(
     subscription_data: SubscriptionCreation,
@@ -88,6 +90,7 @@ async def create_subscription(
         status.HTTP_401_UNAUTHORIZED: {'model': schemas.HTTP401Unauthorized},
         status.HTTP_404_NOT_FOUND: {'model': schemas.HTTP404NotFound},
     },
+    dependencies=[Depends(NoImpersonationChecker())],
 )
 async def create_portal_session(
     request_data: SubscriptionHandleRequest,

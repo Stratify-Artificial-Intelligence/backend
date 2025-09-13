@@ -3,6 +3,7 @@ import logging
 from fastapi import HTTPException, status
 from firebase_admin import auth as firebase_auth, credentials, get_app, initialize_app
 
+from app.schemas import TokenData
 from app.services.identity import IdentityProvider
 from app.settings import FirebaseAuthSettings
 
@@ -23,8 +24,8 @@ class IdentityFirebaseAuth(IdentityProvider):
             initialize_app(credential=cred)
 
     @staticmethod
-    def verify_and_decode_auth_token(token: str) -> str:
-        """Return the decoded Firebase sub from the provided token."""
+    def verify_and_decode_auth_token(token: str) -> TokenData:
+        """Return the decoded Firebase from the provided token."""
         try:
             decoded_firebase_token = firebase_auth.verify_id_token(id_token=token)
         except firebase_auth.ExpiredIdTokenError:
@@ -44,7 +45,7 @@ class IdentityFirebaseAuth(IdentityProvider):
                 detail='Invalid Firebase token',
             ) from e
 
-        return decoded_firebase_token['sub']
+        return TokenData(sub=decoded_firebase_token['sub'])
 
     @staticmethod
     def create_user(email: str, password: str) -> str:
@@ -63,3 +64,22 @@ class IdentityFirebaseAuth(IdentityProvider):
                 detail='Failed to create user in Firebase Auth',
             ) from e
         return user.uid
+
+    @staticmethod
+    def generate_impersonation_token(original_sub: str, impersonated_sub: str) -> str:
+        """Generate a custom token for impersonation."""
+        try:
+            additional_claims = {
+                'impersonated_sub': impersonated_sub,
+            }
+            custom_token = firebase_auth.create_custom_token(
+                uid=original_sub,
+                developer_claims=additional_claims,
+            )
+            return custom_token.decode('utf-8')
+        except Exception as e:
+            logger.error('FIREBASE AUTH ERROR: ' + str(e))
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail='Failed to generate impersonation token',
+            ) from e
