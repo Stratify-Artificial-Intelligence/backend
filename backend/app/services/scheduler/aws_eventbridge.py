@@ -33,27 +33,44 @@ class SchedulerAWSEventBridge(SchedulerProvider):
         This schedule will trigger the lambda function that processes the task.
         ToDo (pduran): Make this schedule more generic.
         """
-        self.scheduler_client.create_schedule(
-            Name=name,
-            GroupName=settings.GROUP_NAME,
-            ScheduleExpression=expression,
-            ScheduleExpressionTimezone='UTC',
-            Target={
-                'Arn': settings.LAMBDA_FUNCTION_ARN,
-                'RoleArn': settings.ROLE_ARN,
-                'Input': json.dumps(body),
-            },
-            ActionAfterCompletion='DELETE',
-            FlexibleTimeWindow={'Mode': 'OFF'},
-        )
+        try:
+            self.scheduler_client.create_schedule(
+                Name=name,
+                GroupName=settings.GROUP_NAME,
+                ScheduleExpression=expression,
+                ScheduleExpressionTimezone='UTC',
+                Target={
+                    'Arn': settings.LAMBDA_FUNCTION_ARN,
+                    'RoleArn': settings.ROLE_ARN,
+                    'Input': json.dumps(body),
+                },
+                ActionAfterCompletion='DELETE',
+                FlexibleTimeWindow={'Mode': 'OFF'},
+            )
+        except self.scheduler_client.exceptions.ConflictException:
+            self.scheduler_client.update_schedule(
+                Name=name,
+                GroupName=settings.GROUP_NAME,
+                ScheduleExpression=expression,
+                ScheduleExpressionTimezone='UTC',
+                Target={
+                    'Arn': settings.LAMBDA_FUNCTION_ARN,
+                    'RoleArn': settings.ROLE_ARN,
+                    'Input': json.dumps(body),
+                },
+                FlexibleTimeWindow={'Mode': 'OFF'},
+            )
 
     async def delete_schedule(
         self,
         name: str,
         group_name: str,
     ) -> None:
-        """Delete a schedule in AWS EventBridge."""
-        self.scheduler_client.delete_schedule(
-            Name=name,
-            GroupName=group_name,
-        )
+        """Delete a schedule in AWS EventBridge (if exists)."""
+        try:
+            self.scheduler_client.delete_schedule(
+                Name=name,
+                GroupName=group_name,
+            )
+        except self.scheduler_client.exceptions.ResourceNotFoundException:
+            pass
