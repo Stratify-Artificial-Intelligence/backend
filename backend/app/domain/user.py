@@ -18,7 +18,7 @@ class UserBase(BaseModel):
 
 
 class UserWithSecret(UserBase):
-    external_id: str
+    external_id: str | None = None
 
 
 class User(UserBase):
