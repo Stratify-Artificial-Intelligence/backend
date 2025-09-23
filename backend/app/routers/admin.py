@@ -47,6 +47,21 @@ async def token_view_as_user(
             detail='Cannot impersonate another admin user',
         )
     identity_service = ServicesFactory().get_identity_provider()
+    if current_user.external_id is None:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=(
+                'Current user does not have an external ID. Thus, it cannot impersonate.'
+            ),
+        )
+    if impersonated_user.external_id is None:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=(
+                'Impersonated user does not have an external ID. Thus, it cannot be '
+                'impersonated.'
+            ),
+        )
     token_str = identity_service.generate_impersonation_token(
         original_sub=current_user.external_id,
         impersonated_sub=impersonated_user.external_id,
