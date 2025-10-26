@@ -137,9 +137,6 @@ dmypy.json
 # macOS
 .DS_Store
 
-# env var / secrets files
-.env*
-
 # Private keys and SSL certificates
 *.key
 *.pem
